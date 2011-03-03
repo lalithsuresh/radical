@@ -1,0 +1,14 @@
+Todo for Radical
+
+- Persistant storage of calendar
+  - de/serialise to bytes
+- Calendar maintains a number of lists, one for each state of slot
+  - free only if not in any of above lists
+- Cache/store messages sent
+- What happens if you cannot deliver a message 
+  - error messages? 
+  - how long do we wait? do we have to wait? live without timeouts
+- RPC calls in .NET
+  - using TCP
+  - asynchronous
+  

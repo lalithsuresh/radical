@@ -1,0 +1,9 @@
+connect archie
+connect lalith
+connect bruno
+reservation {Description: paditest; Users: archie,lalith,bruno; Slots: 123,124; }
+disconnect lalith
+reservation {Description padi2; Users: archie; Slots: 125 }
+readCalendar archie
+disconnect archie
+disconnect bruno
