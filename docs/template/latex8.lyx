@@ -1,0 +1,267 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+
+%  $Description: Author guidelines and sample document in LaTeX 2.09$ 
+%  $Author: ienne $
+%  $Date: 1995/09/15 15:20:59 $
+%  $Revision: 1.4 $
+\usepackage{latex8}\usepackage{times}
+
+%\documentstyle[times,art10,twocolumn,latex8]{article}
+%------------------------------------------------------------------------- 
+% take the % away on next line to produce the final camera-ready version 
+
+
+%------------------------------------------------------------------------- 
+\end_preamble
+\options times
+\use_default_options false
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 10
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 2
+\papersides 1
+\paperpagestyle empty
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Really Awesome Distributed Internet Calendar (RADICAL)
+\end_layout
+
+\begin_layout Author
+Lalith Suresh P.
+\begin_inset Newline newline
+\end_inset
+
+DEI
+\begin_inset Newline newline
+\end_inset
+
+Instituto Superior Tecnico
+\begin_inset Newline newline
+\end_inset
+
+Lisbon, Portugal
+\begin_inset Newline newline
+\end_inset
+
+suresh.lalith@gmail.com
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ Marcus Ljungblad
+\begin_inset Newline newline
+\end_inset
+
+DEI
+\begin_inset Newline newline
+\end_inset
+
+Insituto Superior Tecnico
+\begin_inset Newline newline
+\end_inset
+
+Lisbon, Portugal
+\begin_inset Newline newline
+\end_inset
+
+marcus@ljungblad.nu
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ Bruno Pereira
+\begin_inset Newline newline
+\end_inset
+
+DEI
+\begin_inset Newline newline
+\end_inset
+
+Insituto Superior Tecnico
+\begin_inset Newline newline
+\end_inset
+
+Lisbon, Portugal
+\begin_inset Newline newline
+\end_inset
+
+brunopereir4@gmail.com
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Abstract
+Shared calendar systems like Google Calendar are known to be an effective
+ way for people to schedule and coordinate events.
+ In this project, we design and implement PADICal, a peer-to-peer based
+ distributed calendar system.
+ PADICal allows clients to make event reservations amongst themselves in
+ an almost decentralised manner with minimal assistance from a central server.
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+The aim of this project is to design, implement and evaluate a shared calendar
+ system which has the following components:
+\end_layout
+
+\begin_layout Itemize
+Multiple clients, each with their own calendars, who may contact one another
+ to schedule events together.
+\end_layout
+
+\begin_layout Itemize
+A centralised server which holds usernames and provides clients a sequence
+ number service.
+\end_layout
+
+\begin_layout Standard
+Section 
+\end_layout
+
+\begin_layout Section
+System Architecture
+\end_layout
+
+\begin_layout Standard
+Since there is a Client and Server entity for this system, we describe the
+ architecture of each separetely.
+ One of the main design goals is to allow easy testability and debugging
+ facilities within the system in order to ease development.
+ To a certain degree, we hope to achieve this through classic 'printf' style
+ debugging.
+ Every class in PADICal inherits from a class 
+\family typewriter
+PadiCalObject
+\family default
+, which has two virtual methods named 
+\family typewriter
+Debug() 
+\family default
+and 
+\family typewriter
+UnitTests()
+\family default
+.
+ The former performs pretty printing of internal state of an object, and
+ follows the flow of logic through the stack whereas the latter is written
+ during the development phase to ensure methods do not misbehave when changes
+ are introduced later.
+ All sub classes have to implement these methods depending on the kind of
+ methods and state information they may hold.
+ The 
+\family typewriter
+Debug()
+\family default
+ method of different objects comprising of a client or server can be enabled
+ via a configuration file or through some interfaces we can provide to the
+ UI of the client.
+\end_layout
+
+\begin_layout Standard
+The client and the server architecture has been logically decomposed into
+ 3 layers each.
+ From top to down, they are as follows: the interface layer, the services
+ layer, and the communications layer.
+ In the sections below, we first describe the client, the server, and the
+ components of each of the 3 layers that they comprise of.
+\end_layout
+
+\begin_layout Subsection
+Client
+\end_layout
+
+\begin_layout Subsection
+Server
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "latex8"
+options "latex8"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
