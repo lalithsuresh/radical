@@ -110,6 +110,63 @@ of each of the 3 layers that they comprise of.
 
 
 \subsection{Server}
+The Radical server consists of one master and three replicas. Each replica is strongly consistent with the master and updated on each write. In this section we describe the architecture of the servers, including the replicas, its leader election process, and its interfaces. The services provided by the server are: a user to ip:port lookup table and sequence numbering. 
+
+A server instance may be in one of two states: master or replica. As a master, the instance is the primary, and only, responsible for serving clients with data. We assume that at most one instance may fail at any time during normal execution, including the master. If the master instance becomes unavailable, a new master is automatically elected among the three replicas. 
+
+\subsubsection{Architecture}
+INSERT FIGURE HERE
+
+A server, similar to the client, uses a three-tier architecture. The three layers are named, from top to bottom: Interfaces, Services, and Communication. A layer may only communicate with the layer directly above or below. In other words, there are no calls made from the Interface to the Communication layer directly. The Services layer contains three components: Replication, SequenceNumbering, and UserLookup. Components within the same layer may communicate with each other freely, but aims to have as much of a clear separation of concerns as possible.  
+
+\subsubsection{Interface}
+A server exposes a simple interface to all clients. Similarly to a client, the server exposes a simple Send(Message) and Receive(Message) interface. The types of messages that a server will handle are the following: 
+
+\begin{itemize}
+\item{GetUserAddress(username): a client asks for the IP address and port of a specific user. A list of usernames may be specified to minimize number of requests sent to the server.}
+\item{ConnectUser(username, ip, port): a client adds itself to the user lookup table. }
+\item{DisconnectUser(username): a client disconnects and removes its entry from the lookup table. }
+\item{GetSequenceNumber(): a client asks for a sequence number. }
+\end{itemize}
+
+The three last interfaces are considered write intensive as they require changes to be propagated to all replicas of the server cluster. Each type described above is wrapped in a general Message including the Type, Origin, and Payload. The Message decomposition is further described in section (FILLIN).
+
+All calls between the server and the client are considered asynchronous. In case a client does not receive a reply within a given time, it is up to the client to re-request the data from the server, or another replica (if applicable). 
+
+\subsection{Messages}
+To facilitate client-to-client and client-to-server communication we propose a unified message format. It is inspired by the event message model used in the Appia Framework \cite{appia}. A message is essentially a serializable stack. A service layer component may push strings, integers and other standard types on the stack. Radical specific types may also be pushed on the stack as long as the object implements the Serializable interface. Before the \texttt{SendReceiveMiddleLayer} sends a message to a remote instance it ensures that, or attaches, a message type to the message. This is always the top-most item in the message stack. Thus, the message decomposition can be described as follows: 
+
+\begin{itemize}
+\item Type
+\item Origin
+\item List of destinations
+\item SequenceNumber (optional)
+\item Payload (component specific stacks)
+\end{itemize}
+
+Upon incoming messages the \texttt{SendReceiveMiddleLayer} only determines which component to forward the message. It is then each component's responsibility to deserialise the remaining parts of the message and make use of it.  
+
+\section{Algorithms}
+
+\subsection{Server side}
+In this section we describe the algorithms used in a Radical server to achieve high availability and consistency. 
+
+\subsubsection{Leader Election}
+All instances of a server knows about all other server instances. Each instance has a unique id. Since the number of servers never exceeds four, each server regularly emits a heartbeat to let the other servers know it is alive. It is assumed that at most one server may fail at any time. During the bootstrap of a server, each instance will select the server with the highest ID to be the leader. 
+
+Our leader election process is based on the Bullying algorithm proposed by (XY). In case of a server failure, when any other instance suspects that a server is unavailable, it will send a proposal to all other servers that X is unavailable. If all others agree, the server with the next highest ID is elected the new leader. The leader is selected in a round-robin fashion. 
+
+To handle network partitions, a server may only become a leader if it is part of the cluster with a majority of the servers. In case each cluster is of equal size, the cluster with the current (or previous) leader will remain/elect the leader. Clients trying to contact the minority cluster will not get any replies, and according to the round-robin selection scheme, eventually pick a server from the majority cluster. 
+
+\subsubsection{Replication}
+In the interface above, three of the interfaces are considered writes. Since we want to maintain a strong consistency among the replicas, the master instance will propagate a write to all replicas before replying to the client. The propagation is assumed to be synchronous and utilises the broadcast component of the communication layer described earlier. Since performance is not one of the main non-functional requirements of this system, a server which receives a request will block until it receives an acknowledgement from all correct replicas. A replica is considered correct as long as a heartbeat has been received within the given timeframe. It is worth adding here that an optimisation to this algorithm is to consider only acks from a subset of the replicas. In the event of such optimization it is necessary to establish an auxilliary mechanism to ensure that all replicas are in a consistent state. 
+
+In case a replica, i.e an instance which is not the leader, gets an unexpected request from a client it will query the leader for the data, and retransmit the response to the client. Before propagating write requests to replicas, the leader maintains a log of all write records. 
+
+When a server fails, and after a new leader is elected, the server instances will synchronize to ensure that the user lookup table and sequence number is aligned. Each write to the user lookup table is associated with a logical timestamp, such that ordering can be guaranteed. 
+
+TBD: how to manage network partition for replication propagation. 
+
 \begin{lyxcode}
 
 \end{lyxcode}
