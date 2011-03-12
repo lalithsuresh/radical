@@ -721,6 +721,19 @@ cite{idit}
 .
 \end_layout
 
+\begin_layout Standard
+The possibility of a deadlock exists in the phase where two clients are
+ involved in at least two common event reservations.
+ It can happen that two clients which are in the tentatively booked phase
+ for the same two events, initiate their commit protocols, but receive the
+ pre-commit messages in different order.
+ This can be either handled by using a wait-queue, or by having each client
+ abort the later commit sequence.
+ The latter would lead to both reservation processes aborting.
+ This is safe, but we plan to optimise this part such that one of them will
+ proceed with a commit.
+\end_layout
+
 \begin_layout Subsection
 Server Side: Leader Election and Replication
 \end_layout
