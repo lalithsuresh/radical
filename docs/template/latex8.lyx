@@ -189,11 +189,31 @@ A centralised server which holds usernames and provides clients a sequence
 \end_layout
 
 \begin_layout Standard
-Section 
+The rest of the paper is organised as follows: Section 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{sec:systemarch}
+\end_layout
+
+\end_inset
+
+ describes the architecture of the different components of the system.
 \end_layout
 
 \begin_layout Section
 System Architecture
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:systemarch"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -244,12 +264,542 @@ The client and the server architecture has been logically decomposed into
 Client
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide true
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename client.eps
+	scale 25
+	rotateOrigin center
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Client Architecture.
+ A 3 layer approach is used, with the following stack: An interface layer
+ (
+\family typewriter
+Client Interface
+\family default
+), a service layer (
+\family typewriter
+CalendarService, LookupService, ConnectionManager, SequenceNumberService
+\family default
+) and a communication layer (
+\family typewriter
+SendReceiveMiddleLayer, PointToPoint, GroupMulticast
+\family default
+).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:clientarch"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The client architecture is described in Figure.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref {fig:clientarch}
+\end_layout
+
+\end_inset
+
+.
+ The working of the client has been decomposed into three layers, each of
+ which holds the appropriate working components.
+ This is described as follows:
+\end_layout
+
+\begin_layout Subsubsection
+Interface Layer
+\end_layout
+
+\begin_layout Standard
+The client's interface layer comprises of the following:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+Client Interface
+\family default
+: The instantiation of this class handles user inputs.
+ The user can reserve events on the calendar, view the calendar and connect/disc
+onnect to the server.
+\end_layout
+
+\begin_layout Subsubsection
+Services Layer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+CalendarService
+\family default
+: This is the abstraction for the calendar itself.
+ The event reservation and commit protocols are implemented within this
+ class.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+LookupService
+\family default
+: The Client performs lookups over the usernames of other participants using
+ this service.
+ The (IP,Port) tuples returned for each username are used to describe connection
+s and remote object invocations for every other component in the system.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ConnectionManager
+\family default
+: This component handles user login/sign-outs.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+SequenceNumberService
+\family default
+: This service provides a unique sequence number from the centralised servers.
+\end_layout
+
+\begin_layout Subsubsection
+Communications Layer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+SendReceiveMiddleLayer
+\family default
+: To abstract the underlying communication process from the services, we
+ use the 
+\family typewriter
+SendReceiveMiddleLayer
+\family default
+.
+ If there are multiple recipients to send a message to, this layer uses
+ the 
+\family typewriter
+GroupMulticast 
+\family default
+abstraction, else, uses the 
+\family typewriter
+PointToPoint 
+\family default
+abstraction.
+ It also acts as a demultiplexer (on the same lines as Linux's 
+\family typewriter
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+layer 4 demux
+\family typewriter
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\family default
+), to find the appropriate service layer recipient for a particular message.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+GroupMulticast
+\family default
+: This abstraction uses the 
+\family typewriter
+PointToPoint 
+\family default
+abstraction to deliver messages to a group of participants.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+PointToPoint
+\family default
+: This abstraction uses a remote invocation to send a message to a recipient.
+\end_layout
+
 \begin_layout Subsection
 Server
 \end_layout
 
-\begin_layout LyX-Code
+\begin_layout Standard
+The Radical server consists of one master and three replicas.
+ Each replica is strongly consistent with the master and updated on each
+ write.
+ In this section we describe the architecture of the servers, including
+ the replicas, its leader election process, and its interfaces.
+ The services provided by the server are: a user to (IP, Port) lookup table
+ and sequence numbering.
+ A server instance may be in one of two states: master or replica.
+ As a master, the instance is the primary, and only, responsible for serving
+ clients with data.
+ We assume that at most one instance may fail at any time during normal
+ execution, including the master.
+ If the master instance becomes unavailable, a new master is automatically
+ elected among the three replicas.
+ 
+\end_layout
 
+\begin_layout LyX-Code
+\begin_inset Float figure
+placement t
+wide true
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename server.eps
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Server Architecture.
+ A 3 layer approach is used, with the following stack: An interface layer
+ (
+\family typewriter
+ServerInterface
+\family default
+), a service layer (
+\family typewriter
+ReplicationService, UserLookupService, SequenceNumberService
+\family default
+) and a communication layer (
+\family typewriter
+SendReceiveMiddleLayer, PointToPoint, GroupMulticast
+\family default
+).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:serverarch"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Interface Layer
+\end_layout
+
+\begin_layout Standard
+The client's interface layer comprises of the following:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+Server Interface
+\family default
+: The instantiation of this class handles user inputs.
+ The user can view server state, the currently active replica, and the currently
+ logged on users.
+\end_layout
+
+\begin_layout Subsubsection
+Services Layer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ReplicationService
+\family default
+: This is the abstraction for the strongly consistent replication service.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+UserLookupService
+\family default
+: This service handles both connect/disconnects from the clients, and also
+ provides the required username to (IP, Port) lookup service for them.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+SequenceNumberService
+\family default
+: This service provides a unique sequence number to the clients.
+\end_layout
+
+\begin_layout Subsubsection
+Communications Layer
+\end_layout
+
+\begin_layout Itemize
+The components of the server communications layer remains the same as that
+ of the client.
+\end_layout
+
+\begin_layout Section
+Algorithms
+\end_layout
+
+\begin_layout Subsection
+Client Side: Reservation/Commit Protocol
+\end_layout
+
+\begin_layout Standard
+The reservation protocol follows the steps as outlined in the project descriptio
+n.
+ Once a client is in the tentatively booked state for a particular event
+ slot, it executes the commit protocol.
+\end_layout
+
+\begin_layout Standard
+We have opted to use a modified 3-phase commit algorithm (ref) which works
+ as follows:
+\end_layout
+
+\begin_layout Itemize
+Coordinator side (initiator of the event reservation):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The coordinator receives a transaction request.
+ If there is a failure at this point, the coordinator aborts the transaction
+ (i.e.
+ upon recovery, it will consider the transaction aborted).
+ Otherwise, the coordinator sends a canCommit? message to the cohorts and
+ moves to the waiting state.
+\end_layout
+
+\begin_layout Enumerate
+If there is a failure, timeout, or if the coordinator receives a No message
+ in the waiting state, the coordinator aborts the transaction and sends
+ an abort message to all cohorts.
+ Otherwise the coordinator will receive Yes messages from all cohorts within
+ the time window, so it sends preCommit messages to all cohorts and moves
+ to the prepared state.
+\end_layout
+
+\begin_layout Enumerate
+If the coordinator succeeds in the prepared state, it will move to the commit
+ state.
+ However if the coordinator times out while waiting for an acknowledgement
+ from a cohort, it will abort the transaction.
+ In the case where all acknowledgements are received, the coordinator moves
+ to the commit state as well, and sends a doCommit message to all participants
+ indicating that they can commit right away (and not wait for their abort/commit
+ timeouts).
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Cohort side (other participants in reservation):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The cohort receives a canCommit? message from the coordinator.
+ If the cohort agrees it sends a Yes message to the coordinator and moves
+ to the prepared state.
+ Otherwise it sends a No message and aborts.
+ If there is a failure, it moves to the abort state.
+\end_layout
+
+\begin_layout Enumerate
+In the prepared state, if the cohort receives an abort message from the
+ coordinator, fails, or times out waiting for a commit, it aborts.
+ If the cohort receives a preCommit message, it sends an ACK message to
+ the coordinator.
+ It then initiates a commit timeout and verify timeout.
+ The verify timeout is shorter than the commit timeout and is higher than
+ the minimum time required for the ACK message to reach the coordinator.
+ If the client receives a 'doCommit' message before either timeout, then
+ it commits.
+\end_layout
+
+\begin_layout Enumerate
+Since every participant is aware of the list of participants in the reservation,
+ it is trivial to arrange all the participants (including the coordinator)
+ in a circle (since the coordinator sends all participants the same list).
+ At the point of verify timeout, the nodes ping their left and right neighbours
+ in the ring.
+ If a participant does not receive a pong for its ping, then it detects
+ that a partition could have occured and does not commit, and informs the
+ coordinator and its other neighbour that to abort.
+ We assume symmetrical links in the system, that is, if A cannot ping B,
+ then B cannot ping A.
+ The message can then be disseminated in broadcast or tree patterns in order
+ to ensure a quick abort by all nodes.
+ If the verify phase succeeds, nodes can commit once the commit timeout
+ occurs.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The cohort's execution of verifying whether its left and right neighbours
+ are alive before committing ensures that a network partition has not occurred
+ and all nodes are moving into the same state.
+ The verify timer being shorter than the commit timer protects against the
+ scenario where some nodes proceed with a commit, while the others abort.
+ Any node that fails in between the above procedure executes an orderly
+ leave and can thus abort the process, removing the need for a leader-election
+ and quorum based solution in case of network partitions like the Enhanced
+ 3PC offers 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+cite{idit}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Server Side: Leader Election and Replication
+\end_layout
+
+\begin_layout Subsubsection
+Leader Election
+\end_layout
+
+\begin_layout Standard
+All instances of a server knows about all other server instances.
+ Each instance has a unique id.
+ Since the number of servers never exceeds four, each server regularly emits
+ a heartbeat to let the other servers know it is alive.
+ It is assumed that at most one server may fail at any time.
+ During the bootstrap of a server, each instance will select the server
+ with the highest ID to be the leader.
+ Our leader election process is based on the Bullying algorithm proposed
+ by 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+cite{GarciaMolina}
+\end_layout
+
+\end_inset
+
+.
+ In case of a server failure, when any other instance suspects that a server
+ is unavailable, it will send a proposal to all other servers that X is
+ unavailable.
+ If all others agree, the server with the next highest ID is elected the
+ new leader.
+ The leader is selected in a round-robin fashion.
+ To handle network partitions, a server may only become a leader if it is
+ part of the cluster with a majority of the servers.
+ In case each cluster is of equal size, the cluster with the current (or
+ previous) leader will remain/elect the leader.
+ Clients trying to contact the minority cluster will not get any replies,
+ and according to the round-robin selection scheme, eventually pick a server
+ from the majority cluster.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Replication
+\end_layout
+
+\begin_layout Standard
+In the interface above, three of the interfaces are considered writes.
+ Since we want to maintain a strong consis- tency among the replicas, the
+ master instance will propagate a write to all replicas before replying
+ to the client.
+ The propagation is assumed to be synchronous and utilises the broadcast
+ component of the communication layer described earlier.
+ Since performance is not one of the main non-functional requirements of
+ this system, a server which receives a request will block until it receives
+ an acknowl- edgement from all correct replicas.
+ A replica is considered correct as long as a heartbeat has been received
+ within the given timeframe.
+ It is worth adding here that an optimisation to this algorithm is to consider
+ only acks from a subset of the replicas.
+ In the event of such optimization it is neces- sary to establish an auxilliary
+ mechanism to ensure that all replicas are in a consistent state.
+ In case a replica, i.e an instance which is not the leader, gets an unexpected
+ request from a client it will query the leader for the data, and retransmit
+ the response to the client.
+ Before propagating write requests to replicas, the leader maintains a log
+ of all write records.
+ When a server fails, and after a new leader is elected, the server instances
+ will synchronize to ensure that the user lookup table and sequence number
+ is aligned.
+ Each write to the user lookup table is associated with a logical timestamp,
+ such that ordering can be guaranteed.
+ TBD: how to manage network partition for replication propagation.
+ 
 \end_layout
 
 \begin_layout Standard

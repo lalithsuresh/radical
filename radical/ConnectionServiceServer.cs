@@ -1,7 +1,7 @@
 using System;
 namespace radical
 {
-	public class ConnectionServiceServer
+	public class ConnectionServiceServer : PadicalObject
 	{
 		public ConnectionServiceServer ()
 		{

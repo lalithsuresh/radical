@@ -1,7 +1,7 @@
 using System;
 namespace radical
 {
-	public class SendReceiveMiddleLayer
+	public class SendReceiveMiddleLayer : PadicalObject
 	{
 		public SendReceiveMiddleLayer ()
 		{

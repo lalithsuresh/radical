@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \pagestyle{empty}
+\usepackage{graphicx}
 
 \makeatletter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
@@ -78,10 +79,11 @@ another to schedule events together.
 \item A centralised server which holds usernames and provides clients a
 sequence number service.
 \end{itemize}
-Section 
+The rest of the paper is organised as follows: Section \ref{sec:systemarch}
+describes the architecture of the different components of the system.
 
 
-\section{System Architecture}
+\section{System Architecture\label{sec:systemarch}}
 
 Since there is a Client and Server entity for this system, we describe
 the architecture of each separetely. One of the main design goals
@@ -108,68 +110,245 @@ of each of the 3 layers that they comprise of.
 
 \subsection{Client}
 
+%
+\begin{figure*}
+\begin{centering}
+\includegraphics[scale=0.25]{client}
+\par\end{centering}
+
+\caption{Client Architecture. A 3 layer approach is used, with the following
+stack: An interface layer (\texttt{Client Interface}), a service layer
+(\texttt{CalendarService, LookupService, ConnectionManager, SequenceNumberService})
+and a communication layer (\texttt{SendReceiveMiddleLayer, PointToPoint,
+GroupMulticast}).\label{fig:clientarch}}
+
+\end{figure*}
+
+
+The client architecture is described in Figure. \ref {fig:clientarch}.
+The working of the client has been decomposed into three layers, each
+of which holds the appropriate working components. This is described
+as follows:
+
+
+\subsubsection{Interface Layer}
+
+The client's interface layer comprises of the following:
+\begin{itemize}
+\item \texttt{Client Interface}: The instantiation of this class handles
+user inputs. The user can reserve events on the calendar, view the
+calendar and connect/disconnect to the server.
+\end{itemize}
+
+\subsubsection{Services Layer}
+\begin{itemize}
+\item \texttt{CalendarService}: This is the abstraction for the calendar
+itself. The event reservation and commit protocols are implemented
+within this class.
+\item \texttt{LookupService}: The Client performs lookups over the usernames
+of other participants using this service. The (IP,Port) tuples returned
+for each username are used to describe connections and remote object
+invocations for every other component in the system.
+\item \texttt{ConnectionManager}: This component handles user login/sign-outs.
+\item \texttt{SequenceNumberService}: This service provides a unique sequence
+number from the centralised servers.
+\end{itemize}
+
+\subsubsection{Communications Layer}
+\begin{itemize}
+\item \texttt{SendReceiveMiddleLayer}: To abstract the underlying communication
+process from the services, we use the \texttt{SendReceiveMiddleLayer}.
+If there are multiple recipients to send a message to, this layer
+uses the \texttt{GroupMulticast }abstraction, else, uses the \texttt{PointToPoint
+}abstraction. It also acts as a demultiplexer (on the same lines as
+Linux's \texttt{{}``}layer 4 demux\texttt{''}), to find the appropriate
+service layer recipient for a particular message.
+\item \texttt{GroupMulticast}: This abstraction uses the \texttt{PointToPoint
+}abstraction to deliver messages to a group of participants.
+\item \texttt{PointToPoint}: This abstraction uses a remote invocation to
+send a message to a recipient.
+\end{itemize}
 
 \subsection{Server}
-The Radical server consists of one master and three replicas. Each replica is strongly consistent with the master and updated on each write. In this section we describe the architecture of the servers, including the replicas, its leader election process, and its interfaces. The services provided by the server are: a user to ip:port lookup table and sequence numbering. 
 
-A server instance may be in one of two states: master or replica. As a master, the instance is the primary, and only, responsible for serving clients with data. We assume that at most one instance may fail at any time during normal execution, including the master. If the master instance becomes unavailable, a new master is automatically elected among the three replicas. 
+The Radical server consists of one master and three replicas. Each
+replica is strongly consistent with the master and updated on each
+write. In this section we describe the architecture of the servers,
+including the replicas, its leader election process, and its interfaces.
+The services provided by the server are: a user to (IP, Port) lookup
+table and sequence numbering. A server instance may be in one of two
+states: master or replica. As a master, the instance is the primary,
+and only, responsible for serving clients with data. We assume that
+at most one instance may fail at any time during normal execution,
+including the master. If the master instance becomes unavailable,
+a new master is automatically elected among the three replicas. 
+\begin{lyxcode}
+%
+\begin{figure*}[t]
+\begin{centering}
+\includegraphics[scale=0.25]{server}
+\par\end{centering}
 
-\subsubsection{Architecture}
-INSERT FIGURE HERE
+\caption{Server Architecture. A 3 layer approach is used, with the following
+stack: An interface layer (\texttt{ServerInterface}), a service layer
+(\texttt{ReplicationService, UserLookupService, SequenceNumberService})
+and a communication layer (\texttt{SendReceiveMiddleLayer, PointToPoint,
+GroupMulticast}).\label{fig:serverarch}}
 
-A server, similar to the client, uses a three-tier architecture. The three layers are named, from top to bottom: Interfaces, Services, and Communication. A layer may only communicate with the layer directly above or below. In other words, there are no calls made from the Interface to the Communication layer directly. The Services layer contains three components: Replication, SequenceNumbering, and UserLookup. Components within the same layer may communicate with each other freely, but aims to have as much of a clear separation of concerns as possible.  
+\end{figure*}
 
-\subsubsection{Interface}
-A server exposes a simple interface to all clients. Similarly to a client, the server exposes a simple Send(Message) and Receive(Message) interface. The types of messages that a server will handle are the following: 
+\end{lyxcode}
 
+\subsubsection{Interface Layer}
+
+The client's interface layer comprises of the following:
 \begin{itemize}
-\item{GetUserAddress(username): a client asks for the IP address and port of a specific user. A list of usernames may be specified to minimize number of requests sent to the server.}
-\item{ConnectUser(username, ip, port): a client adds itself to the user lookup table. }
-\item{DisconnectUser(username): a client disconnects and removes its entry from the lookup table. }
-\item{GetSequenceNumber(): a client asks for a sequence number. }
+\item \texttt{Server Interface}: The instantiation of this class handles
+user inputs. The user can view server state, the currently active
+replica, and the currently logged on users.
 \end{itemize}
 
-The three last interfaces are considered write intensive as they require changes to be propagated to all replicas of the server cluster. Each type described above is wrapped in a general Message including the Type, Origin, and Payload. The Message decomposition is further described in section (FILLIN).
-
-All calls between the server and the client are considered asynchronous. In case a client does not receive a reply within a given time, it is up to the client to re-request the data from the server, or another replica (if applicable). 
-
-\subsection{Messages}
-To facilitate client-to-client and client-to-server communication we propose a unified message format. It is inspired by the event message model used in the Appia Framework \cite{appia}. A message is essentially a serializable stack. A service layer component may push strings, integers and other standard types on the stack. Radical specific types may also be pushed on the stack as long as the object implements the Serializable interface. Before the \texttt{SendReceiveMiddleLayer} sends a message to a remote instance it ensures that, or attaches, a message type to the message. This is always the top-most item in the message stack. Thus, the message decomposition can be described as follows: 
-
+\subsubsection{Services Layer}
 \begin{itemize}
-\item Type
-\item Origin
-\item List of destinations
-\item SequenceNumber (optional)
-\item Payload (component specific stacks)
+\item \texttt{ReplicationService}: This is the abstraction for the strongly
+consistent replication service.
+\item \texttt{UserLookupService}: This service handles both connect/disconnects
+from the clients, and also provides the required username to (IP,
+Port) lookup service for them.
+\item \texttt{SequenceNumberService}: This service provides a unique sequence
+number to the clients.
 \end{itemize}
 
-Upon incoming messages the \texttt{SendReceiveMiddleLayer} only determines which component to forward the message. It is then each component's responsibility to deserialise the remaining parts of the message and make use of it.  
+\subsubsection{Communications Layer}
+\begin{itemize}
+\item The components of the server communications layer remains the same
+as that of the client.
+\end{itemize}
 
 \section{Algorithms}
 
-\subsection{Server side}
-In this section we describe the algorithms used in a Radical server to achieve high availability and consistency. 
+
+\subsection{Client Side: Reservation/Commit Protocol}
+
+The reservation protocol follows the steps as outlined in the project
+description. Once a client is in the tentatively booked state for
+a particular event slot, it executes the commit protocol.
+
+We have opted to use a modified 3-phase commit algorithm (ref) which
+works as follows:
+\begin{itemize}
+\item Coordinator side (initiator of the event reservation):
+
+\begin{enumerate}
+\item The coordinator receives a transaction request. If there is a failure
+at this point, the coordinator aborts the transaction (i.e. upon recovery,
+it will consider the transaction aborted). Otherwise, the coordinator
+sends a canCommit? message to the cohorts and moves to the waiting
+state.
+\item If there is a failure, timeout, or if the coordinator receives a No
+message in the waiting state, the coordinator aborts the transaction
+and sends an abort message to all cohorts. Otherwise the coordinator
+will receive Yes messages from all cohorts within the time window,
+so it sends preCommit messages to all cohorts and moves to the prepared
+state.
+\item If the coordinator succeeds in the prepared state, it will move to
+the commit state. However if the coordinator times out while waiting
+for an acknowledgement from a cohort, it will abort the transaction.
+In the case where all acknowledgements are received, the coordinator
+moves to the commit state as well, and sends a doCommit message to
+all participants indicating that they can commit right away (and not
+wait for their abort/commit timeouts).
+\end{enumerate}
+\item Cohort side (other participants in reservation):
+
+\begin{enumerate}
+\item The cohort receives a canCommit? message from the coordinator. If
+the cohort agrees it sends a Yes message to the coordinator and moves
+to the prepared state. Otherwise it sends a No message and aborts.
+If there is a failure, it moves to the abort state.
+\item In the prepared state, if the cohort receives an abort message from
+the coordinator, fails, or times out waiting for a commit, it aborts.
+If the cohort receives a preCommit message, it sends an ACK message
+to the coordinator. It then initiates a commit timeout and verify
+timeout. The verify timeout is shorter than the commit timeout and
+is higher than the minimum time required for the ACK message to reach
+the coordinator. If the client receives a 'doCommit' message before
+either timeout, then it commits.
+\item Since every participant is aware of the list of participants in the
+reservation, it is trivial to arrange all the participants (including
+the coordinator) in a circle (since the coordinator sends all participants
+the same list). At the point of verify timeout, the nodes ping their
+left and right neighbours in the ring. If a participant does not receive
+a pong for its ping, then it detects that a partition could have occured
+and does not commit, and informs the coordinator and its other neighbour
+that to abort. We assume symmetrical links in the system, that is,
+if A cannot ping B, then B cannot ping A. The message can then be
+disseminated in broadcast or tree patterns in order to ensure a quick
+abort by all nodes. If the verify phase succeeds, nodes can commit
+once the commit timeout occurs.
+\end{enumerate}
+\end{itemize}
+The cohort's execution of verifying whether its left and right neighbours
+are alive before committing ensures that a network partition has not
+occurred and all nodes are moving into the same state. The verify
+timer being shorter than the commit timer protects against the scenario
+where some nodes proceed with a commit, while the others abort. Any
+node that fails in between the above procedure executes an orderly
+leave and can thus abort the process, removing the need for a leader-election
+and quorum based solution in case of network partitions like the Enhanced
+3PC offers \cite{idit}.
+
+
+\subsection{Server Side: Leader Election and Replication}
+
 
 \subsubsection{Leader Election}
-All instances of a server knows about all other server instances. Each instance has a unique id. Since the number of servers never exceeds four, each server regularly emits a heartbeat to let the other servers know it is alive. It is assumed that at most one server may fail at any time. During the bootstrap of a server, each instance will select the server with the highest ID to be the leader. 
 
-Our leader election process is based on the Bullying algorithm proposed by (XY). In case of a server failure, when any other instance suspects that a server is unavailable, it will send a proposal to all other servers that X is unavailable. If all others agree, the server with the next highest ID is elected the new leader. The leader is selected in a round-robin fashion. 
+All instances of a server knows about all other server instances.
+Each instance has a unique id. Since the number of servers never exceeds
+four, each server regularly emits a heartbeat to let the other servers
+know it is alive. It is assumed that at most one server may fail at
+any time. During the bootstrap of a server, each instance will select
+the server with the highest ID to be the leader. Our leader election
+process is based on the Bullying algorithm proposed by \cite{GarciaMolina}.
+In case of a server failure, when any other instance suspects that
+a server is unavailable, it will send a proposal to all other servers
+that X is unavailable. If all others agree, the server with the next
+highest ID is elected the new leader. The leader is selected in a
+round-robin fashion. To handle network partitions, a server may only
+become a leader if it is part of the cluster with a majority of the
+servers. In case each cluster is of equal size, the cluster with the
+current (or previous) leader will remain/elect the leader. Clients
+trying to contact the minority cluster will not get any replies, and
+according to the round-robin selection scheme, eventually pick a server
+from the majority cluster. 
 
-To handle network partitions, a server may only become a leader if it is part of the cluster with a majority of the servers. In case each cluster is of equal size, the cluster with the current (or previous) leader will remain/elect the leader. Clients trying to contact the minority cluster will not get any replies, and according to the round-robin selection scheme, eventually pick a server from the majority cluster. 
 
 \subsubsection{Replication}
-In the interface above, three of the interfaces are considered writes. Since we want to maintain a strong consistency among the replicas, the master instance will propagate a write to all replicas before replying to the client. The propagation is assumed to be synchronous and utilises the broadcast component of the communication layer described earlier. Since performance is not one of the main non-functional requirements of this system, a server which receives a request will block until it receives an acknowledgement from all correct replicas. A replica is considered correct as long as a heartbeat has been received within the given timeframe. It is worth adding here that an optimisation to this algorithm is to consider only acks from a subset of the replicas. In the event of such optimization it is necessary to establish an auxilliary mechanism to ensure that all replicas are in a consistent state. 
 
-In case a replica, i.e an instance which is not the leader, gets an unexpected request from a client it will query the leader for the data, and retransmit the response to the client. Before propagating write requests to replicas, the leader maintains a log of all write records. 
+In the interface above, three of the interfaces are considered writes.
+Since we want to maintain a strong consis- tency among the replicas,
+the master instance will propagate a write to all replicas before
+replying to the client. The propagation is assumed to be synchronous
+and utilises the broadcast component of the communication layer described
+earlier. Since performance is not one of the main non-functional requirements
+of this system, a server which receives a request will block until
+it receives an acknowl- edgement from all correct replicas. A replica
+is considered correct as long as a heartbeat has been received within
+the given timeframe. It is worth adding here that an optimisation
+to this algorithm is to consider only acks from a subset of the replicas.
+In the event of such optimization it is neces- sary to establish an
+auxilliary mechanism to ensure that all replicas are in a consistent
+state. In case a replica, i.e an instance which is not the leader,
+gets an unexpected request from a client it will query the leader
+for the data, and retransmit the response to the client. Before propagating
+write requests to replicas, the leader maintains a log of all write
+records. When a server fails, and after a new leader is elected, the
+server instances will synchronize to ensure that the user lookup table
+and sequence number is aligned. Each write to the user lookup table
+is associated with a logical timestamp, such that ordering can be
+guaranteed. TBD: how to manage network partition for replication propagation. 
 
-When a server fails, and after a new leader is elected, the server instances will synchronize to ensure that the user lookup table and sequence number is aligned. Each write to the user lookup table is associated with a logical timestamp, such that ordering can be guaranteed. 
-
-TBD: how to manage network partition for replication propagation. 
-
-\begin{lyxcode}
-
-\end{lyxcode}
 \bibliographystyle{latex8}
 \bibliography{latex8}
 
