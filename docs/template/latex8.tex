@@ -234,7 +234,7 @@ The reservation protocol follows the steps as outlined in the project
 description. Once a client is in the tentatively booked state for
 a particular event slot, it executes the commit protocol.
 
-We have opted to use a modified 3-phase commit algorithm (ref) which
+We have opted to use a modified 3-phase commit algorithm \cite{Skeen:1983:FMC:1313337.1313750} which
 works as follows:
 \begin{itemize}
 \item Coordinator side (initiator of the event reservation):
@@ -243,36 +243,36 @@ works as follows:
 \item The coordinator receives a transaction request. If there is a failure
 at this point, the coordinator aborts the transaction (i.e. upon recovery,
 it will consider the transaction aborted). Otherwise, the coordinator
-sends a canCommit? message to the cohorts and moves to the waiting
+sends a \texttt{canCommit} message to the cohorts and moves to the waiting
 state.
 \item If there is a failure, timeout, or if the coordinator receives a No
 message in the waiting state, the coordinator aborts the transaction
-and sends an abort message to all cohorts. Otherwise the coordinator
-will receive Yes messages from all cohorts within the time window,
-so it sends preCommit messages to all cohorts and moves to the prepared
+and sends an \texttt{abort} message to all cohorts. Otherwise the coordinator
+will receive \texttt{Yes} messages from all cohorts within the time window,
+so it sends \texttt{preCommit} messages to all cohorts and moves to the prepared
 state.
 \item If the coordinator succeeds in the prepared state, it will move to
 the commit state. However if the coordinator times out while waiting
 for an acknowledgement from a cohort, it will abort the transaction.
 In the case where all acknowledgements are received, the coordinator
-moves to the commit state as well, and sends a doCommit message to
+moves to the commit state as well, and sends a \texttt{doCommit} message to
 all participants indicating that they can commit right away (and not
 wait for their abort/commit timeouts).
 \end{enumerate}
 \item Cohort side (other participants in reservation):
 
 \begin{enumerate}
-\item The cohort receives a canCommit? message from the coordinator. If
-the cohort agrees it sends a Yes message to the coordinator and moves
-to the prepared state. Otherwise it sends a No message and aborts.
+\item The cohort receives a \texttt{canCommit} message from the coordinator. If
+the cohort agrees it sends a \texttt{Yes} message to the coordinator and moves
+to the prepared state. Otherwise it sends a \texttt{No} message and aborts.
 If there is a failure, it moves to the abort state.
-\item In the prepared state, if the cohort receives an abort message from
+\item In the prepared state, if the cohort receives an \texttt{abort} message from
 the coordinator, fails, or times out waiting for a commit, it aborts.
-If the cohort receives a preCommit message, it sends an ACK message
+If the cohort receives a \texttt{preCommit} message, it sends an ACK message
 to the coordinator. It then initiates a commit timeout and verify
 timeout. The verify timeout is shorter than the commit timeout and
 is higher than the minimum time required for the ACK message to reach
-the coordinator. If the client receives a 'doCommit' message before
+the coordinator. If the client receives a \texttt{doCommit} message before
 either timeout, then it commits.
 \item Since every participant is aware of the list of participants in the
 reservation, it is trivial to arrange all the participants (including
