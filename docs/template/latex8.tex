@@ -48,7 +48,7 @@
 
 \begin{document}
 
-\title{Really Awesome Distributed Internet Calendar (RADICAL)}
+\title{RADICal: Really Awesome Distributed Internet Calendar (RADICAL)}
 
 \maketitle
 %\author{Lalith Suresh P.\\
@@ -71,8 +71,8 @@
 \begin{abstract}
 Shared calendar systems like Google Calendar are known to be an effective
 way for people to schedule and coordinate events. In this project,
-we design and implement PADICal, a peer-to-peer based distributed
-calendar system. PADICal allows clients to make event reservations
+we design and implement RADICal, a peer-to-peer based distributed
+calendar system. RADICal allows clients to make event reservations
 amongst themselves in an almost decentralised manner with minimal
 assistance from a central server. 
 \end{abstract}
@@ -88,7 +88,10 @@ another to schedule events together.
 sequence number service. 
 \end{itemize}
 The rest of the paper is organised as follows: Section \ref{sec:systemarch}
-describes the architecture of the different components of the system.
+describes the architecture of the different components of the system,
+Section \ref{sec:Algorithms} explains the important algorithms that
+underly RADICal, and Section \ref{sec:Conclusions} concludes the
+paper.
 
 
 \section{System Architecture\label{sec:systemarch}}
@@ -237,7 +240,7 @@ number to the clients.
 as that of the client. 
 \end{itemize}
 
-\section{Algorithms}
+\section{Algorithms\label{sec:Algorithms}}
 
 
 \subsection{Client Side: Reservation/Commit Protocol}
@@ -399,6 +402,15 @@ phase.
 \item It is possible to only consider a subset of acknowledgements when
 propagating writes in the server cluster, thus improving performance. 
 \end{itemize}
+
+\section{Conclusions\label{sec:Conclusions}}
+
+In this paper, we have presented the design and architecture for RADICal,
+a peer-2-peer distributed internet calendar service. The design is
+made with testability in mind. The algorithms have been designed for
+handling partition tolerance on the client side, and strong consistency
+with availability on the server side.
+
 \bibliographystyle{latex8}
 \bibliography{latex8}
 

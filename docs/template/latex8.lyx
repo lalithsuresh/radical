@@ -64,7 +64,7 @@
 \begin_body
 
 \begin_layout Title
-Really Awesome Distributed Internet Calendar (RADICAL)
+RADICal: Really Awesome Distributed Internet Calendar (RADICAL)
 \end_layout
 
 \begin_layout Standard
@@ -357,9 +357,9 @@ thispagestyle{empty}
 \begin_layout Abstract
 Shared calendar systems like Google Calendar are known to be an effective
  way for people to schedule and coordinate events.
- In this project, we design and implement PADICal, a peer-to-peer based
+ In this project, we design and implement RADICal, a peer-to-peer based
  distributed calendar system.
- PADICal allows clients to make event reservations amongst themselves in
+ RADICal allows clients to make event reservations amongst themselves in
  an almost decentralised manner with minimal assistance from a central server.
  
 \end_layout
@@ -393,7 +393,22 @@ reference "sec:systemarch"
 
 \end_inset
 
- describes the architecture of the different components of the system.
+ describes the architecture of the different components of the system, Section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Algorithms"
+
+\end_inset
+
+ explains the important algorithms that underly RADICal, and Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Conclusions"
+
+\end_inset
+
+ concludes the paper.
 \end_layout
 
 \begin_layout Section
@@ -679,6 +694,7 @@ The Radical server consists of one master and three replicas.
 
 \begin_layout LyX-Code
 \begin_inset Float figure
+placement t
 wide false
 sideways false
 status open
@@ -795,6 +811,13 @@ The components of the server communications layer remains the same as that
 
 \begin_layout Section
 Algorithms
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Algorithms"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1113,6 +1136,25 @@ In the scheme for committing a reservation, it is possible that two clients
 It is possible to only consider a subset of acknowledgements when propagating
  writes in the server cluster, thus improving performance.
  
+\end_layout
+
+\begin_layout Section
+Conclusions
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Conclusions"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this paper, we have presented the design and architecture for RADICal,
+ a peer-2-peer distributed internet calendar service.
+ The design is made with testability in mind.
+ The algorithms have been designed for handling partition tolerance on the
+ client side, and strong consistency with availability on the server side.
 \end_layout
 
 \begin_layout Standard
