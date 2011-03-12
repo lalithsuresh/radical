@@ -86,27 +86,27 @@ describes the architecture of the different components of the system.
 \section{System Architecture\label{sec:systemarch}}
 
 Since there is a Client and Server entity for this system, we describe
-the architecture of each separetely. One of the main design goals
-is to allow easy testability and debugging facilities within the system
+the architecture of each separetely. One of the main design goals is
+to allow easy testability and debugging facilities within the system
 in order to ease development. To a certain degree, we hope to achieve
 this through classic 'printf' style debugging. Every class in PADICal
-inherits from a class \texttt{PadiCalObject}, which has two virtual
-methods named \texttt{Debug() }and \texttt{UnitTests()}. The former
-performs pretty printing of internal state of an object, and follows
-the flow of logic through the stack whereas the latter is written
-during the development phase to ensure methods do not misbehave when
-changes are introduced later. All sub classes have to implement these
-methods depending on the kind of methods and state information they
-may hold. The \texttt{Debug()} method of different objects comprising
-of a client or server can be enabled via a configuration file or through
-some interfaces we can provide to the UI of the client.
+inherits from a class \texttt{PadiCalObject}, which has one virtual
+method named \texttt{Debug()}. This method performs pretty printing of
+internal state of an object, and follows the flow of logic through the
+stack. All sub classes have to implement this method depending on the
+kind of methods and state information they may hold.  Additionally,
+the NUnit framework is used during the development phase to ensure
+methods do not misbehave when changes are introduced later. The
+\texttt{Debug()} method of different objects comprising of a client or
+server can be enabled via a configuration file or through some
+interfaces we can provide to the UI of the client.
 
-The client and the server architecture has been logically decomposed
-into 3 layers each. From top to down, they are as follows: the interface
+The client and the server follows a three-tier architectural decomposition. From top to down, they are as follows: the interface
 layer, the services layer, and the communications layer. In the sections
 below, we first describe the client, the server, and the components
-of each of the 3 layers that they comprise of.
+of each of the three layers that they comprise of.
 
+In addition to the client and the server, a puppet master will be introduced to facilitate testing. This component is not further discussed in this paper. 
 
 \subsection{Client}
 
@@ -116,7 +116,7 @@ of each of the 3 layers that they comprise of.
 \includegraphics[scale=0.25]{client}
 \par\end{centering}
 
-\caption{Client Architecture. A 3 layer approach is used, with the following
+\caption{Client Architecture. A three layer approach is used, with the following
 stack: An interface layer (\texttt{Client Interface}), a service layer
 (\texttt{CalendarService, LookupService, ConnectionManager, SequenceNumberService})
 and a communication layer (\texttt{SendReceiveMiddleLayer, PointToPoint,
@@ -135,16 +135,16 @@ as follows:
 
 The client's interface layer comprises of the following:
 \begin{itemize}
-\item \texttt{Client Interface}: The instantiation of this class handles
+\item \texttt{Client Interface}: The instantiation of this component handles
 user inputs. The user can reserve events on the calendar, view the
-calendar and connect/disconnect to the server.
+calendar and connect/disconnect to the server. This interface is also used by the puppet master to remotely control multiple clients. 
 \end{itemize}
 
 \subsubsection{Services Layer}
 \begin{itemize}
 \item \texttt{CalendarService}: This is the abstraction for the calendar
 itself. The event reservation and commit protocols are implemented
-within this class.
+within this component.
 \item \texttt{LookupService}: The Client performs lookups over the usernames
 of other participants using this service. The (IP,Port) tuples returned
 for each username are used to describe connections and remote object
