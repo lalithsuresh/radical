@@ -802,6 +802,28 @@ In the interface above, three of the interfaces are considered writes.
  
 \end_layout
 
+\begin_layout Subsection
+Possible Optimisations
+\end_layout
+
+\begin_layout Standard
+Some possible optimisations that we will work on once we get a basic version
+ of the code include:
+\end_layout
+
+\begin_layout Itemize
+Minimising username lookups from the client side by using a cache (in the
+ same lines as a DNS cache).
+\end_layout
+
+\begin_layout Itemize
+In the scheme for committing a reservation, it is possible that two clients
+ can be part of two reservation sequences, and each of them can abort each
+ other's sequences.
+ This is a safety measure, but it is possible to use a tie-breaking system
+ at the tentatively booked phase.
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
