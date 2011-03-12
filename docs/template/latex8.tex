@@ -43,20 +43,20 @@
 \title{Really Awesome Distributed Internet Calendar (RADICAL)}
 
 
-\author{Lalith Suresh P.\\
-DEI\\
-Instituto Superior Tecnico\\
-Lisbon, Portugal\\
-suresh.lalith@gmail.com\\
-\and Marcus Ljungblad\\
-DEI\\
-Insituto Superior Tecnico\\
-Lisbon, Portugal\\
-marcus@ljungblad.nu\and Bruno Pereira\\
-DEI\\
-Insituto Superior Tecnico\\
-Lisbon, Portugal\\
-brunopereir4@gmail.com}
+%\author{Lalith Suresh P.\\
+%DEI\\
+%Instituto Superior Tecnico\\
+%Lisbon, Portugal\\
+%suresh.lalith@gmail.com\\
+%\and Marcus Ljungblad\\
+%DEI\\
+%Insituto Superior Tecnico\\
+%Lisbon, Portugal\\
+%marcus@ljungblad.nu\and Bruno Pereira\\
+%DEI\\
+%Insituto Superior Tecnico\\
+%Lisbon, Portugal\\
+%brunopereir4@gmail.com}
 
 \maketitle
 \thispagestyle{empty}
@@ -320,12 +320,14 @@ four, each server regularly emits a heartbeat to let the other servers
 know it is alive. It is assumed that at most one server may fail at
 any time. During the bootstrap of a server, each instance will select
 the server with the highest ID to be the leader. Our leader election
-process is based on the Bullying algorithm proposed by \cite{GarciaMolina}.
+process is based on the Bully algorithm proposed by \cite{GarciaMolina}.
 In case of a server failure, when any other instance suspects that
 a server is unavailable, it will send a proposal to all other servers
 that X is unavailable. If all others agree, the server with the next
 highest ID is elected the new leader. The leader is selected in a
-round-robin fashion. To handle network partitions, a server may only
+round-robin fashion. 
+
+To handle network partitions, a server may only
 become a leader if it is part of the cluster with a majority of the
 servers. In case each cluster is of equal size, the cluster with the
 current (or previous) leader will remain/elect the leader. Clients
@@ -337,19 +339,17 @@ from the majority cluster.
 \subsubsection{Replication}
 
 In the interface above, three of the interfaces are considered writes.
-Since we want to maintain a strong consis- tency among the replicas,
+Since we want to maintain a strong consistency among the replicas,
 the master instance will propagate a write to all replicas before
 replying to the client. The propagation is assumed to be synchronous
 and utilises the broadcast component of the communication layer described
 earlier. Since performance is not one of the main non-functional requirements
 of this system, a server which receives a request will block until
-it receives an acknowl- edgement from all correct replicas. A replica
+it receives an acknowledgement from all correct replicas. A replica
 is considered correct as long as a heartbeat has been received within
-the given timeframe. It is worth adding here that an optimisation
-to this algorithm is to consider only acks from a subset of the replicas.
-In the event of such optimization it is neces- sary to establish an
-auxilliary mechanism to ensure that all replicas are in a consistent
-state. In case a replica, i.e an instance which is not the leader,
+the given timeframe. 
+
+In case a replica, i.e an instance which is not the leader,
 gets an unexpected request from a client it will query the leader
 for the data, and retransmit the response to the client. Before propagating
 write requests to replicas, the leader maintains a log of all write
@@ -357,8 +357,7 @@ records. When a server fails, and after a new leader is elected, the
 server instances will synchronize to ensure that the user lookup table
 and sequence number is aligned. Each write to the user lookup table
 is associated with a logical timestamp, such that ordering can be
-guaranteed. TBD: how to manage network partition for replication propagation. 
-
+guaranteed. 
 
 \subsection{Possible Optimisations}
 
@@ -372,6 +371,8 @@ clients can be part of two reservation sequences, and each of them
 can abort each other's sequences. This is a safety measure, but it
 is possible to use a tie-breaking system at the tentatively booked
 phase.
+\item It is possible to only consider a subset of acknowledgements when propagating writes in the server cluster, thus improving performance. 
+
 \end{itemize}
 \bibliographystyle{latex8}
 \bibliography{latex8}
