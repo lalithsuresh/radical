@@ -1,5 +1,5 @@
 using System;
-namespace radical
+namespace comm
 {
 	public class PerfectPointToPointSend : PadicalObject
 	{
