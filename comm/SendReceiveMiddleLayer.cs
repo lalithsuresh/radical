@@ -6,6 +6,10 @@ namespace radical
 		public SendReceiveMiddleLayer ()
 		{
 		}
+		
+		public void Send () 
+		{
+		}
 	}
 }
 

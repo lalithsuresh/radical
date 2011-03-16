@@ -12,3 +12,24 @@ Todo for Radical
   - using TCP
   - asynchronous
   
+
+----- some remoting notes
+- when connecting the first time, do a quick health check
+- check Marshal()
+
+
+ChatServer
+- void SendMsg (string nick, string msg) 
+- void Register (string nick, string clientURL) 
+
+ChatClient
+- void ReceiveMsg (string nick, string msg)
+
+Dirty items in Remoting
+- Not possible to send from a remoting call... so called remoting loops
+-- Basically a remote call is triggered from a remote call. The channel will be locked. 
+
+- The only thing which can change a GUI is the thread which created it. Solution: 
+ 
+public delegate void DelegateAddMessage(string nick, string msg);
+Form1.Invoke(new DelegateAddMessage(Form1.AddMsg), new Object[] { nick, msg });

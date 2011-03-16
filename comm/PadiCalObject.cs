@@ -3,7 +3,7 @@ namespace radical
 {
 	public class PadicalObject
 	{
-		public PadiCalObject ()
+		public PadicalObject ()
 		{
 			Console.WriteLine ("padical object instantiated");
 		}

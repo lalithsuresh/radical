@@ -1,12 +1,13 @@
 using System;
 
-namespace radical
+namespace client
 {
 	class MainClass
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello");
+			Console.WriteLine ("Hello World!");
+			
 		}
 	}
 }

@@ -1,2 +1,9 @@
 *.dll
 *.exe
+*.aux
+*.bbl
+*.blg
+*~
+*.log
+*.pdf
+*.swp

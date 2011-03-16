@@ -1,9 +1,5 @@
 Server architecture
 
-The Radical server consists of one master and three replicas. Each replica is strongly consistent with the master and updated on each write. In this section we describe the architecture of the servers, including the replicas, its leader election process, and its interfaces. The services provided by the server are: a user to ip:port lookup table and sequence numbering. 
-
-Overview
-A server instance may be in one of two states: master or replica. As a master, the instance is the primary, and only, responsible for serving clients with data. We assume that at most one instance may fail at any time during normal execution, including the master. If the master instance becomes unavailable, a new master is automatically elected among the three replicas. 
 
 Interface
 A server exposes a simple interface to all clients. Similarly to a client, the server exposes a simple Send(Message) and Receive(Message) interface. The types of messages that a server will handle are the following: 
