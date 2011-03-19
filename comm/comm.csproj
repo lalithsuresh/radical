@@ -38,6 +38,7 @@
     <Compile Include="GroupMulticast.cs" />
     <Compile Include="PadiCalObject.cs" />
     <Compile Include="PerfectPointToPointSend.cs" />
+    <Compile Include="ReceiveMessageEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
