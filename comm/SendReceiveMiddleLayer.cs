@@ -10,6 +10,7 @@ namespace comm
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
 		private TcpChannel m_channel;
+		private ObjRef m_remoteReference;
 		private PerfectPointToPointSend m_transmitter; 
 		private GroupMulticast m_groupMulticast; 
 		
@@ -25,7 +26,7 @@ namespace comm
 		 * Clients: may use same port (unless run on same machine)
 		 */
 		public void Start (int port) 
-		{
+		{			
 			// create sending interfaces
 			m_transmitter = new PerfectPointToPointSend(this);
 			m_groupMulticast = new GroupMulticast(m_transmitter);
@@ -33,7 +34,12 @@ namespace comm
 			// register tcp channel and connect p2p interface
 			m_channel = new TcpChannel(port);
 			ChannelServices.RegisterChannel(m_channel, false);
-			RemotingServices.Marshal(m_transmitter, "Radical", typeof(PerfectPointToPointSend));
+			m_remoteReference = RemotingServices.Marshal(m_transmitter, "Radical", typeof(PointToPointInterface));
+		}
+		
+		public void Stop ()
+		{
+			RemotingServices.Disconnect(m_transmitter);
 		}
 		
 		public string GetURI () 
@@ -51,7 +57,6 @@ namespace comm
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Deliver (Message m) 
 		{
-			// this function needs synchronization
 			Console.WriteLine("SendRecv got: {0}", Message.GetType(m));
 		}
 		
@@ -60,11 +65,8 @@ namespace comm
 		 */
 		public void Send (Message m) 
 		{
-			TcpChannel channel = new TcpChannel();
-			ChannelServices.RegisterChannel(channel);
-			PerfectPointToPointSend p2p_send = (PerfectPointToPointSend) 
-				Activator.GetObject(typeof(PerfectPointToPointSend), "tcp://localhost:8081/Radical");
-			p2p_send.Send(m);
+			// inspect message destinations, if multiple, use group_multicast else just send with p2p
+			m_transmitter.Send(m, "tcp://localhost:8081/Radical");
 		}
 	}
 }

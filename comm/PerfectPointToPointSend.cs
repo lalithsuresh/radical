@@ -14,29 +14,22 @@ namespace comm
 			m_demuxer = demuxer;
 		}
 		
-		public void Send (Message m)
+		public void Deliver (Message m)
 		{
 			// deliver to incoming queue in SendRecvMiddleLayer
 			m_demuxer.Deliver(m);
 		}
-	}
-	
-	/*public class PerfectPointToPointSend : PadicalObject
-	{
 		
-		public PerfectPointToPointSend ()
+		public void Send (Message m, string uri) 
 		{
-			// empty
+			// get reference to remote object 
+			PointToPointInterface p2p_send = (PointToPointInterface) 
+				Activator.GetObject(typeof(PointToPointInterface), uri);
+			
+			// ohoy!
+			p2p_send.Deliver(m);	
 		}
-		
-		
-		public void Send (string uri, Message m)
-		{
-			Console.WriteLine("Sending message to remote instance");
-		}	
-		
-	}*/
-	
+	}
 	
 }
 
