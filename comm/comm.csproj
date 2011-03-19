@@ -33,13 +33,13 @@
     <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="SendReceiveMiddleLayer.cs" />
     <Compile Include="GroupMulticast.cs" />
     <Compile Include="PadiCalObject.cs" />
     <Compile Include="PerfectPointToPointSend.cs" />
     <Compile Include="PointToPointInterface.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="ReceiveMessageEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

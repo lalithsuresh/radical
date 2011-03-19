@@ -35,6 +35,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CalendarServiceClient.cs" />
+    <Compile Include="SequenceNumberServiceClient.cs" />
+    <Compile Include="LookupServiceClient.cs" />
+    <Compile Include="ConnectionServiceClient.cs" />
+    <Compile Include="Client.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

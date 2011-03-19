@@ -6,37 +6,39 @@ namespace comm
 	[Serializable]
 	public class Message
 	{
-		private string m_type; 
-		private List<string> m_destinations; 
+		private string m_type;
+		private string m_sourceUserName;
+		private List<string> m_recipientUserNames;
 		private Stack<object> m_items;
 		
-		/** 
-		 * Use this function to create a new message. 
-		 * Ensures that all messages are created in the same way.
-		 */
-		public static Message Create (string type) 
+		public Message ()
 		{
-			Message msg = new Message();
-			msg.m_type = type;
-			return msg;
+			m_items = new Stack<object>();
+			m_recipientUserNames = new List<string> ();
 		}
 		
 		/**
 		 * Returns the type of the message for demuxing
 		 */
-		public static string GetType (Message m) 
+		public string GetMessageType () 
 		{
-			return m.m_type;
+			return m_type;
 		}
 		
-		public static List<string> GetDestinations (Message m) 
+		
+		public string GetSource ()
 		{
-			return m.m_destinations;	
+			return m_sourceUserName;
 		}
 		
-		private Message ()
+		public void SetSource (string source)
 		{
-			m_items = new Stack<object>();
+			m_sourceUserName = source;
+		}
+				
+		public List<string> GetDestinations () 
+		{
+			return m_recipientUserNames;	
 		}
 		
 		/** 
@@ -45,7 +47,7 @@ namespace comm
 		 */
 		public void SetDestination (List<string> destinations) 
 		{
-			m_destinations.AddRange(destinations);	
+			m_recipientUserNames.AddRange(destinations);	
 		}
 		
 		/**
@@ -55,21 +57,29 @@ namespace comm
 		public void SetDestination (string user) 
 		{
 			if (user != null) 
-				m_destinations.Add(user); 
+			{
+				m_recipientUserNames.Add(user);
+			}
 		}
 			
 		public void PushString (string s) 
 		{
-			if (s != null) 
+			if (s != null)
+			{
 				m_items.Push(s);
+			}
 		}
 		
 		public string PopString () 
 		{
 			if (m_items.Peek() is string)
+			{
 				return (string)m_items.Pop(); 
+			}
 			else
+			{
 				return null;
+			}
 		}
 	}
 }
