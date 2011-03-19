@@ -3,8 +3,11 @@ namespace comm
 {
 	public class GroupMulticast : PadicalObject
 	{
-		public GroupMulticast ()
+		private PointToPointInterface m_transmitter; 
+		
+		public GroupMulticast (PointToPointInterface transmitter)
 		{
+			m_transmitter = transmitter;
 		}
 	}
 }
