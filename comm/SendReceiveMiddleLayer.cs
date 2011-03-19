@@ -4,15 +4,21 @@ using System.Threading;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Collections.Generic;
 
 namespace comm
 {
+	public delegate void ReceiveCallbackType(object sender, EventArgs e);
+	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
+
 		private TcpChannel m_channel;
 		private ObjRef m_remoteReference;
 		private PerfectPointToPointSend m_transmitter; 
 		private GroupMulticast m_groupMulticast; 
+		private Dictionary<string, ReceiveCallbackType> m_registerMap = new Dictionary<string, ReceiveCallbackType> ();
+
 		
 		public SendReceiveMiddleLayer ()
 		{
@@ -68,6 +74,10 @@ namespace comm
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
 			m_transmitter.Send(m, "tcp://localhost:8081/Radical");
 		}
+		
+		public void RegisterReceiveCallback (String service, ReceiveCallbackType cb)
+		{
+			m_registerMap.Add (service, cb);
+		}
 	}
 }
-
