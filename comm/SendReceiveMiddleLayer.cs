@@ -12,11 +12,10 @@ namespace comm
 	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
-
+		private const string CHANNEL_NAME = "Radical";
 		private TcpChannel m_channel;
 		private ObjRef m_remoteReference;
 		private PerfectPointToPointSend m_transmitter; 
-		private GroupMulticast m_groupMulticast; 
 		private Dictionary<string, ReceiveCallbackType> m_registerMap = new Dictionary<string, ReceiveCallbackType> ();
 
 		
@@ -35,12 +34,11 @@ namespace comm
 		{			
 			// create sending interfaces
 			m_transmitter = new PerfectPointToPointSend(this);
-			m_groupMulticast = new GroupMulticast(m_transmitter);
 			
 			// register tcp channel and connect p2p interface
 			m_channel = new TcpChannel(port);
 			ChannelServices.RegisterChannel(m_channel, false);
-			m_remoteReference = RemotingServices.Marshal(m_transmitter, "Radical", typeof(PointToPointInterface));
+			m_remoteReference = RemotingServices.Marshal(m_transmitter, CHANNEL_NAME, typeof(PointToPointInterface));
 		}
 		
 		public void Stop ()
@@ -54,10 +52,11 @@ namespace comm
 			
 			if (m_channel != null) 
 			{
-				uri = "somecooluri";
+				ChannelDataStore data = (ChannelDataStore) m_channel.ChannelData;
+				uri = new System.Uri(data.ChannelUris[0]).AbsoluteUri;
 			}
 			
-			return uri;
+			return uri + CHANNEL_NAME;
 		}
 		
 		[MethodImpl(MethodImplOptions.Synchronized)]
