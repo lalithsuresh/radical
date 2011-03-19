@@ -5,23 +5,23 @@ using System.Runtime.Remoting.Channels.Tcp;
 
 namespace comm
 {
-	public class PerfectPointToPointDeliver : MarshalByRefObject, PointToPointInterface, PadicalObject
+	public class PerfectPointToPointSend : MarshalByRefObject, PointToPointInterface
 	{
 		private SendReceiveMiddleLayer m_demuxer; 
 		
-		public PerfectPointToPointDeliver (SendReceiveMiddleLayer demuxer)
+		public PerfectPointToPointSend (SendReceiveMiddleLayer demuxer)
 		{
 			m_demuxer = demuxer;
 		}
 		
-		public void Deliver (Message m)
+		public void Send (Message m)
 		{
 			// deliver to incoming queue in SendRecvMiddleLayer
 			m_demuxer.Deliver(m);
 		}
 	}
 	
-	public class PerfectPointToPointSend : PadicalObject
+	/*public class PerfectPointToPointSend : PadicalObject
 	{
 		
 		public PerfectPointToPointSend ()
@@ -35,7 +35,7 @@ namespace comm
 			Console.WriteLine("Sending message to remote instance");
 		}	
 		
-	}
+	}*/
 	
 	
 }

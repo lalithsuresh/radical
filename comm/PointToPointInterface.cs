@@ -3,7 +3,7 @@ namespace comm
 {
 	public interface PointToPointInterface
 	{
-		void Deliver (Message m); 
+		void Send (Message m); 
 	}
 }
 
