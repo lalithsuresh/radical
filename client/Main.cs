@@ -7,6 +7,10 @@ namespace client
 	{
 		public static void Main (string[] args)
 		{
+			Client client = new Client ();
+			
+			client.InitClient ();
+			/*
 			Console.WriteLine ("Client on {0}", args[0]);
 			// instantiate stack 
 			// register service components with send-recv layer
@@ -28,7 +32,7 @@ namespace client
 				Console.WriteLine("sent a message");
 				
 			}
-			
+			*/
 			Console.ReadLine();
 		}
 	}

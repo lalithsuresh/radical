@@ -62,7 +62,7 @@ namespace comm
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Deliver (Message m) 
 		{
-			Console.WriteLine("SendRecv got: {0}", Message.GetType(m));
+			Console.WriteLine("SendRecv got: {0}", m.GetType());
 		}
 		
 		/**

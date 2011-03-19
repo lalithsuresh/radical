@@ -3,16 +3,17 @@ namespace comm
 {
 	public class PadicalObject
 	{
+		bool m_debugFlag = false;
+		
 		public PadicalObject ()
 		{
-			Console.WriteLine ("padical object instantiated");
 		}
 		
-		public virtual void Debug ()
+		public virtual void Debug (bool value)
 		{
-			Console.WriteLine ("Debug method called");
+			m_debugFlag = value;
+			Console.WriteLine ("Debug method set");
 		}
 		
 	}
 }
-
