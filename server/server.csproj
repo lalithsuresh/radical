@@ -39,6 +39,7 @@
     <Compile Include="Server.cs" />
     <Compile Include="IServiceServer.cs" />
     <Compile Include="SequenceNumberServiceServer.cs" />
+    <Compile Include="ConfigReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
