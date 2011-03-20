@@ -1,10 +1,13 @@
 using System;
 using comm;
+using config;
+using System.Collections.Generic;
 
 namespace client
 {
-	public class Client
+	public class Client : PadicalObject
 	{
+		// Eventually make these not-so-public
 		public PerfectPointToPointSend m_perfectPointToPointSend;
 		public SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
 		public GroupMulticast m_groupMulticast;
@@ -13,8 +16,37 @@ namespace client
 		public SequenceNumberServiceClient m_sequenceNumberService;
 		public ConnectionServiceClient m_connectionServiceClient;
 		
+		// Client properties.
+		// C# naming conventions require us to abandon
+		// our own naming conventions. -- Lalith x-(
+		public string UserName {
+			get;
+			set;
+		}
+		
+		public int ClientPort {
+			get;
+			set;
+		}
+		
+		public List<string> ServerList {
+			get;
+			set;
+		}
+		
 		public Client ()
 		{
+			LoadConfig ();
+		}
+		
+		public void LoadConfig ()
+		{
+			UserName = ConfigReader.GetConfigurationValue ("username");
+			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
+			ServerList = new List<string> ();
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3"));
 		}
 		
 		public void InitClient ()

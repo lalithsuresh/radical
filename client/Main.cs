@@ -1,5 +1,6 @@
 using System;
-using comm; 
+using comm;
+using config;
 
 namespace client
 {
@@ -7,32 +8,19 @@ namespace client
 	{
 		public static void Main (string[] args)
 		{
+			// some sanity checks
+			if (args.Length < 1) 
+			{
+				Console.WriteLine ("Usage: client.exe <configfile>");
+				Environment.Exit(0);
+			}
+						
+			if (!ConfigReader.ReadFile (args[0]))
+				Environment.Exit(0);
+			
 			Client client = new Client ();
 			
 			client.InitClient ();
-			/*
-			Console.WriteLine ("Client on {0}", args[0]);
-			// instantiate stack 
-			// register service components with send-recv layer
-			// run gui
-			// start the client
-			
-			int port = Int32.Parse(args[0]);
-			SendReceiveMiddleLayer sm = new SendReceiveMiddleLayer();
-			sm.Start(port);
-			
-			if (port != 8081) {
-				Console.WriteLine("I'm not 8081, so I will try to send a message to 8081");
-				
-				Message m = Message.Create("test");
-				m.PushString("hej");
-				
-				sm.Send(m);
-				
-				Console.WriteLine("sent a message");
-				
-			}
-			*/
 			Console.ReadLine();
 		}
 	}

@@ -14,7 +14,7 @@ namespace server
 			{
 				Console.WriteLine ("Usage: server.exe <port> <configfile>");
 				Environment.Exit(0);
-			} 
+			}
 			
 			try 
 			{

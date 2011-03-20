@@ -1,14 +1,16 @@
 using System;
+
 namespace comm
 {
 	public class PadicalObject
 	{
-		string m_debugLevel;
+		protected string m_debugLevel;
 		string m_objectName;
 		
 		public PadicalObject ()
 		{
 			m_objectName = this.ToString ();
+			
 			m_debugLevel = "";
 		}
 				
