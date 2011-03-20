@@ -27,7 +27,7 @@ namespace client
 			Message m = new Message ();
 			
 			m.SetSource ("testuser1");
-			m.SetDestination ("server1");
+			m.SetDestination ("tcp://localhost:8080/Radical");
 			m.SetMessageType ("lookup");
 			m.PushString ("testuser2");
 			

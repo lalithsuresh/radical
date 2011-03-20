@@ -55,7 +55,12 @@ namespace comm
 		public void Send (Message m) 
 		{
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
-			m_perfectPointToPoint.Send(m, "tcp://localhost:8080/Radical");
+			List<string> destinations = m.GetDestinations ();
+			foreach (string destination in destinations) 
+			{
+				string destination_uri = destination; // for now, assume destination is uri
+				m_perfectPointToPoint.Send(m, destination_uri);
+			}
 		}
 		
 		public void RegisterReceiveCallback (String service, ReceiveCallbackType cb)

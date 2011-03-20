@@ -24,18 +24,25 @@ namespace server
 		public void InitServer (int port) 
 		{
 			// Communication Layer
-			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer();
-			m_perfectPointToPointSend = new PerfectPointToPointSend();
+			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer ();
+			m_perfectPointToPointSend = new PerfectPointToPointSend ();
+			
+			m_perfectPointToPointSend.Start (m_sendReceiveMiddleLayer, 8080);
+			m_sendReceiveMiddleLayer.SetPointToPointInterface (m_perfectPointToPointSend);
 			
 			// Services Layer
-			m_userTableService = new UserTableServiceServer();
-			m_userTableService.SetServer(this);
+			m_userTableService = new UserTableServiceServer ();
+			m_userTableService.SetServer (this);
 			
-			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, 8080);
-			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
+			m_sequenceNumberService = new SequenceNumberServiceServer ();
+			m_sequenceNumberService.SetServer (this);
 			
 			// Server references
 			m_serverId = GetServerIdFromConfig ();
+			
+			// Determine current master
+			// (now it's only me) 
+			m_userTableService.RegisterUser ("server1", ConfigReader.GetConfigurationValue ("server1"));
 		}
 		
 		/**
