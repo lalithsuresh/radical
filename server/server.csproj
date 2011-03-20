@@ -38,6 +38,7 @@
     <Compile Include="UserTableServiceServer.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="IServiceServer.cs" />
+    <Compile Include="SequenceNumberServiceServer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
