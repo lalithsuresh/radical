@@ -5,6 +5,9 @@ namespace server
 {
 	public class Server
 	{
+		// Server settings
+		private int m_serverId; 
+		
 		// Services Layer components
 		private UserTableServiceServer m_userTableService; 
 		private SequenceNumberServiceServer m_sequenceNumberService;
@@ -33,9 +36,7 @@ namespace server
 			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
 			
 			// Server references
-			m_userTableService.RegisterUser("server1", ConfigReader.GetConfigurationValue("server1"));
-			m_userTableService.RegisterUser("server2", ConfigReader.GetConfigurationValue("server2"));
-			m_userTableService.RegisterUser("server3", ConfigReader.GetConfigurationValue("server3"));
+			m_serverId = GetServerIdFromConfig ();
 		}
 		
 		/**
@@ -48,7 +49,26 @@ namespace server
 		
 		public void Shutdown () 
 		{
+			Console.WriteLine ("Shutdown.");
 			m_perfectPointToPointSend.Stop ();	
+			Environment.Exit(1);
+		}
+		
+		private int GetServerIdFromConfig () 
+		{
+			int id = -1; 
+			string serverInstance = ConfigReader.GetConfigurationValue ("id");
+			string serverId = serverInstance.Substring (6);
+			try 
+			{
+				id = Int32.Parse (serverId);
+			} 
+			catch (Exception) 
+			{
+			 	Console.WriteLine ("Cannot determine server id, will shutdown.");
+				Shutdown ();
+			}
+			return id;
 		}
 	}
 }
