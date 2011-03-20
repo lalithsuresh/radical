@@ -1,24 +1,48 @@
 using System;
 using comm;
 using common;
+using System.Collections.Generic;
 
 namespace server
 {
 	public class Server : PadicalObject
-	{
-		// Server settings
-		private int m_serverId; 
-		
+	{		
 		// Services Layer components
 		private UserTableServiceServer m_userTableService; 
 		private SequenceNumberServiceServer m_sequenceNumberService;
 		
 		// Communication Layer components
 		public SendReceiveMiddleLayer m_sendReceiveMiddleLayer; 
-		private PerfectPointToPointSend m_perfectPointToPointSend; 
+		private PerfectPointToPointSend m_perfectPointToPointSend;
+		
+		public string UserName {
+			get;
+			set;
+		}
+		
+		public int ServerPort {
+			get;
+			set;
+		}
+		
+		public List<string> ServerList {
+			get;
+			set;
+		}
 		
 		public Server ()
 		{
+			LoadConfig ();
+		}
+		
+		public void LoadConfig ()
+		{
+			UserName = ConfigReader.GetConfigurationValue ("username");
+			ServerPort = Int32.Parse (ConfigReader.GetConfigurationValue ("serverport"));
+			ServerList = new List<string> ();
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3"));
 		}
 		
 		public void InitServer (int port) 
@@ -34,15 +58,14 @@ namespace server
 			m_userTableService = new UserTableServiceServer ();
 			m_userTableService.SetServer (this);
 			
+			m_sendReceiveMiddleLayer.SetLookupCallback (m_userTableService.Lookup);
+			
 			m_sequenceNumberService = new SequenceNumberServiceServer ();
 			m_sequenceNumberService.SetServer (this);
 			
-			// Server references
-			m_serverId = GetServerIdFromConfig ();
-			
-			// Determine current master
+			// TODO: Determine current master
 			// (now it's only me) 
-			m_userTableService.RegisterUser ("server1", ConfigReader.GetConfigurationValue ("server1"));
+			m_userTableService.UserConnect ("server1", ServerList [0]);
 		}
 		
 		/**
@@ -58,23 +81,6 @@ namespace server
 			DebugLogic ("Shutdown.");
 			m_perfectPointToPointSend.Stop ();	
 			Environment.Exit(1);
-		}
-		
-		private int GetServerIdFromConfig () 
-		{
-			int id = -1; 
-			string serverInstance = ConfigReader.GetConfigurationValue ("id");
-			string serverId = serverInstance.Substring (6);
-			try 
-			{
-				id = Int32.Parse (serverId);
-			} 
-			catch (Exception) 
-			{
-			 	DebugInfo ("Cannot determine server id, will shutdown.");
-				Shutdown ();
-			}
-			return id;
 		}
 	}
 }

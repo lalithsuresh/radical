@@ -36,7 +36,7 @@ namespace client
 			// Lookup service knows the servers.
 			// It will also check the cache at a later stage of
 			// development.
-			if (user == "SERVER")
+			if (user.Equals ("SERVER"))
 			{
 				// Return server 1. Will be changed later.
 				return m_client.ServerList [0]; 
@@ -47,11 +47,12 @@ namespace client
 			// lower layer will query for SERVER, and this
 			// method will answer it.
 			Message m = new Message ();
-			m.SetSource (m_client.UserName);
-			m.SetDestination ("SERVER");
+			m.SetSourceUserName (m_client.UserName);
+			m.SetDestinationUsers ("SERVER");
 			m.SetMessageType ("lookup");
 			m.PushString (user); // This should change to a list later
 			
+			m_client.m_sendReceiveMiddleLayer.Send (m);
 			// This thread will block here until the reset event is sent.
 			// In this case, it happens when the Receive() method is invocated
 			// upon getting a response.

@@ -36,7 +36,7 @@ namespace server
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
 			Message message = eventargs.m_message;
-			string source = message.GetSource ();
+			string source = message.GetSourceUserName ();
 			string request = message.GetMessageType ();
 			if (request.Equals ("GetSequenceNumber"))
 			{
@@ -48,7 +48,7 @@ namespace server
 		private void SendReply (string destination, long sequenceNumber) 
 		{
 			Message reply = new Message ();
-			reply.SetDestination (destination);
+			reply.SetDestinationUsers (destination);
 			reply.PushString (sequenceNumber.ToString ());
 			m_server.Send (reply);
 		}

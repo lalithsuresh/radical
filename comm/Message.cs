@@ -8,6 +8,8 @@ namespace comm
 	{
 		private string m_type;
 		private string m_sourceUserName;
+		private string m_sourceUri;
+		
 		private List<string> m_recipientUserNames;
 		private Stack<object> m_items;
 		
@@ -30,17 +32,27 @@ namespace comm
 			m_type = type;
 		}		
 		
-		public string GetSource ()
+		public string GetSourceUserName ()
 		{
 			return m_sourceUserName;
 		}
 		
-		public void SetSource (string source)
+		public void SetSourceUserName (string source)
 		{
 			m_sourceUserName = source;
 		}
-				
-		public List<string> GetDestinations () 
+		
+		public string GetSourceUri ()
+		{
+			return m_sourceUri;
+		}
+		
+		public void SetSourceUri (string source)
+		{
+			m_sourceUri = source;
+		}
+		
+		public List<string> GetDestinationUsers () 
 		{
 			return m_recipientUserNames;	
 		}
@@ -49,7 +61,7 @@ namespace comm
 		 * Pass a list of users that this message is intended for. 
 		 * Note: duplicate users will recieve duplicate messages. 
 		 */
-		public void SetDestination (List<string> destinations) 
+		public void SetDestinationUsers (List<string> destinations) 
 		{
 			m_recipientUserNames.AddRange(destinations);	
 		}
@@ -58,7 +70,7 @@ namespace comm
 		 * Add a specific user as destination of this message. 
 		 * Note: if already added, user will receive message twice. 
 		 */
-		public void SetDestination (string user) 
+		public void SetDestinationUsers (string user) 
 		{
 			if (user != null) 
 			{

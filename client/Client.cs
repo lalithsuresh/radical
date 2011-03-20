@@ -44,9 +44,9 @@ namespace client
 			UserName = ConfigReader.GetConfigurationValue ("username");
 			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1"));
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2"));
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
 		}
 		
 		public void InitClient ()
@@ -55,7 +55,7 @@ namespace client
 			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer();
 			m_perfectPointToPointSend = new PerfectPointToPointSend();
 			
-			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, 9090);
+			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, ClientPort);
 			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
 			
 			// Services
@@ -63,9 +63,21 @@ namespace client
 			m_calendarService = new CalendarServiceClient ();
 			m_lookupService = new LookupServiceClient ();
 			m_lookupService.SetClient (this);
+			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);
+			
 			m_sequenceNumberService = new SequenceNumberServiceClient (); 
 			m_connectionServiceClient = new ConnectionServiceClient ();
+			m_connectionServiceClient.SetClient (this);
 			
+			m_connectionServiceClient.Connect ();
+			
+			System.Threading.Thread.Sleep (3000);
+			
+			DebugUncond ("lookup() returned this: {0}", m_lookupService.Lookup ("testclient1"));
+			
+			System.Threading.Thread.Sleep (3000);
+			
+			m_connectionServiceClient.Disconnect ();
 			/*
 			System.Threading.Thread testthread = new System.Threading.Thread (bleh);
 			testthread.Start ();
@@ -78,8 +90,8 @@ namespace client
 		{
 			System.Threading.Thread.Sleep (2000);
 			Message m = new Message ();
-			m.SetSource ("SERVER");
-			m.SetDestination (UserName);
+			m.SetSourceUserName ("SERVER");
+			m.SetDestinationUsers (UserName);
 			m.SetMessageType ("lookup");
 			m.PushString ("uriforrequesteduser");
 			m_lookupService.Receive (new ReceiveMessageEventArgs (m));

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 namespace comm
 {
 	public delegate void ReceiveCallbackType(ReceiveMessageEventArgs e);
+	public delegate string LookupCallbackType(string user);
 	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
@@ -17,7 +18,10 @@ namespace comm
 		private Dictionary<string, ReceiveCallbackType> m_registerMap = new Dictionary<string, ReceiveCallbackType> ();
 
 		// comm components
-		private PerfectPointToPointSend m_perfectPointToPoint; 
+		private PerfectPointToPointSend m_perfectPointToPoint;
+		
+		// lookup callback
+		private LookupCallbackType m_lookupCallback;
 		
 		public SendReceiveMiddleLayer ()
 		{
@@ -25,8 +29,20 @@ namespace comm
 		
 		public void SetPointToPointInterface (PerfectPointToPointSend p2p) 
 		{
-			if (p2p != null) 
+			if (p2p != null)
+			{
 				m_perfectPointToPoint = p2p;
+			}
+			else
+			{
+				DebugUncond ("FATAL: SetPointToPointInterface received null p2p pointer");
+				Environment.Exit (0);
+			}
+		}
+		
+		public void SetLookupCallback (LookupCallbackType cb)
+		{
+			m_lookupCallback = cb;
 		}
 		
 		[MethodImpl(MethodImplOptions.Synchronized)]
@@ -44,8 +60,7 @@ namespace comm
 			}
 			else
 			{
-				DebugInfo ("Fatal error: Received a message with an unknown type");
-				Environment.Exit (0);
+				DebugFatal ("Received a message with an unknown type");
 			}
 		}
 		
@@ -54,11 +69,15 @@ namespace comm
 		 */
 		public void Send (Message m) 
 		{
+			// TODO: Later, we want to perform whole lookups
+			// for a list together instead of one at a time
+			// which is lolz.
+			
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
-			List<string> destinations = m.GetDestinations ();
+			List<string> destinations = m.GetDestinationUsers ();
 			foreach (string destination in destinations) 
 			{
-				string destination_uri = destination; // for now, assume destination is uri
+				string destination_uri = m_lookupCallback (destination); // for now, assume destination is uri
 				m_perfectPointToPoint.Send(m, destination_uri);
 			}
 		}

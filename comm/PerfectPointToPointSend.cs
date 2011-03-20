@@ -2,10 +2,11 @@ using System;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using common;
 
 namespace comm
 {
-	public class PerfectPointToPointSend
+	public class PerfectPointToPointSend : PadicalObject
 	{ 
 		private const string CHANNEL_NAME = "Radical";
 		private TcpChannel m_channel;
@@ -24,7 +25,10 @@ namespace comm
 		public bool Start (SendReceiveMiddleLayer demuxer, int port) 
 		{	
 			if (demuxer == null) 
-				return false; 
+			{
+				DebugUncond ("FATAL: Received null demuxer");
+				Environment.Exit (0);
+			}
 			
 			// create sending interfaces
 			m_pointToPoint = new PointToPointInterface ();
@@ -58,12 +62,13 @@ namespace comm
 		
 		public void Send (Message m, string uri) 
 		{
+			m.SetSourceUri (GetURI ());
 			// get reference to remote object 
 			PointToPointInterface p2p_send = (PointToPointInterface) 
 				Activator.GetObject (typeof (PointToPointInterface), uri);
 			
 			// ohoy!
-			p2p_send.Deliver (m);	
+			p2p_send.Deliver (m);
 		}
 	}
 	
