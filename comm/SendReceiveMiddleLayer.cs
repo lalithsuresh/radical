@@ -35,8 +35,7 @@ namespace comm
 			}
 			else
 			{
-				DebugUncond ("FATAL: SetPointToPointInterface received null p2p pointer");
-				Environment.Exit (0);
+				DebugFatal ("FATAL: SetPointToPointInterface received null p2p pointer");
 			}
 		}
 		

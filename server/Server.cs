@@ -51,7 +51,7 @@ namespace server
 			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer ();
 			m_perfectPointToPointSend = new PerfectPointToPointSend ();
 			
-			m_perfectPointToPointSend.Start (m_sendReceiveMiddleLayer, 8080);
+			m_perfectPointToPointSend.Start (m_sendReceiveMiddleLayer, ServerPort);
 			m_sendReceiveMiddleLayer.SetPointToPointInterface (m_perfectPointToPointSend);
 			
 			// Services Layer

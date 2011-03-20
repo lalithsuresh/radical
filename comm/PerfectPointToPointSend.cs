@@ -9,12 +9,15 @@ namespace comm
 	public class PerfectPointToPointSend : PadicalObject
 	{ 
 		private const string CHANNEL_NAME = "Radical";
+		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
 		private TcpChannel m_channel;
 		private PointToPointInterface m_pointToPoint; 
 		
+		// for debugging/development purposes only
+		private PointToPointInterface m_dummy = null;
+		
 		public PerfectPointToPointSend ()
 		{
-			// empty
 		}
 		
 		/**
@@ -26,10 +29,15 @@ namespace comm
 		{	
 			if (demuxer == null) 
 			{
-				DebugUncond ("FATAL: Received null demuxer");
-				Environment.Exit (0);
+				DebugFatal ("Received null demuxer");
 			}
 			
+			string useDummyRecipient = ConfigReader.GetConfigurationValue ("dummyrecipient");
+			if (useDummyRecipient != null && useDummyRecipient.Equals ("true"))
+			{
+				m_dummy = new DummyPointToPointSend ();
+				m_dummy.Init (demuxer);
+			}
 			// create sending interfaces
 			m_pointToPoint = new PointToPointInterface ();
 			m_pointToPoint.Init (demuxer);
@@ -63,9 +71,17 @@ namespace comm
 		public void Send (Message m, string uri) 
 		{
 			m.SetSourceUri (GetURI ());
+			
 			// get reference to remote object 
-			PointToPointInterface p2p_send = (PointToPointInterface) 
-				Activator.GetObject (typeof (PointToPointInterface), uri);
+			PointToPointInterface p2p_send;
+			if (m_dummy == null) 
+			{
+				p2p_send = (PointToPointInterface) Activator.GetObject (typeof (PointToPointInterface), uri);
+			} 
+			else
+			{
+				p2p_send = m_dummy;
+			}
 			
 			// ohoy!
 			p2p_send.Deliver (m);

@@ -88,13 +88,6 @@ namespace client
 		
 		public void bleh ()
 		{
-			System.Threading.Thread.Sleep (2000);
-			Message m = new Message ();
-			m.SetSourceUserName ("SERVER");
-			m.SetDestinationUsers (UserName);
-			m.SetMessageType ("lookup");
-			m.PushString ("uriforrequesteduser");
-			m_lookupService.Receive (new ReceiveMessageEventArgs (m));
 		}
 		
 	}

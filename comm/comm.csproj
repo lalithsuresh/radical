@@ -40,6 +40,7 @@
     <Compile Include="PointToPointInterface.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="ReceiveMessageEventArgs.cs" />
+    <Compile Include="DummyPointToPointSend.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

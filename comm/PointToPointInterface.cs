@@ -4,7 +4,7 @@ namespace comm
 {
 	public class PointToPointInterface : MarshalByRefObject
 	{
-		private SendReceiveMiddleLayer m_demuxer; 
+		protected SendReceiveMiddleLayer m_demuxer; 
 			
 		public PointToPointInterface () 
 		{
@@ -17,7 +17,7 @@ namespace comm
 				m_demuxer = demuxer;
 		}
 		
-		public void Deliver (Message m) {
+		virtual public void Deliver (Message m) {
 			// deliver to incoming queue in SendRecvMiddleLayer
 			m_demuxer.Deliver(m);
 		}
