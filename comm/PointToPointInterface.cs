@@ -1,9 +1,26 @@
 using System;
+
 namespace comm
 {
-	public interface PointToPointInterface
+	public class PointToPointInterface : MarshalByRefObject
 	{
-		void Deliver (Message m); 
+		private SendReceiveMiddleLayer m_demuxer; 
+			
+		public PointToPointInterface () 
+		{
+			// empty
+		}
+		
+		public void Init (SendReceiveMiddleLayer demuxer) 
+		{
+			if (demuxer != null) 
+				m_demuxer = demuxer;
+		}
+		
+		public void Deliver (Message m) {
+			// deliver to incoming queue in SendRecvMiddleLayer
+			m_demuxer.Deliver(m);
+		}
 	}
 }
 

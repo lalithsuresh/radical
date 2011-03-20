@@ -25,6 +25,10 @@ namespace comm
 			return m_type;
 		}
 		
+		public void SetMessageType (string type)
+		{
+			m_type = type;
+		}		
 		
 		public string GetSource ()
 		{

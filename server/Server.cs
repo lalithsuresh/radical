@@ -5,11 +5,12 @@ namespace server
 {
 	public class Server
 	{
-		// services
+		// Services Layer components
 		private UserTableServiceServer m_userTableService; 
 		
-		// comm
-		private SendReceiveMiddleLayer m_comm; 
+		// Communication Layer components
+		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer; 
+		private PerfectPointToPointSend m_perfectPointToPointSend; 
 		
 		public Server ()
 		{
@@ -17,17 +18,21 @@ namespace server
 		
 		public void InitServer () 
 		{
-			// services
+			// Services Layer
 			m_userTableService = new UserTableServiceServer();
 			m_userTableService.SetCallback(this);
 			
-			// comm
-			m_comm = new SendReceiveMiddleLayer();
+			// Communication Layer
+			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer();
+			m_perfectPointToPointSend = new PerfectPointToPointSend();
+			
+			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, 8080);
+			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
 		}
 		
 		public void Send (Message m) 
 		{
-			m_comm.Send(m);
+			m_sendReceiveMiddleLayer.Send(m);
 		}
 	}
 }

@@ -12,57 +12,27 @@ namespace comm
 	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
-		private const string CHANNEL_NAME = "Radical";
-		private TcpChannel m_channel;
-		private ObjRef m_remoteReference;
-		private PerfectPointToPointSend m_transmitter; 
+		// services registered
 		private Dictionary<string, ReceiveCallbackType> m_registerMap = new Dictionary<string, ReceiveCallbackType> ();
 
+		// comm components
+		private PerfectPointToPointSend m_perfectPointToPoint; 
 		
 		public SendReceiveMiddleLayer ()
 		{
 			// empty
 		}
-	
 		
-		/**
-		 * Start a remote listening interface on a specific port
-		 * Servers: use unique ports
-		 * Clients: may use same port (unless run on same machine)
-		 */
-		public void Start (int port) 
-		{			
-			// create sending interfaces
-			m_transmitter = new PerfectPointToPointSend(this);
-			
-			// register tcp channel and connect p2p interface
-			m_channel = new TcpChannel(port);
-			ChannelServices.RegisterChannel(m_channel, false);
-			m_remoteReference = RemotingServices.Marshal(m_transmitter, CHANNEL_NAME, typeof(PointToPointInterface));
-		}
-		
-		public void Stop ()
+		public void SetPointToPointInterface (PerfectPointToPointSend p2p) 
 		{
-			RemotingServices.Disconnect(m_transmitter);
-		}
-		
-		public string GetURI () 
-		{
-			string uri = "";
-			
-			if (m_channel != null) 
-			{
-				ChannelDataStore data = (ChannelDataStore) m_channel.ChannelData;
-				uri = new System.Uri(data.ChannelUris[0]).AbsoluteUri;
-			}
-			
-			return uri + CHANNEL_NAME;
+			if (p2p != null) 
+				m_perfectPointToPoint = p2p;
 		}
 		
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Deliver (Message m) 
 		{
-			Console.WriteLine("SendRecv got: {0}", m.GetType());
+			Console.WriteLine("Got: {0}", m.GetType());
 		}
 		
 		/**
@@ -71,7 +41,7 @@ namespace comm
 		public void Send (Message m) 
 		{
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
-			m_transmitter.Send(m, "tcp://localhost:8081/Radical");
+			m_perfectPointToPoint.Send(m, "tcp://localhost:8080/Radical");
 		}
 		
 		public void RegisterReceiveCallback (String service, ReceiveCallbackType cb)

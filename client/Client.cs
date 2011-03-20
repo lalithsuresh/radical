@@ -19,13 +19,26 @@ namespace client
 		
 		public void InitClient ()
 		{
-			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer ();
-			m_perfectPointToPointSend = new PerfectPointToPointSend (m_sendReceiveMiddleLayer);
+			// Communication Layer
+			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer();
+			m_perfectPointToPointSend = new PerfectPointToPointSend();
+			
+			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, 9090);
+			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
+			
+			Message m = new Message ();
+			m.SetMessageType ("haxxor");
+			m.SetDestination ("monkey");
+			
+			m_sendReceiveMiddleLayer.Send (m);
+			
+			/*
 			//m_groupMulticast = new GroupMulticast ();
 			m_calendarService = new CalendarServiceClient ();
 			m_lookupService = new LookupServiceClient ();
 			m_sequenceNumberService = new SequenceNumberServiceClient (); 
 			m_connectionServiceClient = new ConnectionServiceClient ();
+			*/
 		}
 		
 	}
