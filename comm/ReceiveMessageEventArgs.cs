@@ -3,9 +3,10 @@ namespace comm
 {
 	public class ReceiveMessageEventArgs : EventArgs
 	{
-		public String m_service;
-		public ReceiveMessageEventArgs ()
+		public Message m_message;
+		public ReceiveMessageEventArgs (Message m)
 		{
+			m_message = m;
 		}		
 	}
 }

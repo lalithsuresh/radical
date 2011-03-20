@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace comm
 {
-	public delegate void ReceiveCallbackType(object sender, EventArgs e);
+	public delegate void ReceiveCallbackType(ReceiveMessageEventArgs e);
 	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
@@ -33,6 +33,20 @@ namespace comm
 		public void Deliver (Message m) 
 		{
 			Console.WriteLine("Got: {0}", m.GetType());
+			
+			// Extract the message type from the message
+			// and look for corresponding protocol handler
+			// in the registerMap
+			if (m_registerMap.ContainsKey (m.GetMessageType ()))
+			{
+				Console.WriteLine ("Received {0} message", m.GetMessageType ());
+				m_registerMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
+			}
+			else
+			{
+				Console.WriteLine ("Fatal error: Received a message with an unknown type");
+				Environment.Exit (0);
+			}
 		}
 		
 		/**
@@ -46,6 +60,7 @@ namespace comm
 		
 		public void RegisterReceiveCallback (String service, ReceiveCallbackType cb)
 		{
+			Console.WriteLine ("Registered subscriber for {0} events", service);
 			m_registerMap.Add (service, cb);
 		}
 	}

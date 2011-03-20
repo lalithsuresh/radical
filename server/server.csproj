@@ -35,11 +35,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
-    <Compile Include="UserTableServiceServer.cs" />
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="IServiceServer.cs" />
+<<<<<<< HEAD
     <Compile Include="SequenceNumberServiceServer.cs" />
     <Compile Include="ConfigReader.cs" />
+=======
+    <Compile Include="UserTableServiceServer.cs" />
+>>>>>>> 33fcab9a2a7d485727d88a2e6ca358cc2921a8cd
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
