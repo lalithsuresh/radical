@@ -34,9 +34,9 @@ namespace client
 			m_client.m_sendReceiveMiddleLayer.Send (m);
 				
 			//This thread will block here until the reset event is sent.
-			Console.WriteLine ("Sent Lookup request");
+			Debug ("Sent Lookup request");
 			m_oSignalEvent.WaitOne();
-			Console.WriteLine ("Releasing block");
+			Debug ("Releasing block");
 			m_oSignalEvent.Reset ();
 		}
 		

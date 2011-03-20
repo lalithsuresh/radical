@@ -12,7 +12,7 @@ namespace server
 			// some sanity checks
 			if (args.Length < 2) 
 			{
-				Console.WriteLine("Usage: server.exe <port> <configfile>");
+				Console.WriteLine ("Usage: server.exe <port> <configfile>");
 				Environment.Exit(0);
 			} 
 			

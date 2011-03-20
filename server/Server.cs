@@ -4,7 +4,7 @@ using config;
 
 namespace server
 {
-	public class Server
+	public class Server : PadicalObject
 	{
 		// Server settings
 		private int m_serverId; 
@@ -55,7 +55,7 @@ namespace server
 		
 		public void Shutdown () 
 		{
-			Console.WriteLine ("Shutdown.");
+			DebugLogic ("Shutdown.");
 			m_perfectPointToPointSend.Stop ();	
 			Environment.Exit(1);
 		}
@@ -71,7 +71,7 @@ namespace server
 			} 
 			catch (Exception) 
 			{
-			 	Console.WriteLine ("Cannot determine server id, will shutdown.");
+			 	DebugInfo ("Cannot determine server id, will shutdown.");
 				Shutdown ();
 			}
 			return id;

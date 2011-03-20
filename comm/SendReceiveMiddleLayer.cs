@@ -20,7 +20,6 @@ namespace comm
 		
 		public SendReceiveMiddleLayer ()
 		{
-			// empty
 		}
 		
 		public void SetPointToPointInterface (PerfectPointToPointSend p2p) 
@@ -32,19 +31,19 @@ namespace comm
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Deliver (Message m) 
 		{
-			Console.WriteLine("Got: {0}", m.GetType());
+			DebugInfo ("Got: {0}", m.GetType());
 			
 			// Extract the message type from the message
 			// and look for corresponding protocol handler
 			// in the registerMap
 			if (m_registerMap.ContainsKey (m.GetMessageType ()))
 			{
-				Console.WriteLine ("Received {0} message", m.GetMessageType ());
+				DebugInfo ("Received {0} message", m.GetMessageType ());
 				m_registerMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
 			}
 			else
 			{
-				Console.WriteLine ("Fatal error: Received a message with an unknown type");
+				DebugInfo ("Fatal error: Received a message with an unknown type");
 				Environment.Exit (0);
 			}
 		}
@@ -65,7 +64,7 @@ namespace comm
 		
 		public void RegisterReceiveCallback (String service, ReceiveCallbackType cb)
 		{
-			Console.WriteLine ("Registered subscriber for {0} events", service);
+			DebugLogic ("Registered subscriber for {0} events", service);
 			m_registerMap.Add (service, cb);
 		}
 	}
