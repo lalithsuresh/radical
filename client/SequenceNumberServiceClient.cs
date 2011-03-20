@@ -1,10 +1,11 @@
 using System;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using common;
 
 namespace client
 {
-	public class SequenceNumberServiceClient : comm.PadicalObject
+	public class SequenceNumberServiceClient : PadicalObject
 	{
 		ManualResetEvent oSignalEvent = new ManualResetEvent (false);
 		

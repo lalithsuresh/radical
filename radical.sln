@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "puppet", "puppet\puppet.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client", "client\client.csproj", "{75007D1A-B88C-43DB-A5CF-9C70FB832ADE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "config", "config\config.csproj", "{277BCBAB-18FE-444D-91DD-9B03E4979E2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common", "config\common.csproj", "{277BCBAB-18FE-444D-91DD-9B03E4979E2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

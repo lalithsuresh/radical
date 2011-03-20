@@ -1,5 +1,6 @@
 using System;
 using comm;
+using common;
 
 namespace client
 {

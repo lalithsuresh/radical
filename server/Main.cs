@@ -1,5 +1,5 @@
 using System; 
-using config; 
+using common;
 
 namespace server
 {

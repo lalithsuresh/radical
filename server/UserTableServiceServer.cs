@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using comm;
+using common;
 
 namespace server
 {
@@ -64,9 +65,9 @@ namespace server
 			
 			if (request.Equals ("lookup")) 
 			{
-				//string username = m.PopString();
-				//string reply = GetUriForUser(username);
-				//SendReply(source, reply);
+				string username = m.PopString();
+				string reply = "lolz";
+				SendReply(source, reply);
 			}
 			else if (request.Equals ("connect")) 
 			{
@@ -87,8 +88,8 @@ namespace server
 		{
 			Message message = new Message();
 			message.SetDestination(destination);
+			message.SetMessageType("lookup");
 			message.PushString(reply);
-			message.PushString("UriForUser");
 			m_server.Send(message);
 		}
 	}

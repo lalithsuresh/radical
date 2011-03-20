@@ -36,7 +36,6 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="SendReceiveMiddleLayer.cs" />
     <Compile Include="GroupMulticast.cs" />
-    <Compile Include="PadiCalObject.cs" />
     <Compile Include="PerfectPointToPointSend.cs" />
     <Compile Include="PointToPointInterface.cs" />
     <Compile Include="Message.cs" />
@@ -48,4 +47,10 @@
       <Properties InternalTargetFrameworkVersion="3.5" />
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <ProjectReference Include="..\config\common.csproj">
+      <Project>{277BCBAB-18FE-444D-91DD-9B03E4979E2A}</Project>
+      <Name>common</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

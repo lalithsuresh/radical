@@ -1,6 +1,6 @@
 using System;
 using comm;
-using config;
+using common;
 using System.Collections.Generic;
 
 namespace client
@@ -66,7 +66,23 @@ namespace client
 			m_sequenceNumberService = new SequenceNumberServiceClient (); 
 			m_connectionServiceClient = new ConnectionServiceClient ();
 			
-			m_lookupService.Lookup ();
+			/*
+			System.Threading.Thread testthread = new System.Threading.Thread (bleh);
+			testthread.Start ();
+			string lookupresonse = m_lookupService.Lookup ("user1");
+			
+			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
+		}
+		
+		public void bleh ()
+		{
+			System.Threading.Thread.Sleep (2000);
+			Message m = new Message ();
+			m.SetSource ("SERVER");
+			m.SetDestination (UserName);
+			m.SetMessageType ("lookup");
+			m.PushString ("uriforrequesteduser");
+			m_lookupService.Receive (new ReceiveMessageEventArgs (m));
 		}
 		
 	}

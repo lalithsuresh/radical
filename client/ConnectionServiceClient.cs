@@ -2,10 +2,11 @@ using System;
 using System.Threading;
 using System.Runtime.CompilerServices;
 using comm;
+using common;
 
 namespace client
 {
-	public class ConnectionServiceClient : comm.PadicalObject
+	public class ConnectionServiceClient : PadicalObject
 	{
 		ManualResetEvent m_oSignalEvent = new ManualResetEvent (false);
 		Client m_client;

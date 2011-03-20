@@ -1,4 +1,6 @@
 using System;
+using common;
+
 namespace comm
 {
 	public class GroupMulticast : PadicalObject
