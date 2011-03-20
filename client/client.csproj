@@ -53,5 +53,9 @@
       <Project>{969E6067-A73F-4671-8AD7-2B32EAAFE19C}</Project>
       <Name>comm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\config\config.csproj">
+      <Project>{277BCBAB-18FE-444D-91DD-9B03E4979E2A}</Project>
+      <Name>config</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

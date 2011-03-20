@@ -12,10 +12,14 @@ namespace server
 			m_sequenceNumber = 0;
 		}
 		
-		public void SetCallback (Server server) 
+		public void SetServer (Server server) 
 		{
 			if (server != null) 
+			{
 				m_server = server;
+			}
+			
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("GetSequenceNumber", new ReceiveCallbackType (Receive));
 		}
 		
 		
@@ -29,18 +33,23 @@ namespace server
 		}
 		
 		
-		public void Receive (Message message)
+		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
+			Message message = eventargs.m_message;
 			string source = message.GetSource ();
-			string request = message.PopString ();
+			string request = message.GetMessageType ();
+			if (request.Equals ("GetSequenceNumber"))
+			{
+				// do cool stuff 
+			}
 			SendReply (source, GetSequenceNumber ());
 		}
 		
-		private void SendReply (string destination, long no) 
+		private void SendReply (string destination, long sequenceNumber) 
 		{
 			Message reply = new Message ();
 			reply.SetDestination (destination);
-			reply.PushString (no.ToString ());
+			reply.PushString (sequenceNumber.ToString ());
 			m_server.Send (reply);
 		}
 	}

@@ -38,12 +38,8 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="IServiceServer.cs" />
-<<<<<<< HEAD
     <Compile Include="SequenceNumberServiceServer.cs" />
-    <Compile Include="ConfigReader.cs" />
-=======
     <Compile Include="UserTableServiceServer.cs" />
->>>>>>> 33fcab9a2a7d485727d88a2e6ca358cc2921a8cd
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -55,6 +51,10 @@
     <ProjectReference Include="..\comm\comm.csproj">
       <Project>{969E6067-A73F-4671-8AD7-2B32EAAFE19C}</Project>
       <Name>comm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\config\config.csproj">
+      <Project>{277BCBAB-18FE-444D-91DD-9B03E4979E2A}</Project>
+      <Name>config</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

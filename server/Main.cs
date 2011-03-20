@@ -1,4 +1,5 @@
 using System; 
+using config; 
 
 namespace server
 {
@@ -8,6 +9,7 @@ namespace server
 		{
 			int port = 0;
 			
+			// some sanity checks
 			if (args.Length < 2) 
 			{
 				Console.WriteLine("Usage: server.exe <port> <configfile>");
