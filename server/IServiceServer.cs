@@ -9,8 +9,8 @@ namespace server
 	 */
 	public interface IServiceServer
 	{
-		void SetCallback(Server s); 	// for outgoing messages
-		void Receive(Message m); 		// for incoming messages
+		void SetServer (Server s); 	// for outgoing messages
+		void Receive (ReceiveMessageEventArgs eventargs); 		// for incoming messages
 	}
 }
 

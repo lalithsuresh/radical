@@ -35,9 +35,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
-    <Compile Include="UserTableServiceServer.cs" />
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="IServiceServer.cs" />
+    <Compile Include="UserTableServiceServer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

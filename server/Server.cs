@@ -9,7 +9,7 @@ namespace server
 		private UserTableServiceServer m_userTableService; 
 		
 		// Communication Layer components
-		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer; 
+		public SendReceiveMiddleLayer m_sendReceiveMiddleLayer; 
 		private PerfectPointToPointSend m_perfectPointToPointSend; 
 		
 		public Server ()
@@ -18,13 +18,13 @@ namespace server
 		
 		public void InitServer () 
 		{
-			// Services Layer
-			m_userTableService = new UserTableServiceServer();
-			m_userTableService.SetCallback(this);
-			
 			// Communication Layer
 			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer();
 			m_perfectPointToPointSend = new PerfectPointToPointSend();
+			
+			// Services Layer
+			m_userTableService = new UserTableServiceServer();
+			m_userTableService.SetServer(this);
 			
 			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, 8080);
 			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);

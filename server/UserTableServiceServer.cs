@@ -16,10 +16,13 @@ namespace server
 			m_usertable = new Dictionary<string, string> ();
 		}
 		
-		public void SetCallback (Server server) 
+		public void SetServer (Server server) 
 		{
-			if (server != null) 
-				m_server = server;
+			m_server = server;
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("lookup", new ReceiveCallbackType (Receive));
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("connect", new ReceiveCallbackType (Receive));
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("disconnect", new ReceiveCallbackType (Receive));
+			
 		}
 		
 		public void RegisterUser (string username, string uri) 
@@ -52,28 +55,29 @@ namespace server
 			return m_usertable[username];
 		}
 		
-		public void Receive (Message m) 
+		public void Receive (ReceiveMessageEventArgs eventargs) 
 		{
 			// parse message and call appropriate action
-			string source = m.GetSource();
-			string request = m.PopString();
+			Message m = eventargs.m_message;
+			string source = m.GetSource ();
+			string request = m.GetMessageType ();
 			
-			if (request.Equals("GetUriForUser")) 
+			if (request.Equals ("lookup")) 
 			{
-				string username = m.PopString();
-				string reply = GetUriForUser(username);
-				SendReply(source, reply);
+				//string username = m.PopString();
+				//string reply = GetUriForUser(username);
+				//SendReply(source, reply);
 			}
-			else if (request.Equals("Register")) 
+			else if (request.Equals ("connect")) 
 			{
-				string username = m.PopString();
-				string uri = m.PopString();
-				RegisterUser(username, uri);
+				//string username = m.PopString();
+				//string uri = m.PopString();
+				//RegisterUser(username, uri);
 			}
-			else if (request.Equals("Remove")) 
+			else if (request.Equals ("disconnect")) 
 			{
-				string username = m.PopString();
-				RemoveUser(username);
+				//string username = m.PopString();
+				//RemoveUser(username);
 			}
 			
 			return;
