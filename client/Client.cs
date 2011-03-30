@@ -66,9 +66,11 @@ namespace client
 			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);
 			
 			m_sequenceNumberService = new SequenceNumberServiceClient (); 
+			m_sequenceNumberService.SetClient (this);
 			m_connectionServiceClient = new ConnectionServiceClient ();
 			m_connectionServiceClient.SetClient (this);
 			
+			/*
 			m_connectionServiceClient.Connect ();
 			
 			System.Threading.Thread.Sleep (3000);
@@ -78,6 +80,7 @@ namespace client
 			System.Threading.Thread.Sleep (3000);
 			
 			m_connectionServiceClient.Disconnect ();
+			*/
 			/*
 			System.Threading.Thread testthread = new System.Threading.Thread (bleh);
 			testthread.Start ();
@@ -89,6 +92,16 @@ namespace client
 		public bool Connect () 
 		{
 			return m_connectionServiceClient.Connect ();
+		}
+		
+		public bool Disconnect () 
+		{
+			return m_connectionServiceClient.Disconnect ();
+		}
+		
+		public int GetSequenceNumber ()
+		{
+			return m_sequenceNumberService.RequestSequenceNumber ();
 		}
 		
 		public void bleh ()

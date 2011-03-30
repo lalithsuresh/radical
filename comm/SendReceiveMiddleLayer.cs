@@ -71,7 +71,6 @@ namespace comm
 			// TODO: Later, we want to perform whole lookups
 			// for a list together instead of one at a time
 			// which is lolz.
-			
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
 			List<string> destinations = m.GetDestinationUsers ();
 			foreach (string destination in destinations) 

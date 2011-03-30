@@ -2,6 +2,8 @@ using System;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using common;
 
 namespace comm
@@ -68,6 +70,7 @@ namespace comm
 			return uri + CHANNEL_NAME;
 		}
 		
+		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Send (Message m, string uri) 
 		{
 			m.SetSourceUri (GetURI ());
