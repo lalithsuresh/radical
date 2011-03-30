@@ -86,6 +86,11 @@ namespace client
 			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
 		}
 		
+		public bool Connect () 
+		{
+			return m_connectionServiceClient.Connect ();
+		}
+		
 		public void bleh ()
 		{
 		}

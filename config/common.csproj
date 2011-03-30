@@ -5,10 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{969E6067-A73F-4671-8AD7-2B32EAAFE19C}</ProjectGuid>
+    <ProjectGuid>{277BCBAB-18FE-444D-91DD-9B03E4979E2A}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>comm</RootNamespace>
-    <AssemblyName>comm</AssemblyName>
+    <RootNamespace>config</RootNamespace>
+    <AssemblyName>config</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,20 +30,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Runtime.Remoting" />
-    <Reference Include="nunit.framework">
-      <Package>mono-nunit</Package>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="SendReceiveMiddleLayer.cs" />
-    <Compile Include="GroupMulticast.cs" />
-    <Compile Include="PerfectPointToPointSend.cs" />
-    <Compile Include="PointToPointInterface.cs" />
-    <Compile Include="Message.cs" />
-    <Compile Include="ReceiveMessageEventArgs.cs" />
-    <Compile Include="DummyPointToPointSend.cs" />
+    <Compile Include="ConfigReader.cs" />
+    <Compile Include="PadiCalObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -51,10 +42,4 @@
       <Properties InternalTargetFrameworkVersion="3.5" />
     </MonoDevelop>
   </ProjectExtensions>
-  <ItemGroup>
-    <ProjectReference Include="..\config\common.csproj">
-      <Project>{277BCBAB-18FE-444D-91DD-9B03E4979E2A}</Project>
-      <Name>common</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

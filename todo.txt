@@ -8,16 +8,21 @@ Todo for Radical
 - What happens if you cannot deliver a message 
   - error messages? 
   - how long do we wait? do we have to wait? live without timeouts
-- RPC calls in .NET
-  - using TCP
-  - asynchronous
-  
 
------ some remoting notes
-- when connecting the first time, do a quick health check
-- check Marshal()
+- Lookup for batch users
+- prevent registering restricted name
+- method synchronization and blocking calls
+- fix recv msg type in client (connect ACKs)
+- Better way to ack disconnect msgs
+- check return type for lookup response
+
+Puppet master
+- add PuppetServiceClient to client project
+- PuppetMaster has two services: PuppetMasterService and StatisticsService (for evaluation purposes of the protocol) 
 
 
+Related but not project specific notes
+/////////////////////////////////////
 ChatServer
 - void SendMsg (string nick, string msg) 
 - void Register (string nick, string clientURL) 

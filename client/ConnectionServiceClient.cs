@@ -25,7 +25,7 @@ namespace client
 		}
 		
 		[MethodImpl(MethodImplOptions.Synchronized)]
-		public void Connect ()
+		public bool Connect ()
 		{
 			Message m = new Message ();
 			m.SetMessageType ("connect");
@@ -38,9 +38,11 @@ namespace client
 			//This thread will block here until the reset event is sent.
 			m_oSignalEvent.WaitOne();
 			m_oSignalEvent.Reset ();
+			
+			return true;
 		}
 		
-		public void Disconnect ()
+		public bool Disconnect ()
 		{
 			// TODO: Don't forget to notify all peers about leave at this point
 			Message m = new Message ();
@@ -51,6 +53,7 @@ namespace client
 			DebugLogic ("Sending disconnection request");
 			m_client.m_sendReceiveMiddleLayer.Send (m);
 			
+			return true;
 			// TODO: For now, no need to block on disconnect
 		}
 		
