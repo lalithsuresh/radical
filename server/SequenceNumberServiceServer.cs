@@ -1,5 +1,8 @@
 using System;
 using comm;
+using System.Threading;
+using System.Runtime.CompilerServices;
+
 namespace server
 {
 	public class SequenceNumberServiceServer : IServiceServer
@@ -19,39 +22,36 @@ namespace server
 				m_server = server;
 			}
 			
-			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("GetSequenceNumber", new ReceiveCallbackType (Receive));
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sequencenumber", new ReceiveCallbackType (Receive));
 		}
 		
 		
 		/**
 		 * Get a unique sequence number
+		 * TODO: Talk with all servers before doing
+		 * this.
 		 */
+		[MethodImpl(MethodImplOptions.Synchronized)]
 		public long GetSequenceNumber ()
 		{
 			m_sequenceNumber++;
 			return m_sequenceNumber;
 		}
 		
-		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
+			// All we need from the request is the source
+			// uri.
 			Message message = eventargs.m_message;
-			string source = message.GetSourceUserName ();
-			string request = message.GetMessageType ();
-			if (request.Equals ("GetSequenceNumber"))
-			{
-				// do cool stuff 
-			}
-			SendReply (source, GetSequenceNumber ());
-		}
-		
-		private void SendReply (string destination, long sequenceNumber) 
-		{
-			Message reply = new Message ();
-			reply.SetDestinationUsers (destination);
-			reply.PushString (sequenceNumber.ToString ());
-			m_server.Send (reply);
+			
+			// Create response to the requester
+			Message response = new Message ();
+			response.SetSourceUri (m_server.UserName);
+			response.SetDestinationUsers (message.GetSourceUserName ());
+			response.SetMessageType ("sequencenumber");
+			response.PushString (GetSequenceNumber ().ToString ());
+			
+			m_server.m_sendReceiveMiddleLayer.Send (response);
 		}
 	}
 }
-

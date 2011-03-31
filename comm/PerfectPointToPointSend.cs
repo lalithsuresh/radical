@@ -70,7 +70,6 @@ namespace comm
 			return uri + CHANNEL_NAME;
 		}
 		
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Send (Message m, string uri) 
 		{
 			m.SetSourceUri (GetURI ());
