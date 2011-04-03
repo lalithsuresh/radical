@@ -23,9 +23,9 @@ namespace client
 						
 		// Constructor WIN
 		public ClientUnitTests ()
-		{			
+		{	
+			ConfigReader.ReadFile ("/home/nightstrike/programming/mono/radical/client/client.config");
 			m_client1 = new Client();
-			m_client1.LoadConfig ("/home/nightstrike/programming/mono/radical/client/client.config");
 			m_client1.InitClient ();
 		}
 		
@@ -74,7 +74,7 @@ namespace client
 			slotlist.Add (3);
 			m_client1.Reserve (description, userlist, slotlist);
 			}
-			
+			/*
 			{
 			List<string> userlist = new List<string> ();
 			List<int> slotlist = new List<int> ();
@@ -87,7 +87,7 @@ namespace client
 			slotlist.Add (2);
 			slotlist.Add (8);
 			m_client1.Reserve (description, userlist, slotlist);
-			}
+			}*/
 		}
 		
 		

@@ -6,13 +6,13 @@ namespace common
 	{
 		protected string m_debugLevel;
 		string m_objectName;
-		public ConfigReader m_configReader = new ConfigReader ();
+		//static public ConfigReader m_configReader = new ConfigReader ();
 		
 		public PadicalObject ()
 		{
 			m_objectName = this.ToString ();
 			
-			string debuglevel = m_configReader.GetConfigurationValue (this.ToString ());
+			string debuglevel = ConfigReader.GetConfigurationValue (this.ToString ());
 			
 			if (debuglevel != null && (debuglevel.Equals ("info")
 			                           || debuglevel.Equals ("all")
@@ -25,12 +25,7 @@ namespace common
 				m_debugLevel = ""; // No debugging for this object
 			}
 		}
-				
-		public virtual void SetDebug (string val)
-		{
-			m_debugLevel = val;
-		}
-		
+			
 		public virtual void DebugUncond (string debugstr, params object[] args)
 		{
 			Debug ("", debugstr, args);

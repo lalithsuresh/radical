@@ -36,15 +36,15 @@ namespace server
 		
 		public void LoadConfig (string config)
 		{
-			if (!m_configReader.ReadFile (config))
+			if (!ConfigReader.ReadFile (config))
 				DebugFatal ("Can't read config file {0}", config);
 			
-			UserName = m_configReader.GetConfigurationValue ("username");
-			ServerPort = Int32.Parse (m_configReader.GetConfigurationValue ("serverport"));
+			UserName = ConfigReader.GetConfigurationValue ("username");
+			ServerPort = Int32.Parse (ConfigReader.GetConfigurationValue ("serverport"));
 			ServerList = new List<string> ();
-			ServerList.Add (m_configReader.GetConfigurationValue ("server1"));
-			ServerList.Add (m_configReader.GetConfigurationValue ("server2"));
-			ServerList.Add (m_configReader.GetConfigurationValue ("server3"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3"));
 		}
 		
 		public void InitServer () 

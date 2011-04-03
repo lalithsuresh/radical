@@ -34,7 +34,7 @@ namespace comm
 				DebugFatal ("Received null demuxer");
 			}
 			
-			string useDummyRecipient = m_configReader.GetConfigurationValue ("dummyrecipient");
+			string useDummyRecipient = ConfigReader.GetConfigurationValue ("dummyrecipient");
 			if (useDummyRecipient != null && useDummyRecipient.Equals ("true"))
 			{
 				m_dummy = new DummyPointToPointSend ();
@@ -75,10 +75,13 @@ namespace comm
 		{
 			m.SetSourceUri (GetURI ());
 			
+			DebugLogic ("Sending to {0}", uri);
+
 			// get reference to remote object 
 			PointToPointInterface p2p_send;
 			if (m_dummy == null) 
 			{
+				DebugLogic ("Sending to {0}", uri);
 				p2p_send = (PointToPointInterface) Activator.GetObject (typeof (PointToPointInterface), uri);
 			} 
 			else

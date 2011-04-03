@@ -36,20 +36,17 @@ namespace client
 		
 		public Client ()
 		{
+			LoadConfig ();
 		}
 		
-		public void LoadConfig (string config)
+		public void LoadConfig ()
 		{
-			
-			if (!m_configReader.ReadFile (config))
-				DebugFatal ("Can't read config file {0}", config);
-			
-			UserName = m_configReader.GetConfigurationValue ("username");
-			ClientPort = Int32.Parse (m_configReader.GetConfigurationValue ("clientport"));
+			UserName = ConfigReader.GetConfigurationValue ("username");
+			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
 			ServerList = new List<string> ();
-			ServerList.Add (m_configReader.GetConfigurationValue ("server1") + "/Radical");
-			ServerList.Add (m_configReader.GetConfigurationValue ("server2") + "/Radical");
-			ServerList.Add (m_configReader.GetConfigurationValue ("server3") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
 		}
 		
 		public void InitClient ()
@@ -92,6 +89,8 @@ namespace client
 			string lookupresonse = m_lookupService.Lookup ("user1");
 			
 			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
+			
+			Console.WriteLine ("My username {0}", UserName);
 		}
 		
 		// All client side APIs are listed belowS

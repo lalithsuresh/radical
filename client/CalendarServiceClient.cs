@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using comm;
 using common;
 
@@ -215,6 +217,8 @@ namespace client
 			// of the format
 			reservationRequest.PushString (description);
 			
+			// Since we're pushing on to a stack and would like
+			// to retreive it in the same order at the other end.
 			slotlist.Reverse ();
 			foreach (int i in slotlist)
 			{
@@ -230,17 +234,14 @@ namespace client
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
-			/* Message format for reservation (stack part) is as follows:
+			lock (this){
+			/* Message format for any calendar message (stack part) starts as follows:
 			 * 
 			 * - SubType TODO: Later register more types up there.
 			 * - ReservationSequenceNumber
 			 * - Message Sub Type
-			 * - NumberOfSlots
-			 * - Slot 1
-			 * - Slot 2
-			 * ...
-			 * - Slot NumberOfUsers
-			 * - Description
+			 * 
+			 * This remains common for all kinds of messages.
 			 */
 			
 			// Unpack message
@@ -252,26 +253,134 @@ namespace client
 			
 			string messageSubType = m.PopString (); // message sub type
 			int reservationSequenceNumber = Int32.Parse (m.PopString ()); // seq no
-			int numSlots = Int32.Parse (m.PopString ()); // number of slots
-			List<int> slotlist = new List<int> (); // unpack all the slots
-			for (int i = 0; i < numSlots; i++)
-			{
-				slotlist.Add (Int32.Parse (m.PopString ()));
-			}
-			
-			string description = m.PopString (); // description
-			DebugInfo ("Received Message:" +
-							   "[{0}, {1}, {2}, {3}, {4}, {5}, {6}]",
-			                   src, userlist, messageSubType, reservationSequenceNumber, numSlots, slotlist, description);
-			
+		
 			// TODO: Implement most of protocol here
-			
 			/* If I get a reservation request for a slot
 			 * that is either FREE or ACKNOWLEDGED, then
 			 * respond with an ACK, else if it is either
 			 * BOOKED, or ASSIGNED, then respond with a NACK
 			 */
+			DebugLogic ("Message of subtype {0} received", messageSubType);
 			
+			if (messageSubType.Equals ("reservationrequest"))
+			{
+				int numSlots = Int32.Parse (m.PopString ()); // number of slots
+				List<int> slotlist = new List<int> (); // unpack all the slots
+				for (int i = 0; i < numSlots; i++)
+				{
+					slotlist.Add (Int32.Parse (m.PopString ()));
+				}
+			
+				string description = m.PopString (); // description
+				Console.WriteLine ("Received Message:" +
+						   "[{0}, {1}, {2}, {3}, {4}, {5}, {6}]",
+			               src, userlist, messageSubType, reservationSequenceNumber, numSlots, slotlist, description);
+				
+				
+				/* Message unpacked, now create a reservation object
+				 */
+				
+				if (m_activeReservationSessions.ContainsKey (reservationSequenceNumber))
+				{
+					DebugFatal ("Duplicate reservation request received {0}", reservationSequenceNumber);
+				}
+				
+				/* Create reservation object
+				 */
+				Reservation reservation = new Reservation ();
+				reservation.m_description = description;
+				reservation.m_sequenceNumber = reservationSequenceNumber;
+				reservation.m_userList = userlist;
+				reservation.m_slotNumberList = slotlist;
+								
+				/* 
+				 * check if slots are free
+				 * and proceed to respond with an ACK or NACK.
+				 */
+				List<int> availableslots = new List<int> ();
+				foreach (int i in slotlist)
+				{
+					// If slot is being encountered for the
+					// first time...
+					if (!m_numberToSlotMap.ContainsKey (i))
+					{
+						DebugLogic ("Creating new slot instance for slot-number: {0}", i);
+		
+						// Then create new slot.
+						// TODO: Probably need internal methods for this
+						Slot tempslot = new Slot ();
+						tempslot.m_calendarState = CalendarState.FREE;
+						tempslot.m_slotNumber = i;
+						tempslot.m_reservationsForThisSlot = new List<Reservation> ();
+					
+						// Add to int-to-slot-object map
+						m_numberToSlotMap.Add (i, tempslot);
+					}
+					
+					// Get the concerned slot
+					Slot slot = m_numberToSlotMap[i];
+					
+					if (slot.m_calendarState == CalendarServiceClient.CalendarState.FREE ||
+					    slot.m_calendarState == CalendarServiceClient.CalendarState.ACKNOWLEDGED)
+					{
+						// Update the slot's reservation list
+						slot.m_reservationsForThisSlot.Add (reservation);
+						
+						// Append to list of slots.
+						availableslots.Add (i);
+						
+						// Update slot state
+						slot.m_calendarState = CalendarServiceClient.CalendarState.ACKNOWLEDGED;
+					}
+				}
+				
+				// Respond with ACK/NACK
+				if (availableslots.Count > 0)
+				{
+					// We do have at least one free slot, so respond with an ACK
+					Message ack = new Message ();
+					
+					ack.SetSourceUserName (m_client.UserName);
+					ack.SetDestinationUsers (src);
+					ack.SetMessageType ("calendar");
+					
+					/*
+					 * ACK Message format, data part
+					 * 
+					 * - Number of Slots
+					 * - Slot 1
+					 * - Slot 2
+					 * ...
+					 * - Slot N
+					 */
+					ack.PushString (availableslots.Count.ToString ());
+					availableslots.Reverse ();
+					
+					foreach (int i in availableslots)
+					{
+						ack.PushString (i.ToString ());
+					}
+					
+					ack.PushString (availableslots.Count.ToString ());
+					ack.PushString ("reservationack");
+					
+					DebugLogic ("Sending an ack to: {0}", src);
+
+					m_client.m_sendReceiveMiddleLayer.Send (ack);
+				}
+				else
+				{
+					Message nack = new Message ();
+					// No free slots, so respond with a NACK
+					nack.SetSourceUserName (m_client.UserName);
+					nack.SetDestinationUsers (src);
+					nack.SetMessageType ("calendar");
+					
+					nack.PushString ("reservationnack");
+					
+					//m_client.m_sendReceiveMiddleLayer.Send (nack);
+				}
+			}
 			
 			/* If I am the initiator of the reservation,
 			 * then keep collecting ACKS/NACKS from all participants
@@ -286,7 +395,12 @@ namespace client
 			 * 		If at least one NACK, move reservation state
 			 * 		to ABORTED. TODO: Should we notify others?
 			 */
-			
+	
+			if (messageSubType.Equals ("reservationack") || messageSubType.Equals ("reservationnack"))
+			{
+				DebugLogic ("Received {0} from {1} for reservation ID: {2}",
+				            messageSubType, src, reservationSequenceNumber);
+			}
 			
 			/* If I get a PRECOMMIT update for a slot,
 			 * and it is still in ACKNOWLEDGED state, then
@@ -324,6 +438,7 @@ namespace client
 			
 			/* If I am a cohort and get a DOCOMMIT message, then commit.
 			 */
+			}
 		}
 	}
 }

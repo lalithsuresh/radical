@@ -44,7 +44,6 @@ namespace comm
 			m_lookupCallback = cb;
 		}
 		
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Deliver (Message m) 
 		{
 			DebugInfo ("Got: {0}", m.GetType());
@@ -73,10 +72,13 @@ namespace comm
 			// which is lolz.
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
 			List<string> destinations = m.GetDestinationUsers ();
+			DebugInfo ("Please help {0}", destinations);
 			foreach (string destination in destinations) 
 			{
+				DebugInfo ("Performing lookup for {0}", destination);
 				// TODO: If server returns NO SUCH USER, then bail out
 				string destination_uri = m_lookupCallback (destination); // for now, assume destination is uri
+				DebugInfo ("Lookup returned {0}", destination_uri);
 				m_perfectPointToPoint.Send(m, destination_uri);
 			}
 		}

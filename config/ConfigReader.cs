@@ -6,13 +6,13 @@ namespace common
 {
 	public class ConfigReader
 	{
-		private Dictionary<string, string> m_configurationItems = new Dictionary<string, string>(); 
+		static private Dictionary<string, string> m_configurationItems = new Dictionary<string, string>(); 
 		
 		public ConfigReader ()
 		{
 		}
 		
-		public string GetConfigurationValue (string key) 
+		static public string GetConfigurationValue (string key) 
 		{
 			if (m_configurationItems.ContainsKey(key))
 				return m_configurationItems[key];
@@ -20,7 +20,7 @@ namespace common
 			return null;
 		}
 		
-		public bool ReadFile (string filename) 
+		static public bool ReadFile (string filename) 
 		{
 			if (File.Exists (filename)) 
 			{
