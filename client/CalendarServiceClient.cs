@@ -192,12 +192,79 @@ namespace client
 			DebugLogic ("Dissemination reservation request " +
 				"[Desc: {0}, Users: {1}, Slots: {2}]",description, userlist, slotlist);
 			
+			Message reservationRequest = new Message ();
+			
+			
+			/* Message format for reservations (stack part) is as follows: 
+			 * 
+			 * - SubType TODO: Later register more types up there.
+			 * - ReservationSequenceNumber
+			 * - User NumberOfSlots
+			 * - NumberOfSlots
+			 * - Slot 1
+			 * - Slot 2
+			 * ...
+			 * - Slot NumberOfUsers
+			 * - Description
+			 */
+			reservationRequest.SetDestinationUsers (userlist);
+			reservationRequest.SetMessageType ("calendar");
+			reservationRequest.SetSourceUserName (m_client.UserName);
+			
+			// Data part. Things will be pushed in the reverse order
+			// of the format
+			reservationRequest.PushString (description);
+			
+			slotlist.Reverse ();
+			foreach (int i in slotlist)
+			{
+				reservationRequest.PushString (i.ToString ());
+			}
+			
+			reservationRequest.PushString (reservation.m_slotNumberList.Count.ToString ());
+			reservationRequest.PushString (reservation.m_sequenceNumber.ToString ());
+			reservationRequest.PushString ("reservationrequest");			
+		
+			m_client.m_sendReceiveMiddleLayer.Send (reservationRequest);
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
-			// TODO: Implement most of protocol here
+			/* Message format for reservation (stack part) is as follows:
+			 * 
+			 * - SubType TODO: Later register more types up there.
+			 * - ReservationSequenceNumber
+			 * - Message Sub Type
+			 * - NumberOfSlots
+			 * - Slot 1
+			 * - Slot 2
+			 * ...
+			 * - Slot NumberOfUsers
+			 * - Description
+			 */
 			
+			// Unpack message
+			// FIXME: Put me in a method
+			Message m = eventargs.m_message;
+			
+			string src = m.GetSourceUserName (); // source user name
+			List<string> userlist = m.GetDestinationUsers (); // list of users
+			
+			string messageSubType = m.PopString (); // message sub type
+			int reservationSequenceNumber = Int32.Parse (m.PopString ()); // seq no
+			int numSlots = Int32.Parse (m.PopString ()); // number of slots
+			List<int> slotlist = new List<int> (); // unpack all the slots
+			for (int i = 0; i < numSlots; i++)
+			{
+				slotlist.Add (Int32.Parse (m.PopString ()));
+			}
+			
+			string description = m.PopString (); // description
+			DebugInfo ("Received Message:" +
+							   "[{0}, {1}, {2}, {3}, {4}, {5}, {6}]",
+			                   src, userlist, messageSubType, reservationSequenceNumber, numSlots, slotlist, description);
+			
+			// TODO: Implement most of protocol here
 			
 			/* If I get a reservation request for a slot
 			 * that is either FREE or ACKNOWLEDGED, then

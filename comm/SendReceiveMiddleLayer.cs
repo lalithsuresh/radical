@@ -75,6 +75,7 @@ namespace comm
 			List<string> destinations = m.GetDestinationUsers ();
 			foreach (string destination in destinations) 
 			{
+				// TODO: If server returns NO SUCH USER, then bail out
 				string destination_uri = m_lookupCallback (destination); // for now, assume destination is uri
 				m_perfectPointToPoint.Send(m, destination_uri);
 			}

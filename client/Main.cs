@@ -19,10 +19,9 @@ namespace client
 			client.LoadConfig (args[0]);
 			client.InitClient ();
 			
-			Client client1 = new Client ();
-			client1.LoadConfig ("/home/nightstrike/programming/mono/radical/client/client1.config");
-			client1.InitClient ();
 			
+			//FIXME: Remove later
+			client.Connect ();
 			Console.ReadLine();			
 		}
 	}

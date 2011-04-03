@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using common;
 using NUnit.Framework;
@@ -19,12 +20,12 @@ namespace client
 	public class ClientUnitTests
 	{
 		private Client m_client1;
-				
+						
 		// Constructor WIN
 		public ClientUnitTests ()
 		{			
 			m_client1 = new Client();
-			m_client1.LoadConfig ("/home/nightstrike/programming/mono/radical/client/client1.config");
+			m_client1.LoadConfig ("/home/nightstrike/programming/mono/radical/client/client.config");
 			m_client1.InitClient ();
 		}
 		
@@ -65,9 +66,9 @@ namespace client
 			List<int> slotlist = new List<int> ();
 			string description = "test description";
 			
-			userlist.Add ("user1");
-			userlist.Add ("user2");
-			userlist.Add ("user3");
+			userlist.Add ("testclient2");
+			//userlist.Add ("user2");
+			//userlist.Add ("user3");
 			slotlist.Add (1);
 			slotlist.Add (2);
 			slotlist.Add (3);
@@ -79,9 +80,9 @@ namespace client
 			List<int> slotlist = new List<int> ();
 			string description = "test description";
 			
-			userlist.Add ("user4");
-			userlist.Add ("user5");
-			userlist.Add ("user6");
+			userlist.Add ("testclient2");
+			//userlist.Add ("user5");
+			//userlist.Add ("user6");
 			slotlist.Add (1);
 			slotlist.Add (2);
 			slotlist.Add (8);

@@ -40,6 +40,7 @@ namespace server
 			// re-enter.
 			if (!m_usertable.ContainsKey (username))
 			{
+				Console.WriteLine ("User has connected {0},{1}", username, uri);
 				m_usertable.Add(username, uri);
 			}
 		}
@@ -98,7 +99,7 @@ namespace server
 				string user_request = m.PopString ();
 				string uri = GetUriForUser (user_request);
 				
-				DebugLogic ("Answering lookup for {0} with {1}", 
+				Console.WriteLine ("Answering lookup for {0} with {1}", 
 				            user_request, uri);
 				
 				Message response = new Message ();

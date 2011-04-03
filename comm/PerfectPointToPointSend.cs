@@ -45,6 +45,7 @@ namespace comm
 			m_pointToPoint.Init (demuxer);
 			
 			// register tcp channel and connect p2p interface
+						
 			m_channel = new TcpChannel (port);
 			ChannelServices.RegisterChannel (m_channel, false);
 			RemotingServices.Marshal (m_pointToPoint, CHANNEL_NAME, typeof(PointToPointInterface));
