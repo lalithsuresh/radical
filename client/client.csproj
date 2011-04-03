@@ -44,7 +44,7 @@
     <Compile Include="LookupServiceClient.cs" />
     <Compile Include="ConnectionServiceClient.cs" />
     <Compile Include="Client.cs" />
-    <Compile Include="ConnectionManagerTest.cs" />
+    <Compile Include="ClientUnitTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

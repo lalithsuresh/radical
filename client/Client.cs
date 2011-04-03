@@ -36,17 +36,20 @@ namespace client
 		
 		public Client ()
 		{
-			LoadConfig ();
 		}
 		
-		public void LoadConfig ()
+		public void LoadConfig (string config)
 		{
-			UserName = ConfigReader.GetConfigurationValue ("username");
-			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
+			
+			if (!m_configReader.ReadFile (config))
+				DebugFatal ("Can't read config file {0}", config);
+			
+			UserName = m_configReader.GetConfigurationValue ("username");
+			ClientPort = Int32.Parse (m_configReader.GetConfigurationValue ("clientport"));
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
+			ServerList.Add (m_configReader.GetConfigurationValue ("server1") + "/Radical");
+			ServerList.Add (m_configReader.GetConfigurationValue ("server2") + "/Radical");
+			ServerList.Add (m_configReader.GetConfigurationValue ("server3") + "/Radical");
 		}
 		
 		public void InitClient ()
@@ -61,6 +64,8 @@ namespace client
 			// Services
 			//m_groupMulticast = new GroupMulticast ();
 			m_calendarService = new CalendarServiceClient ();
+			m_calendarService.SetClient (this);
+			
 			m_lookupService = new LookupServiceClient ();
 			m_lookupService.SetClient (this);
 			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);
@@ -89,6 +94,8 @@ namespace client
 			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
 		}
 		
+		// All client side APIs are listed belowS
+		
 		public bool Connect () 
 		{
 			return m_connectionServiceClient.Connect ();
@@ -104,10 +111,11 @@ namespace client
 			return m_sequenceNumberService.RequestSequenceNumber ();
 		}
 		
-		public void bleh ()
+		public void Reserve (string description, List<string> userlist, List<int> slotlist)
 		{
+			// TODO: Don't forget to do Sanity checks
+			m_calendarService.Reserve (description, userlist, slotlist);
 		}
-		
 	}
 }
 

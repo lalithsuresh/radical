@@ -34,7 +34,7 @@ namespace comm
 				DebugFatal ("Received null demuxer");
 			}
 			
-			string useDummyRecipient = ConfigReader.GetConfigurationValue ("dummyrecipient");
+			string useDummyRecipient = m_configReader.GetConfigurationValue ("dummyrecipient");
 			if (useDummyRecipient != null && useDummyRecipient.Equals ("true"))
 			{
 				m_dummy = new DummyPointToPointSend ();

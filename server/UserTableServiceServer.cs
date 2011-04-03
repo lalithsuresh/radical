@@ -35,7 +35,13 @@ namespace server
 				DebugFatal ("FATAL: Received null username or uri");
 			}
 			
-			m_usertable.Add(username, uri);
+			// Because it's OK if we get multiple Connect
+			// requests from the same user, just don't
+			// re-enter.
+			if (!m_usertable.ContainsKey (username))
+			{
+				m_usertable.Add(username, uri);
+			}
 		}
 		
 		public void UserDisconnect (string username) 

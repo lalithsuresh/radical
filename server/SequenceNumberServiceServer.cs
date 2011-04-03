@@ -49,6 +49,8 @@ namespace server
 			response.SetSourceUri (m_server.UserName);
 			response.SetDestinationUsers (message.GetSourceUserName ());
 			response.SetMessageType ("sequencenumber");
+			
+			// In future, this will probably be a blocking call
 			response.PushString (GetSequenceNumber ().ToString ());
 			
 			m_server.m_sendReceiveMiddleLayer.Send (response);

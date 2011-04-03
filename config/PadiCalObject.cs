@@ -6,12 +6,13 @@ namespace common
 	{
 		protected string m_debugLevel;
 		string m_objectName;
+		public ConfigReader m_configReader = new ConfigReader ();
 		
 		public PadicalObject ()
 		{
 			m_objectName = this.ToString ();
 			
-			string debuglevel = ConfigReader.GetConfigurationValue (this.ToString ());
+			string debuglevel = m_configReader.GetConfigurationValue (this.ToString ());
 			
 			if (debuglevel != null && (debuglevel.Equals ("info")
 			                           || debuglevel.Equals ("all")

@@ -15,13 +15,15 @@ namespace client
 				Environment.Exit(0);
 			}
 						
-			if (!ConfigReader.ReadFile (args[0]))
-				Environment.Exit(0);
-			
 			Client client = new Client ();
-			
+			client.LoadConfig (args[0]);
 			client.InitClient ();
-			Console.ReadLine();
+			
+			Client client1 = new Client ();
+			client1.LoadConfig ("/home/nightstrike/programming/mono/radical/client/client1.config");
+			client1.InitClient ();
+			
+			Console.ReadLine();			
 		}
 	}
 }
