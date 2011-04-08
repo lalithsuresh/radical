@@ -24,9 +24,9 @@ namespace client
 			                                                           new ReceiveCallbackType (Receive));
 		}
 		
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public bool Connect ()
 		{
+			lock (this) {
 			Message m = new Message ();
 			m.SetMessageType ("connect");
 			m.SetSourceUserName (m_client.UserName);
@@ -40,6 +40,7 @@ namespace client
 			m_oSignalEvent.Reset ();
 			
 			return true;
+			}
 		}
 		
 		public bool Disconnect ()

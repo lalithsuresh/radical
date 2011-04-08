@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -10,10 +11,14 @@ namespace comm
 {
 	public class PerfectPointToPointSend : PadicalObject
 	{ 
-		private const string CHANNEL_NAME = "Radical";
+		private string CHANNEL_NAME;
+        public ManualResetEvent e = new ManualResetEvent(false);
+
 		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
 		private TcpChannel m_channel;
 		private PointToPointInterface m_pointToPoint; 
+	    public delegate void RemoteAsyncDelegate(Message m);
+
 		
 		// for debugging/development purposes only
 		private PointToPointInterface m_dummy = null;
@@ -43,6 +48,9 @@ namespace comm
 			// create sending interfaces
 			m_pointToPoint = new PointToPointInterface ();
 			m_pointToPoint.Init (demuxer);
+			
+			// Channel name is Radical + username
+			CHANNEL_NAME = "Radical" + ConfigReader.GetConfigurationValue ("username");
 			
 			// register tcp channel and connect p2p interface
 						
@@ -75,8 +83,6 @@ namespace comm
 		{
 			m.SetSourceUri (GetURI ());
 			
-			DebugLogic ("Sending to {0}", uri);
-
 			// get reference to remote object 
 			PointToPointInterface p2p_send;
 			if (m_dummy == null) 
@@ -90,7 +96,28 @@ namespace comm
 			}
 			
 			// ohoy!
-			p2p_send.Deliver (m);
+			if (p2p_send == null)
+			{
+				DebugLogic ("Crash! Cannot find recipient: {0}", uri);	
+			}
+			else
+			{
+				AsyncCallback cb = new AsyncCallback(MyCallBack);
+                RemoteAsyncDelegate d = new RemoteAsyncDelegate (p2p_send.Deliver);
+                IAsyncResult ar = d.BeginInvoke(m, cb, null);
+				//p2p_send.Deliver (m);
+				
+				e.WaitOne ();
+			}
+			
+
+		}
+		
+		public void MyCallBack(IAsyncResult ar)
+		{
+    		RemoteAsyncDelegate d = (RemoteAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+    		d.EndInvoke(ar);
+    		e.Set();
 		}
 	}
 	

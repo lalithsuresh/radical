@@ -111,6 +111,11 @@ namespace client
 				set;
 			}
 			
+			public Dictionary<int, int> m_acksForSlot {
+				get;
+				set;
+			}
+			
 			public List<string> m_userList {
 				get;
 				set;
@@ -155,6 +160,7 @@ namespace client
 			reservation.m_slotNumberList = slotlist;
 			reservation.m_userList = userlist;
 			reservation.m_reservationState = CalendarServiceClient.ReservationState.INITIATED;
+			reservation.m_acksForSlot = new Dictionary<int, int> ();
 			
 			// 2) Obtain sequence number
 			reservation.m_sequenceNumber = m_client.GetSequenceNumber ();
@@ -164,7 +170,7 @@ namespace client
 			m_activeReservationSessions.Add (reservation.m_sequenceNumber, reservation);
 			
 			DebugLogic ("Created reservation object for" +
-				"[Desc: {0}, Users: {1}, Slots: {2}]",description, userlist, slotlist);
+				"[Desc: {0}, Users: {1}, Slots: {2} Seq: {3}]",description, userlist, slotlist, reservation.m_sequenceNumber);
 			
 			// Update slot objects
 			foreach (int i in slotlist)
@@ -331,6 +337,7 @@ namespace client
 						
 						// Update slot state
 						slot.m_calendarState = CalendarServiceClient.CalendarState.ACKNOWLEDGED;
+						DebugLogic ("Slot {0} is now in ACKNOWLEDGED state", i);
 					}
 				}
 				
@@ -353,7 +360,6 @@ namespace client
 					 * ...
 					 * - Slot N
 					 */
-					ack.PushString (availableslots.Count.ToString ());
 					availableslots.Reverse ();
 					
 					foreach (int i in availableslots)
@@ -362,6 +368,7 @@ namespace client
 					}
 					
 					ack.PushString (availableslots.Count.ToString ());
+					ack.PushString (reservationSequenceNumber.ToString ());
 					ack.PushString ("reservationack");
 					
 					DebugLogic ("Sending an ack to: {0}", src);
@@ -382,62 +389,138 @@ namespace client
 				}
 			}
 			
-			/* If I am the initiator of the reservation,
-			 * then keep collecting ACKS/NACKS from all participants
-			 * 
-			 *      If ACK rcvd, then update received ACK counter.
-			 * 		
-			 * 			If all ACKS rcvd, move reservation state to
-			 *	    	TENTATIVELY_BOOKED for those slots.
-			 * 			Then inform all nodes about decision with a
-			 * 			PRECOMMIT message and move to PRECOMMIT state.
-			 * 
-			 * 		If at least one NACK, move reservation state
-			 * 		to ABORTED. TODO: Should we notify others?
-			 */
+				/* If I am the initiator of the reservation,
+				 * then keep collecting ACKS/NACKS from all participants
+				 * 
+				 *      If ACK rcvd, then update received ACK counter.
+				 * 		
+				 * 			If all ACKS rcvd, move reservation state to
+				 *	    	TENTATIVELY_BOOKED for those slots.
+				 * 			Then inform all nodes about decision with a
+				 * 			PRECOMMIT message and move to PRECOMMIT state.
+				 * 
+				 * 		If at least one NACK, move reservation state
+				 * 		to ABORTED. TODO: Should we notify others?
+				 */
 	
-			if (messageSubType.Equals ("reservationack") || messageSubType.Equals ("reservationnack"))
-			{
-				DebugLogic ("Received {0} from {1} for reservation ID: {2}",
+				if (messageSubType.Equals ("reservationack") || messageSubType.Equals ("reservationnack"))
+				{
+					DebugLogic ("Received {0} from {1} for reservation ID: {2}",
 				            messageSubType, src, reservationSequenceNumber);
-			}
+				
+					// obtain reservation objects
+					Reservation res = m_activeReservationSessions[reservationSequenceNumber];
+				
+					if (messageSubType.Equals ("reservationack"))
+					{
+						int slotCount = Int32.Parse (m.PopString ());
+						while (slotCount > 0)
+						{
+							int s = Int32.Parse (m.PopString ());
+							int ackcount;
+							if (res.m_acksForSlot.ContainsKey (s))
+							{
+								res.m_acksForSlot[s]++;
+								ackcount = res.m_acksForSlot[s];
+							}
+							else
+							{
+								ackcount = 1;
+								res.m_acksForSlot[s] = ackcount;
+							}
+							
+							// If we get ACKS from all clients for slot 's',
+							// and the reservation isn't already tentatively booked for any slot,
+							// and the slot in concern isn't already booked for some other reservation...
+							if (ackcount == res.m_userList.Count
+							    && res.m_reservationState != CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED
+							    && m_numberToSlotMap[s].m_calendarState != CalendarServiceClient.CalendarState.BOOKED)
+							{
+								DebugLogic ("Woopee! I can haz slot! {0}", s);
+								
+								// Update reservation state.
+								res.m_reservationState = CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED;
+								res.m_slotNumberList.Clear ();
+								
+								// m_slotNumberList now holds the only
+								// slot under consideration.
+								res.m_slotNumberList.Add (s);
+								
+								// Update slot state.
+								m_numberToSlotMap [s].m_calendarState = CalendarServiceClient.CalendarState.BOOKED;
+								
+								
+								// Now send a precommit message to everyone involved.
+								// Party time!
+								
+								Message precommitMsg = new Message ();
+								
+								precommitMsg.SetSourceUserName (m_client.UserName);
+								precommitMsg.SetDestinationUsers (res.m_userList);
+								DebugUncond ("SENDING PRECOMMIT TO {0} many ppl", res.m_userList.Count);
+								precommitMsg.SetMessageType ("calendar");
+								precommitMsg.PushString (s.ToString ());
+								precommitMsg.PushString (reservationSequenceNumber.ToString ());
+								precommitMsg.PushString ("precommit");
+								m_client.m_sendReceiveMiddleLayer.Send (precommitMsg);
+									
+								break; // safe to not go through the other slot.
+							}
+							
+							slotCount--;
+						}
+					}
+				else if (messageSubType.Equals ("reservationnack"))
+					{
+						res.m_reservationState = CalendarServiceClient.ReservationState.ABORTED;
+					}
+				}
+				
 			
-			/* If I get a PRECOMMIT update for a slot,
-			 * and it is still in ACKNOWLEDGED state, then
-			 * respond with YES!. Else, respond with a NO!
-			 * 
-			 * 		If I responded with a YES, then
-			 * 		move into PRECOMMIT state and begin
-			 * 		verification and commit timers.
-			 * 
-			 * 			When verification timer fires, verify
-			 * 			your neighbours. TODO: Might need ping
-			 * 			utility
-			 * 
-			 * 				If verification fails, ABORT, else do nothing.
-			 * 
-			 * 			When commit timer fires, commit.
-			 * 
-			 * 		If I respondded with a NO, then move
-			 * 		into ABORT.
-			 * 
-			 * 		If between any of the above, the coordinator
-			 * 		sends an ABORT message, then ABORT. DUH!
-			 */
-			
-			/* If I am the initiator/coordinator, and I get a YES!
-			 * message, then keep collecting them.
-			 * 
-			 * 		If some cohort times out, then ABORT.
-			 * 
-			 * If I get a NO message, then ABORT everyone.
-			 * 
-			 * If I get all YES!'s, then run commit and send DOCOMMIT
-			 * messages to all cohorts.
-			 */
-			
-			/* If I am a cohort and get a DOCOMMIT message, then commit.
-			 */
+				/* If I get a PRECOMMIT update for a slot,
+				 * and it is still in ACKNOWLEDGED state, then
+				 * respond with YES!. Else, respond with a NO!
+				 * 
+				 * 		If I responded with a YES, then#include.
+
+				 * 		move into PRECOMMIT state and begin
+				 * 		verification and commit timers.
+				 * 
+				 * 			When verification timer fires, verify
+				 * 			your neighbours. TODO: Might need ping
+				 * 			utility
+				 * 
+				 * 				If verification fails, ABORT, else do nothing.
+				 * 
+				 * 			When commit timer fires, commit.
+				 * 
+				 * 		If I responded with a NO, then move
+				 * 		into ABORT.
+				 * 
+				 * 		If between any of the above, the coordinator
+				 * 		sends an ABORT message, then ABORT. DUH!
+				 */
+					
+				if (messageSubType.Equals ("precommit"))
+				{
+					int slotCount = Int32.Parse (m.PopString ());
+					DebugLogic ("Received precommit for slot {0}",slotCount);
+				}
+				
+					
+				/* If I am the initiator/coordinator, and I get a YES!
+				 * message, then keep collecting them.
+				 * 
+				 * 		If some cohort times out, then ABORT.
+				 * 
+				 * If I get a NO message, then ABORT everyone.
+				 * 
+				 * If I get all YES!'s, then run commit and send DOCOMMIT
+				 * messages to all cohorts.
+				 */
+				
+				/* If I am a cohort and get a DOCOMMIT message, then commit.
+				 */
 			}
 		}
 	}

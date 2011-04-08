@@ -23,9 +23,9 @@ namespace client
 			                                                           new ReceiveCallbackType (Receive));
 		}
 		
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public string Lookup (string user)
 		{
+			//lock (this){
 			// TODO: This should later move into a lookup for
 			// a list of users.
 			// TODO: It should also implement a cache
@@ -62,6 +62,7 @@ namespace client
 			m_oSignalEvent.Reset ();
 			
 			return m_lookupResponse;
+		//	}
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)

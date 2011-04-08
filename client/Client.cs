@@ -44,9 +44,9 @@ namespace client
 			UserName = ConfigReader.GetConfigurationValue ("username");
 			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical" + "server1");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical" + "server2");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical" + "server3");
 		}
 		
 		public void InitClient ()
@@ -90,7 +90,7 @@ namespace client
 			
 			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
 			
-			Console.WriteLine ("My username {0}", UserName);
+			//Console.WriteLine ("My username {0}", UserName);
 		}
 		
 		// All client side APIs are listed belowS

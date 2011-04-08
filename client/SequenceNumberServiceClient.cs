@@ -23,9 +23,9 @@ namespace client
 			                                                           new ReceiveCallbackType (Receive));
 		}
 		
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public int RequestSequenceNumber ()
 		{
+			lock (this){
 			Message m = new Message ();
 			m.SetSourceUserName (m_client.UserName);
 			m.SetDestinationUsers ("SERVER");
@@ -37,6 +37,7 @@ namespace client
 			oSignalEvent.Reset ();
 			
 			return m_sequenceNumberToReturn;
+			}
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
