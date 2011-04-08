@@ -20,6 +20,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <ConsolePause>false</ConsolePause>
+    <Commandlineparameters>/home/archie/repos/radical/puppet/puppet.config /home/archie/repos/radical/puppet/example.txt</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -62,6 +63,12 @@
     <Compile Include="MainWindow.cs" />
     <Compile Include="gtk-gui\MainWindow.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="PuppetConfigurationReader.cs" />
+    <Compile Include="PuppetInstructionType.cs" />
+    <Compile Include="PuppetMaster.cs" />
+    <Compile Include="PuppetMasterService.cs" />
+    <Compile Include="ConnectionServicePuppet.cs" />
+    <Compile Include="LookupServicePuppet.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -77,6 +84,10 @@
     <ProjectReference Include="..\comm\comm.csproj">
       <Project>{969E6067-A73F-4671-8AD7-2B32EAAFE19C}</Project>
       <Name>comm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\config\common.csproj">
+      <Project>{277BCBAB-18FE-444D-91DD-9B03E4979E2A}</Project>
+      <Name>common</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

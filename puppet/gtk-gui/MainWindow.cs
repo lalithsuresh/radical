@@ -12,12 +12,89 @@
 
 public partial class MainWindow {
     
+    private Gtk.VBox vbox1;
+    
+    private Gtk.ScrolledWindow GtkScrolledWindow;
+    
+    private Gtk.TextView textMain;
+    
+    private Gtk.HBox hbox1;
+    
+    private Gtk.Button buttonStep;
+    
+    private Gtk.Button buttonPlay;
+    
+    private Gtk.Button buttonExit;
+    
     protected virtual void Build() {
         Stetic.Gui.Initialize(this);
         // Widget MainWindow
         this.Name = "MainWindow";
         this.Title = Mono.Unix.Catalog.GetString("MainWindow");
         this.WindowPosition = ((Gtk.WindowPosition)(4));
+        // Container child MainWindow.Gtk.Container+ContainerChild
+        this.vbox1 = new Gtk.VBox();
+        this.vbox1.Name = "vbox1";
+        this.vbox1.Spacing = 6;
+        // Container child vbox1.Gtk.Box+BoxChild
+        this.GtkScrolledWindow = new Gtk.ScrolledWindow();
+        this.GtkScrolledWindow.Name = "GtkScrolledWindow";
+        this.GtkScrolledWindow.ShadowType = ((Gtk.ShadowType)(1));
+        // Container child GtkScrolledWindow.Gtk.Container+ContainerChild
+        this.textMain = new Gtk.TextView();
+        this.textMain.Buffer.Text = "Loading...";
+        this.textMain.CanFocus = true;
+        this.textMain.Name = "textMain";
+        this.textMain.Editable = false;
+        this.textMain.WrapMode = ((Gtk.WrapMode)(2));
+        this.textMain.Indent = 2;
+        this.GtkScrolledWindow.Add(this.textMain);
+        this.vbox1.Add(this.GtkScrolledWindow);
+        Gtk.Box.BoxChild w2 = ((Gtk.Box.BoxChild)(this.vbox1[this.GtkScrolledWindow]));
+        w2.Position = 0;
+        // Container child vbox1.Gtk.Box+BoxChild
+        this.hbox1 = new Gtk.HBox();
+        this.hbox1.Name = "hbox1";
+        this.hbox1.Spacing = 6;
+        // Container child hbox1.Gtk.Box+BoxChild
+        this.buttonStep = new Gtk.Button();
+        this.buttonStep.CanFocus = true;
+        this.buttonStep.Name = "buttonStep";
+        this.buttonStep.UseUnderline = true;
+        this.buttonStep.Label = "Step";
+        this.hbox1.Add(this.buttonStep);
+        Gtk.Box.BoxChild w3 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonStep]));
+        w3.Position = 0;
+        w3.Expand = false;
+        w3.Fill = false;
+        // Container child hbox1.Gtk.Box+BoxChild
+        this.buttonPlay = new Gtk.Button();
+        this.buttonPlay.CanFocus = true;
+        this.buttonPlay.Name = "buttonPlay";
+        this.buttonPlay.UseUnderline = true;
+        this.buttonPlay.Label = Mono.Unix.Catalog.GetString("Play");
+        this.hbox1.Add(this.buttonPlay);
+        Gtk.Box.BoxChild w4 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonPlay]));
+        w4.Position = 1;
+        w4.Expand = false;
+        w4.Fill = false;
+        // Container child hbox1.Gtk.Box+BoxChild
+        this.buttonExit = new Gtk.Button();
+        this.buttonExit.CanFocus = true;
+        this.buttonExit.Name = "buttonExit";
+        this.buttonExit.UseUnderline = true;
+        this.buttonExit.Label = Mono.Unix.Catalog.GetString("Exit");
+        this.hbox1.Add(this.buttonExit);
+        Gtk.Box.BoxChild w5 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonExit]));
+        w5.Position = 2;
+        w5.Expand = false;
+        w5.Fill = false;
+        this.vbox1.Add(this.hbox1);
+        Gtk.Box.BoxChild w6 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox1]));
+        w6.Position = 2;
+        w6.Expand = false;
+        w6.Fill = false;
+        this.Add(this.vbox1);
         if ((this.Child != null)) {
             this.Child.ShowAll();
         }

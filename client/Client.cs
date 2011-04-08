@@ -7,6 +7,9 @@ namespace client
 {
 	public class Client : PadicalObject
 	{
+		private bool m_isPuppetControlled;
+		public PuppetClientService m_puppetService;
+		
 		// Eventually make these not-so-public
 		public PerfectPointToPointSend m_perfectPointToPointSend;
 		public SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
@@ -34,6 +37,11 @@ namespace client
 			set;
 		}
 		
+		public string PuppetMasterAddress {
+			get;
+			set;
+		}
+		
 		public Client ()
 		{
 			LoadConfig ();
@@ -47,6 +55,17 @@ namespace client
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
+			
+			string puppetControlled = ConfigReader.GetConfigurationValue ("puppetmaster");
+			if (puppetControlled != null)
+			{
+				m_isPuppetControlled = true;
+				PuppetMasterAddress = puppetControlled + "/Radical";
+			}
+			else 
+			{
+				m_isPuppetControlled = false;
+			}
 		}
 		
 		public void InitClient ()
@@ -71,6 +90,13 @@ namespace client
 			m_sequenceNumberService.SetClient (this);
 			m_connectionServiceClient = new ConnectionServiceClient ();
 			m_connectionServiceClient.SetClient (this);
+			
+			if (m_isPuppetControlled) {
+				DebugInfo ("Client may be controlled by Puppet Master");
+				m_puppetService = new PuppetClientService ();
+				m_puppetService.SetClient (this);
+				m_puppetService.RegisterAsPuppet ();				
+			}
 			
 			/*
 			m_connectionServiceClient.Connect ();
