@@ -27,19 +27,19 @@ namespace client
 		public bool Connect ()
 		{
 			lock (this) {
-			Message m = new Message ();
-			m.SetMessageType ("connect");
-			m.SetSourceUserName (m_client.UserName);
-			m.SetDestinationUsers ("SERVER");
-			
-			DebugLogic ("Sending connection request");
-			m_client.m_sendReceiveMiddleLayer.Send (m);
-			
-			//This thread will block here until the reset event is sent.
-			m_oSignalEvent.WaitOne();
-			m_oSignalEvent.Reset ();
-			
-			return true;
+				Message m = new Message ();
+				m.SetMessageType ("connect");
+				m.SetSourceUserName (m_client.UserName);
+				m.SetDestinationUsers ("SERVER");
+				
+				DebugLogic ("Sending connection request");
+				m_client.m_sendReceiveMiddleLayer.Send (m);
+				
+				//This thread will block here until the reset event is sent.
+				m_oSignalEvent.WaitOne();
+				m_oSignalEvent.Reset ();
+				
+				return true;
 			}
 		}
 		
