@@ -92,6 +92,23 @@ namespace client
 			slotlist.Add (8);
 			m_client1.Reserve (description, userlist, slotlist);
 			}
+			
+			// This test should book slot 8 as opposed to slot 1 or 2
+			{
+			List<string> userlist = new List<string> ();
+			List<int> slotlist = new List<int> ();
+			string description = "test description111";
+			
+			userlist.Add ("testclient2");
+			userlist.Add ("testclient3");
+			//userlist.Add ("user5");
+			//userlist.Add ("user6");
+			slotlist.Add (1);
+			slotlist.Add (2);
+			slotlist.Add (8);
+			m_client1.Reserve (description, userlist, slotlist);
+			}
+			
 		}
 		
 		

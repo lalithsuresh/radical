@@ -54,6 +54,11 @@ namespace client
 				set;
 			}
 			
+			public SortedList<int, Reservation> m_preCommitList {
+				get;
+				set;
+			}
+			
 			public CalendarState m_calendarState {
 				get;
 				set;
@@ -187,6 +192,7 @@ namespace client
 					slot.m_calendarState = CalendarState.FREE;
 					slot.m_slotNumber = i;
 					slot.m_reservationsForThisSlot = new List<Reservation> ();
+					slot.m_preCommitList = new SortedList<int, Reservation> ();
 					
 					// Add to int-to-slot-object map
 					m_numberToSlotMap.Add (i, slot);
@@ -240,288 +246,422 @@ namespace client
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
-			lock (this){
-			/* Message format for any calendar message (stack part) starts as follows:
-			 * 
-			 * - SubType TODO: Later register more types up there.
-			 * - ReservationSequenceNumber
-			 * - Message Sub Type
-			 * 
-			 * This remains common for all kinds of messages.
-			 */
+			lock (this)
+			{
+				/* Message format for any calendar message (stack part) starts as follows:
+				 * 
+				 * - SubType TODO: Later register more types up there.
+				 * - ReservationSequenceNumber
+				 * - Message Sub Type
+				 * 
+				 * This remains common for all kinds of messages.
+				 */
+				
+				// Unpack message
+				Message m = eventargs.m_message;
+				string src = m.GetSourceUserName (); // source user name
+				List<string> userlist = m.GetDestinationUsers (); // list of users
+				string messageSubType = m.PopString (); // message sub type
+				int reservationSequenceNumber = Int32.Parse (m.PopString ()); // seq no
 			
-			// Unpack message
-			// FIXME: Put me in a method
-			Message m = eventargs.m_message;
+							
+				DebugLogic ("Message of subtype {0} received", messageSubType);
+				
+				if (messageSubType.Equals ("reservationrequest"))
+				{	
+					ReceiveReservationRequest (m, src, userlist, reservationSequenceNumber, messageSubType);
+				}
+							
+				else if (messageSubType.Equals ("reservationack") || messageSubType.Equals ("reservationnack"))
+				{
+					ReceiveReservationAckNack (m, src, userlist, reservationSequenceNumber, messageSubType);		
+				}
 			
-			string src = m.GetSourceUserName (); // source user name
-			List<string> userlist = m.GetDestinationUsers (); // list of users
-			
-			string messageSubType = m.PopString (); // message sub type
-			int reservationSequenceNumber = Int32.Parse (m.PopString ()); // seq no
+				else if (messageSubType.Equals ("precommit"))
+				{
+					ReceiveReservationPreCommit (m, src, userlist, reservationSequenceNumber, messageSubType);		
+				}
+				else if (messageSubType.Equals ("yes"))
+				{
+					ReceiveReservationYes (m, src, userlist, reservationSequenceNumber, messageSubType);
+				}
+				else if (messageSubType.Equals ("docommit"))
+				{
+						ReceiveReservationDoCommit(m, src, userlist, reservationSequenceNumber, messageSubType);
+				}
+				
+			} // Lock end
+		}
 		
-			// TODO: Implement most of protocol here
+		private void ReceiveReservationRequest (Message m,
+		                                        string src,
+		                                        List<string> userlist,
+		                                        int reservationSequenceNumber,
+		                                        string messageSubType)
+		{
 			/* If I get a reservation request for a slot
 			 * that is either FREE or ACKNOWLEDGED, then
 			 * respond with an ACK, else if it is either
 			 * BOOKED, or ASSIGNED, then respond with a NACK
-			 */
-			DebugLogic ("Message of subtype {0} received", messageSubType);
-			
-			if (messageSubType.Equals ("reservationrequest"))
+			 */	
+			int numSlots = Int32.Parse (m.PopString ()); // number of slots
+			List<int> slotlist = new List<int> (); // unpack all the slots
+			for (int i = 0; i < numSlots; i++)
 			{
-				int numSlots = Int32.Parse (m.PopString ()); // number of slots
-				List<int> slotlist = new List<int> (); // unpack all the slots
-				for (int i = 0; i < numSlots; i++)
-				{
-					slotlist.Add (Int32.Parse (m.PopString ()));
-				}
+				slotlist.Add (Int32.Parse (m.PopString ()));
+			}
 			
-				string description = m.PopString (); // description
-				Console.WriteLine ("Received Message:" +
-						   "[{0}, {1}, {2}, {3}, {4}, {5}, {6}]",
-			               src, userlist, messageSubType, reservationSequenceNumber, numSlots, slotlist, description);
-				
-				
-				/* Message unpacked, now create a reservation object
-				 */
-				
-				if (m_activeReservationSessions.ContainsKey (reservationSequenceNumber))
+			string description = m.PopString (); // description
+			DebugLogic ("Received Message:" +
+							   "[{0}, {1}, {2}, {3}, {4}, {5}, {6}]",
+				               src, userlist, messageSubType, reservationSequenceNumber, numSlots, slotlist, description);
+					
+					
+			/* Message unpacked, now create a reservation object
+			 */
+					
+			if (m_activeReservationSessions.ContainsKey (reservationSequenceNumber))
+			{
+				DebugFatal ("Duplicate reservation request received {0}", reservationSequenceNumber);
+			}
+					
+			/* Create reservation object
+			 */
+			Reservation reservation = new Reservation ();
+			reservation.m_description = description;
+			reservation.m_sequenceNumber = reservationSequenceNumber;
+			reservation.m_userList = userlist;
+			reservation.m_slotNumberList = slotlist;
+									
+			/* 
+			 * check if slots are free
+			 * and proceed to respond with an ACK or NACK.
+			 */
+			List<int> availableslots = new List<int> ();
+			foreach (int i in slotlist)
+			{
+				// If slot is being encountered for the
+				// first time...
+				if (!m_numberToSlotMap.ContainsKey (i))
 				{
-					DebugFatal ("Duplicate reservation request received {0}", reservationSequenceNumber);
+					DebugLogic ("Creating new slot instance for slot-number: {0}", i);
+					// Then create new slot.
+					// TODO: Probably need internal methods for this
+					Slot tempslot = new Slot ();
+					tempslot.m_calendarState = CalendarState.FREE;
+					tempslot.m_slotNumber = i;
+					tempslot.m_reservationsForThisSlot = new List<Reservation> ();
+					tempslot.m_preCommitList = new SortedList<int, Reservation> ();
+							
+					// Add to int-to-slot-object map
+					m_numberToSlotMap.Add (i, tempslot);
 				}
+						
+				// Get the concerned slot
+				Slot slot = m_numberToSlotMap[i];
 				
-				/* Create reservation object
-				 */
-				Reservation reservation = new Reservation ();
-				reservation.m_description = description;
-				reservation.m_sequenceNumber = reservationSequenceNumber;
-				reservation.m_userList = userlist;
-				reservation.m_slotNumberList = slotlist;
-								
-				/* 
-				 * check if slots are free
-				 * and proceed to respond with an ACK or NACK.
-				 */
-				List<int> availableslots = new List<int> ();
-				foreach (int i in slotlist)
+				if (slot.m_calendarState == CalendarServiceClient.CalendarState.FREE ||
+				    slot.m_calendarState == CalendarServiceClient.CalendarState.ACKNOWLEDGED)
 				{
-					// If slot is being encountered for the
-					// first time...
-					if (!m_numberToSlotMap.ContainsKey (i))
-					{
-						DebugLogic ("Creating new slot instance for slot-number: {0}", i);
+					// Update the slot's reservation list
+					slot.m_reservationsForThisSlot.Add (reservation);
+							
+					// Append to list of slots.
+					availableslots.Add (i);
+							
+					// Update slot state
+					slot.m_calendarState = CalendarServiceClient.CalendarState.ACKNOWLEDGED;
+					DebugLogic ("Slot {0} is now in ACKNOWLEDGED state", i);
+				}
+			}
+					
+			// Respond with ACK/NACK
+			if (availableslots.Count > 0)
+			{
+				// We do have at least one free slot, so respond with an ACK
+				Message ack = new Message ();
+					
+				ack.SetSourceUserName (m_client.UserName);
+				ack.SetDestinationUsers (src);
+				ack.SetMessageType ("calendar");
+						
+				/*
+				 * ACK Message format, data part
+				 * 
+				 * - Number of Slots
+				 * - Slot 1
+				 * - Slot 2
+				 * ...
+				 * - Slot N
+				 */
+				availableslots.Reverse ();
+						
+				foreach (int i in availableslots)
+				{
+					ack.PushString (i.ToString ());
+				}
+						
+				ack.PushString (availableslots.Count.ToString ());
+				ack.PushString (reservationSequenceNumber.ToString ());
+				ack.PushString ("reservationack");
+						
+				DebugLogic ("Sending an ack to: {0}", src);
+	
+				m_client.m_sendReceiveMiddleLayer.Send (ack);
+				m_activeReservationSessions.Add (reservationSequenceNumber, reservation);
+			}
+			else
+			{
+				Message nack = new Message ();
+				// No free slots, so respond with a NACK
+				nack.SetSourceUserName (m_client.UserName);
+				nack.SetDestinationUsers (src);
+				nack.SetMessageType ("calendar");
+					
+				nack.PushString ("reservationnack");
+					
+				m_client.m_sendReceiveMiddleLayer.Send (nack);
+			}
+		}
 		
-						// Then create new slot.
-						// TODO: Probably need internal methods for this
-						Slot tempslot = new Slot ();
-						tempslot.m_calendarState = CalendarState.FREE;
-						tempslot.m_slotNumber = i;
-						tempslot.m_reservationsForThisSlot = new List<Reservation> ();
-					
-						// Add to int-to-slot-object map
-						m_numberToSlotMap.Add (i, tempslot);
-					}
-					
-					// Get the concerned slot
-					Slot slot = m_numberToSlotMap[i];
-					
-					if (slot.m_calendarState == CalendarServiceClient.CalendarState.FREE ||
-					    slot.m_calendarState == CalendarServiceClient.CalendarState.ACKNOWLEDGED)
-					{
-						// Update the slot's reservation list
-						slot.m_reservationsForThisSlot.Add (reservation);
-						
-						// Append to list of slots.
-						availableslots.Add (i);
-						
-						// Update slot state
-						slot.m_calendarState = CalendarServiceClient.CalendarState.ACKNOWLEDGED;
-						DebugLogic ("Slot {0} is now in ACKNOWLEDGED state", i);
-					}
-				}
-				
-				// Respond with ACK/NACK
-				if (availableslots.Count > 0)
-				{
-					// We do have at least one free slot, so respond with an ACK
-					Message ack = new Message ();
-					
-					ack.SetSourceUserName (m_client.UserName);
-					ack.SetDestinationUsers (src);
-					ack.SetMessageType ("calendar");
-					
-					/*
-					 * ACK Message format, data part
-					 * 
-					 * - Number of Slots
-					 * - Slot 1
-					 * - Slot 2
-					 * ...
-					 * - Slot N
-					 */
-					availableslots.Reverse ();
-					
-					foreach (int i in availableslots)
-					{
-						ack.PushString (i.ToString ());
-					}
-					
-					ack.PushString (availableslots.Count.ToString ());
-					ack.PushString (reservationSequenceNumber.ToString ());
-					ack.PushString ("reservationack");
-					
-					DebugLogic ("Sending an ack to: {0}", src);
+		private void ReceiveReservationAckNack (Message m,
+		                                        string src,
+		                                        List<string> userlist,
+		                                        int reservationSequenceNumber,
+		                                        string messageSubType)
+		{
+			/* If I am the initiator of the reservation,
+			 * then keep collecting ACKS/NACKS from all participants
+			 * 
+			 *      If ACK rcvd, then update received ACK counter.
+			 * 		
+			 * 			If all ACKS rcvd, move reservation state to
+			 *	    	TENTATIVELY_BOOKED for those slots.
+			 * 			Then inform all nodes about decision with a
+			 * 			PRECOMMIT message and move to PRECOMMIT state.
+			 * 
+			 * 		If at least one NACK, move reservation state
+			 * 		to ABORTED. TODO: Should we notify others?
+			 */
 
-					m_client.m_sendReceiveMiddleLayer.Send (ack);
+			DebugLogic ("Received {0} from {1} for reservation ID: {2}",
+				            messageSubType, src, reservationSequenceNumber);
+				
+			// obtain reservation objects
+			Reservation res = m_activeReservationSessions[reservationSequenceNumber];
+		
+			if (messageSubType.Equals ("reservationack"))
+			{
+				int slotCount = Int32.Parse (m.PopString ());
+				while (slotCount > 0)
+				{
+					int s = Int32.Parse (m.PopString ());
+					int ackcount;
+					if (res.m_acksForSlot.ContainsKey (s))
+					{
+						res.m_acksForSlot[s]++;
+						ackcount = res.m_acksForSlot[s];
+					}
+					else
+					{
+						ackcount = 1;
+						res.m_acksForSlot[s] = ackcount;
+					}
+					
+					// If we get ACKS from all clients for slot 's',
+					// and the reservation isn't already tentatively booked for any slot,
+					// and the slot in concern isn't already booked for some other reservation...
+					if (ackcount == res.m_userList.Count
+					    && res.m_reservationState != CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED
+					    && m_numberToSlotMap[s].m_calendarState != CalendarServiceClient.CalendarState.BOOKED)
+					{
+						DebugLogic ("Woopee! I can haz slot! {0}", s);
+						
+						// Update reservation state.
+						res.m_reservationState = CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED;
+						
+						// Remove reservation object from slots that
+						// are not under consideration
+						foreach (int i in res.m_slotNumberList)
+						{
+							if (i != s)
+							{
+								m_numberToSlotMap[i].m_reservationsForThisSlot.Remove (res);
+							}
+						}
+						
+						// m_slotNumberList now holds the only
+						// slot under consideration.
+						res.m_slotNumberList.Add (s);
+						
+						// Update slot state.
+						m_numberToSlotMap [s].m_calendarState = CalendarServiceClient.CalendarState.BOOKED;
+						
+						
+						// Now send a precommit message to everyone involved.
+						// Party time!
+						
+						Message precommitMsg = new Message ();
+						
+						precommitMsg.SetSourceUserName (m_client.UserName);
+						precommitMsg.SetDestinationUsers (res.m_userList);
+						DebugUncond ("SENDING PRECOMMIT TO {0} many ppl", res.m_userList.Count);
+						precommitMsg.SetMessageType ("calendar");
+						precommitMsg.PushString (s.ToString ());
+						precommitMsg.PushString (reservationSequenceNumber.ToString ());
+						precommitMsg.PushString ("precommit");
+						m_client.m_sendReceiveMiddleLayer.Send (precommitMsg);
+						
+						res.m_acksForSlot.Clear ();
+						break; // safe to not go through the other slot.
+					}
+					
+					slotCount--;
+				}
+			}
+			else if (messageSubType.Equals ("reservationnack"))
+			{
+				res.m_reservationState = CalendarServiceClient.ReservationState.ABORTED;
+				
+				foreach (int i in res.m_slotNumberList)
+				{
+					m_numberToSlotMap[i].m_reservationsForThisSlot.Remove (res);
+				}
+			}
+		}
+		
+		
+				
+		private void ReceiveReservationPreCommit (Message m,
+		                                          string src,
+		                                          List<string> userlist,
+		                                          int reservationSequenceNumber,
+		                                          string messageSubType)
+		{
+						
+			/* If I get a PRECOMMIT update for a slot,
+			 * and it is still in ACKNOWLEDGED state, then
+			 * respond with YES!. Else, respond with a NO!
+			 * 
+			 * 		If I responded with a YES, then
+	
+			 * 		move into PRECOMMIT state and begin
+			 * 		verification and commit timers.
+			 * 
+			 * 			When verification timer fires, verify
+			 * 			your neighbours. TODO: Might need ping
+			 * 			utility
+			 * 
+			 * 				If verification fails, ABORT, else do nothing.
+			 * 
+			 * 			When commit timer fires, commit.
+			 * 
+			 * 		If I responded with a NO, then move
+			 * 		into ABORT.
+			 * 
+			 * 		If between any of the above, the coordinator
+			 * 		sends an ABORT message, then ABORT. DUH!
+			 */
+				
+			int s = Int32.Parse (m.PopString ());
+			DebugLogic ("Received precommit for slot {0}, reservation number {1}",s,reservationSequenceNumber);
+			
+			Slot slot = m_numberToSlotMap[s];
+			Reservation res = m_activeReservationSessions[reservationSequenceNumber];
+			
+			if (slot.m_calendarState == CalendarServiceClient.CalendarState.ACKNOWLEDGED)
+			{				
+				if (slot.m_preCommitList.Count == 0)
+				{
+					DebugLogic ("Slot {0} is in ack state, and has {1} precommits", slot.m_slotNumber, slot.m_preCommitList.Count);
+					
+					Message yes = new Message ();
+					
+					yes.SetDestinationUsers (src);
+					yes.SetMessageType ("calendar");
+					yes.SetSourceUserName (m_client.UserName);
+					yes.PushString (s.ToString ());
+					yes.PushString (reservationSequenceNumber.ToString ());
+					yes.PushString ("yes");
+					
+					m_client.m_sendReceiveMiddleLayer.Send (yes);
+				}
+				else if (slot.m_preCommitList.Keys [0] > reservationSequenceNumber)
+				{
+					// Wait for the time being
+					slot.m_preCommitList.Add (reservationSequenceNumber, res);
 				}
 				else
 				{
-					Message nack = new Message ();
-					// No free slots, so respond with a NACK
-					nack.SetSourceUserName (m_client.UserName);
-					nack.SetDestinationUsers (src);
-					nack.SetMessageType ("calendar");
-					
-					nack.PushString ("reservationnack");
-					
-					//m_client.m_sendReceiveMiddleLayer.Send (nack);
+					// Handle weird case. For now, bail out.
+					DebugFatal ("Crashing. Can't handle weird case.");
 				}
 			}
+		}
+		
+		
+		private void ReceiveReservationYes	 (Message m,
+		                                      string src,
+		                                      List<string> userlist,
+		                                      int reservationSequenceNumber,
+		                                      string messageSubType)
+		{
+			int s = Int32.Parse (m.PopString ());
+			DebugLogic ("Received YES for slot {0}, reservation number {1}",s,reservationSequenceNumber);
 			
-				/* If I am the initiator of the reservation,
-				 * then keep collecting ACKS/NACKS from all participants
-				 * 
-				 *      If ACK rcvd, then update received ACK counter.
-				 * 		
-				 * 			If all ACKS rcvd, move reservation state to
-				 *	    	TENTATIVELY_BOOKED for those slots.
-				 * 			Then inform all nodes about decision with a
-				 * 			PRECOMMIT message and move to PRECOMMIT state.
-				 * 
-				 * 		If at least one NACK, move reservation state
-				 * 		to ABORTED. TODO: Should we notify others?
-				 */
-	
-				if (messageSubType.Equals ("reservationack") || messageSubType.Equals ("reservationnack"))
-				{
-					DebugLogic ("Received {0} from {1} for reservation ID: {2}",
-				            messageSubType, src, reservationSequenceNumber);
-				
-					// obtain reservation objects
-					Reservation res = m_activeReservationSessions[reservationSequenceNumber];
-				
-					if (messageSubType.Equals ("reservationack"))
-					{
-						int slotCount = Int32.Parse (m.PopString ());
-						while (slotCount > 0)
-						{
-							int s = Int32.Parse (m.PopString ());
-							int ackcount;
-							if (res.m_acksForSlot.ContainsKey (s))
-							{
-								res.m_acksForSlot[s]++;
-								ackcount = res.m_acksForSlot[s];
-							}
-							else
-							{
-								ackcount = 1;
-								res.m_acksForSlot[s] = ackcount;
-							}
-							
-							// If we get ACKS from all clients for slot 's',
-							// and the reservation isn't already tentatively booked for any slot,
-							// and the slot in concern isn't already booked for some other reservation...
-							if (ackcount == res.m_userList.Count
-							    && res.m_reservationState != CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED
-							    && m_numberToSlotMap[s].m_calendarState != CalendarServiceClient.CalendarState.BOOKED)
-							{
-								DebugLogic ("Woopee! I can haz slot! {0}", s);
-								
-								// Update reservation state.
-								res.m_reservationState = CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED;
-								res.m_slotNumberList.Clear ();
-								
-								// m_slotNumberList now holds the only
-								// slot under consideration.
-								res.m_slotNumberList.Add (s);
-								
-								// Update slot state.
-								m_numberToSlotMap [s].m_calendarState = CalendarServiceClient.CalendarState.BOOKED;
-								
-								
-								// Now send a precommit message to everyone involved.
-								// Party time!
-								
-								Message precommitMsg = new Message ();
-								
-								precommitMsg.SetSourceUserName (m_client.UserName);
-								precommitMsg.SetDestinationUsers (res.m_userList);
-								DebugUncond ("SENDING PRECOMMIT TO {0} many ppl", res.m_userList.Count);
-								precommitMsg.SetMessageType ("calendar");
-								precommitMsg.PushString (s.ToString ());
-								precommitMsg.PushString (reservationSequenceNumber.ToString ());
-								precommitMsg.PushString ("precommit");
-								m_client.m_sendReceiveMiddleLayer.Send (precommitMsg);
-									
-								break; // safe to not go through the other slot.
-							}
-							
-							slotCount--;
-						}
-					}
-				else if (messageSubType.Equals ("reservationnack"))
-					{
-						res.m_reservationState = CalendarServiceClient.ReservationState.ABORTED;
-					}
-				}
-				
+			Slot slot = m_numberToSlotMap[s];
+			Reservation res = m_activeReservationSessions[reservationSequenceNumber];
 			
-				/* If I get a PRECOMMIT update for a slot,
-				 * and it is still in ACKNOWLEDGED state, then
-				 * respond with YES!. Else, respond with a NO!
-				 * 
-				 * 		If I responded with a YES, then#include.
-
-				 * 		move into PRECOMMIT state and begin
-				 * 		verification and commit timers.
-				 * 
-				 * 			When verification timer fires, verify
-				 * 			your neighbours. TODO: Might need ping
-				 * 			utility
-				 * 
-				 * 				If verification fails, ABORT, else do nothing.
-				 * 
-				 * 			When commit timer fires, commit.
-				 * 
-				 * 		If I responded with a NO, then move
-				 * 		into ABORT.
-				 * 
-				 * 		If between any of the above, the coordinator
-				 * 		sends an ABORT message, then ABORT. DUH!
-				 */
-					
-				if (messageSubType.Equals ("precommit"))
-				{
-					int slotCount = Int32.Parse (m.PopString ());
-					DebugLogic ("Received precommit for slot {0}",slotCount);
-				}
-				
-					
-				/* If I am the initiator/coordinator, and I get a YES!
-				 * message, then keep collecting them.
-				 * 
-				 * 		If some cohort times out, then ABORT.
-				 * 
-				 * If I get a NO message, then ABORT everyone.
-				 * 
-				 * If I get all YES!'s, then run commit and send DOCOMMIT
-				 * messages to all cohorts.
-				 */
-				
-				/* If I am a cohort and get a DOCOMMIT message, then commit.
-				 */
+			int ackcount;
+			if (res.m_acksForSlot.ContainsKey (s))
+			{
+				res.m_acksForSlot[s]++;
+				ackcount = res.m_acksForSlot[s];
 			}
+			else
+			{
+				ackcount = 1;
+				res.m_acksForSlot[s] = ackcount;
+			}
+			
+			if (ackcount == res.m_userList.Count
+			    // the below two conditions are sanity checks.
+			    && res.m_reservationState != CalendarServiceClient.ReservationState.COMMITTED
+			    && m_numberToSlotMap[s].m_calendarState != CalendarServiceClient.CalendarState.ASSIGNED)
+			{
+				DebugLogic ("Woopee! I can haz slot! {0}", s);
+				
+				//send DoCommit
+				
+				Message docommitMsg = new Message ();
+				docommitMsg.SetSourceUserName (m_client.UserName);
+				docommitMsg.SetDestinationUsers (res.m_userList);
+				DebugUncond ("SENDING PRECOMMIT TO {0} many ppl", res.m_userList.Count);
+				docommitMsg.SetMessageType ("calendar");
+				docommitMsg.PushString (s.ToString ());
+				docommitMsg.PushString (reservationSequenceNumber.ToString ());
+				docommitMsg.PushString ("docommit");
+				m_client.m_sendReceiveMiddleLayer.Send (docommitMsg);
+			}
+			
+		}
+		
+		private void ReceiveReservationDoCommit	 (Message m,
+		                                          string src,
+		                                          List<string> userlist,
+		                                          int reservationSequenceNumber,
+		                                          string messageSubType)
+		{
+			int s = Int32.Parse (m.PopString ());
+			DebugLogic ("Received docommit for slot {0}, reservation number {1}",s,reservationSequenceNumber);
+			
+			Slot slot = m_numberToSlotMap[s];
+			Reservation res = m_activeReservationSessions[reservationSequenceNumber];
+			
+			slot.m_calendarState = CalendarServiceClient.CalendarState.ASSIGNED;
+			res.m_reservationState = CalendarServiceClient.ReservationState.COMMITTED;
+			
+			DebugLogic ("Reservation ID: {0}, Slot: {1} has committed", reservationSequenceNumber, s);
 		}
 	}
 }

@@ -44,9 +44,9 @@ namespace client
 			UserName = ConfigReader.GetConfigurationValue ("username");
 			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical" + "server1");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical" + "server2");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical" + "server3");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
 		}
 		
 		public void InitClient ()

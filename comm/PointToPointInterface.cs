@@ -21,6 +21,11 @@ namespace comm
 			// deliver to incoming queue in SendRecvMiddleLayer
 			m_demuxer.Deliver(m);
 		}
+		
+		public override object InitializeLifetimeService()
+		{
+			return null;
+		}
 	}
 }
 

@@ -11,7 +11,7 @@ namespace comm
 {
 	public class PerfectPointToPointSend : PadicalObject
 	{ 
-		private string CHANNEL_NAME;
+		private const string CHANNEL_NAME = "Radical";
         public ManualResetEvent e = new ManualResetEvent(false);
 
 		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
@@ -50,7 +50,7 @@ namespace comm
 			m_pointToPoint.Init (demuxer);
 			
 			// Channel name is Radical + username
-			CHANNEL_NAME = "Radical" + ConfigReader.GetConfigurationValue ("username");
+			// CHANNEL_NAME = "Radical" + ConfigReader.GetConfigurationValue ("username");
 			
 			// register tcp channel and connect p2p interface
 						
@@ -109,8 +109,6 @@ namespace comm
 				
 				e.WaitOne ();
 			}
-			
-
 		}
 		
 		public void MyCallBack(IAsyncResult ar)
