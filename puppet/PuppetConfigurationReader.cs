@@ -59,16 +59,16 @@ namespace puppet
 			return true; 
 		}	
 		
-		public List<PuppetInstruction> ParseAllInstructions () 
+		public Queue<PuppetInstruction> ParseAllInstructions () 
 		{
-			List<PuppetInstruction> puppetInstructions = new List<PuppetInstruction>();
+			Queue<PuppetInstruction> puppetInstructions = new Queue<PuppetInstruction>();
 			string line; 
 			while ((line = m_file.ReadLine ()) != null) 
 			{
 				PuppetInstruction instruction; 
 				if ((instruction = ParseInstruction (line)) != null) 
 				{
-					puppetInstructions.Add (instruction);
+					puppetInstructions.Enqueue (instruction);
 					DebugLogic ("Added instruction {0} {1}", instruction.Type, instruction.ApplyToUser);
 				} 
 				else 

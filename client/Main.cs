@@ -26,7 +26,7 @@ namespace client
 			
 			
 			//FIXME: Remove later
-			client.Connect ();
+			/*client.Connect ();
 			
 			if (client.UserName.Equals ("testclient1"))
 			{
@@ -42,6 +42,7 @@ namespace client
 			slotlist.Add (3);
 			client.Reserve (description, userlist, slotlist);
 			}
+			*/
 			Console.ReadLine();			
 		}
 	}

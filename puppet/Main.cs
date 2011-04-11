@@ -30,11 +30,15 @@ namespace puppet
 			puppetMaster.InitPuppetMaster ();
 			//puppetMaster.Play ();
 			
-			/*
+			
+			// initiate gui
 			Application.Init ();		
 			MainWindow win = new MainWindow ();
+			win.SetPuppetMaster(puppetMaster);
+			
 			win.Show ();
-			Application.Run ();*/											
+			Application.Run ();
+			
 			
 			// terminate gracefully
 			Console.ReadLine ();

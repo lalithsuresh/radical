@@ -8,10 +8,15 @@ using common;
 namespace puppet
 {
 
+	public delegate void ReceiveNotificationsCallbackType(NotificationEventArgs e);
+	
 	public class PuppetMaster : PadicalObject
-	{		
+	{	
+		// GUI listener
+		private ReceiveNotificationsCallbackType m_notificationCallback;
+		
 		// Services Layer components		
-		private PuppetMasterService m_puppetMasterService; 
+		public PuppetMasterService m_puppetMasterService; 
 		private ConnectionServicePuppet m_connectionService;
 		private LookupServicePuppet m_lookupService;
 		
@@ -34,7 +39,7 @@ namespace puppet
 			set;
 		}
 				
-		public List<PuppetInstruction> InstructionSet {
+		public Queue<PuppetInstruction> InstructionSet {
 			get;
 			set;
 		}
@@ -77,18 +82,28 @@ namespace puppet
 			m_connectionService.Connect ();
 			DebugInfo ("Puppet master registered with servers");
 			
-		}		
+		}	
 		
 		public void Step ()
 		{
-			
-		}
+			if (InstructionSet.Count > 0)
+			{
+				PuppetInstruction instruction = InstructionSet.Dequeue ();
+				new NotificationEventArgs (String.Format ("{0} {1}", instruction.Type, 
+				                                          instruction.ApplyToUser));
+				m_puppetMasterService.CommandClient (instruction);
+			} 
+			else 
+			{
+				new NotificationEventArgs ("Instruction queue is empty.");
+			}
+		}		
 		
 		public void Play () 
-		{
-			foreach (PuppetInstruction instruction in InstructionSet) 
+		{		
+			while (InstructionSet.Count > 0)			
 			{
-				m_puppetMasterService.CommandClient (instruction);
+				Step ();
 				Thread.Sleep (1000);
 			}
 		}
@@ -97,6 +112,11 @@ namespace puppet
 		{
 			DebugLogic ("Shutdown.");
 			m_perfectPointToPointSend.Stop ();
+		}
+		
+		public void RegisterNotificationSubscriber (ReceiveNotificationsCallbackType cb)
+		{
+			m_notificationCallback = cb;
 		}
 	}
 }

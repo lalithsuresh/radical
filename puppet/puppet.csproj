@@ -69,6 +69,7 @@
     <Compile Include="PuppetMasterService.cs" />
     <Compile Include="ConnectionServicePuppet.cs" />
     <Compile Include="LookupServicePuppet.cs" />
+    <Compile Include="NotificationEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

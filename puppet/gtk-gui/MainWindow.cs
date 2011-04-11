@@ -78,6 +78,7 @@ public partial class MainWindow {
         w4.Position = 1;
         w4.Expand = false;
         w4.Fill = false;
+        w4.Padding = ((uint)(5));
         // Container child hbox1.Gtk.Box+BoxChild
         this.buttonExit = new Gtk.Button();
         this.buttonExit.CanFocus = true;
@@ -102,5 +103,7 @@ public partial class MainWindow {
         this.DefaultHeight = 300;
         this.Show();
         this.DeleteEvent += new Gtk.DeleteEventHandler(this.OnDeleteEvent);
+        this.buttonStep.Clicked += new System.EventHandler(this.OnButtonStepClicked);
+        this.buttonPlay.Clicked += new System.EventHandler(this.OnButtonPlayClicked);
     }
 }

@@ -30,6 +30,10 @@ namespace puppet
 				// TODO: Return server 1. Will be changed later
 				return m_master.ServerList [0]; 
 			} 
+			else if (m_master.m_puppetMasterService.Clients.ContainsKey (user)) 
+			{
+				return m_master.m_puppetMasterService.Clients[user];
+			}
 			
 			DebugFatal ("Couldn't not find server address");
 			
