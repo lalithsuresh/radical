@@ -482,7 +482,9 @@ namespace client
 				{
 					int s = Int32.Parse (m.PopString ());
 						
-					if (m_numberToSlotMap[s].m_calendarState != CalendarServiceClient.CalendarState.BOOKED)
+					if (m_numberToSlotMap[s].m_calendarState != CalendarServiceClient.CalendarState.BOOKED
+					    && m_numberToSlotMap[s].m_lockedReservation == -1)
+					{
 						validSlots.Add (s);
 						
 						DebugInfo ("Adding {0} to validslot list", s);
@@ -496,6 +498,7 @@ namespace client
 							ackcount = 1;
 							res.m_acksForSlot[s] = ackcount;
 						}
+					}
 										
 					slotCount--;
 				}
@@ -532,6 +535,7 @@ namespace client
 				{
 					res.m_reservationState = CalendarServiceClient.ReservationState.TENTATIVELY_BOOKED;
 					m_numberToSlotMap[res.m_slotNumberList[0]].m_calendarState = CalendarServiceClient.CalendarState.BOOKED;
+					m_numberToSlotMap[res.m_slotNumberList[0]].m_lockedReservation = reservationSequenceNumber;
 					SendPreCommitMessage (res, res.m_slotNumberList[0]);
 					
 					res.m_acksForSlot.Clear ();
@@ -674,8 +678,7 @@ namespace client
 			{
 				DebugLogic ("Woopee! I can haz slot! {0}", s);
 				
-				//send DoCommit
-				
+				//send DoCommit				
 				Message docommitMsg = new Message ();
 				docommitMsg.SetSourceUserName (m_client.UserName);
 				docommitMsg.SetDestinationUsers (res.m_userList);
@@ -684,6 +687,11 @@ namespace client
 				docommitMsg.PushString (reservationSequenceNumber.ToString ());
 				docommitMsg.PushString ("docommit");
 				m_client.m_sendReceiveMiddleLayer.Send (docommitMsg);
+				
+				// If you have to send this, then you can commit.
+				// TODO: Handle 2/1, 1/2 deadlock.
+				slot.m_calendarState = CalendarServiceClient.CalendarState.ASSIGNED;
+				res.m_reservationState = CalendarServiceClient.ReservationState.COMMITTED;
 			}
 			
 		}
@@ -716,42 +724,78 @@ namespace client
 			
 			foreach (int i in slot.m_preCommitList.Keys)
 			{
-				ReservationAbort (i, s);
+					
+				Message abortmsg = new Message ();
+				
+				abortmsg.SetDestinationUsers (m_activeReservationSessions[reservationSequenceNumber].m_initiator);
+				abortmsg.SetMessageType ("calendar");
+				abortmsg.SetSourceUserName (m_client.UserName);
+				abortmsg.PushString (s.ToString ()); // we need to mention the slot that is being aborted
+				abortmsg.PushString (reservationSequenceNumber.ToString ());
+				abortmsg.PushString ("abort");
+				
+				m_client.m_sendReceiveMiddleLayer.Send (abortmsg);
+				ReservationAbortCohort (i, s);
 			}
 			
 		}
 		
 		
-		private void ReservationAbort (int reservationSequenceNumber, int s)
+		private void ReservationAbortCohort (int reservationSequenceNumber, int s)
 		{
 			Slot slot = m_numberToSlotMap[s];
+						
+			Reservation oldReservation = m_activeReservationSessions[reservationSequenceNumber];
+			oldReservation.m_slotNumberList.Remove (s);
+						
+			// The earlier reservation is now removed from this slot
+			slot.m_reservationsForThisSlot.Remove (oldReservation);
 			
-			Message abortmsg = new Message ();
+			// If this was the last slot in contention for
+			// the reservation...
+			if (oldReservation.m_slotNumberList.Count == 0)
+			{
+				// ... then the reservation should be in ABORTED state. Sigh.				
+				oldReservation.m_reservationState = CalendarServiceClient.ReservationState.ABORTED;
+			}
 			
-			abortmsg.SetDestinationUsers (m_activeReservationSessions[reservationSequenceNumber].m_initiator);
-			abortmsg.SetMessageType ("calendar");
-			abortmsg.SetSourceUserName (m_client.UserName);
-			abortmsg.PushString (reservationSequenceNumber.ToString ());
-			abortmsg.PushString ("abort");
-			
-			m_client.m_sendReceiveMiddleLayer.Send (abortmsg);
-			
-			// Promote next reservation in precommit queue
-			slot.m_lockedReservation = slot.m_preCommitList.Keys[0]; // Lock top queue elements
-			slot.m_preCommitList.RemoveAt (0); // remove top element from queue.
-			
-			Reservation newres = m_activeReservationSessions[slot.m_lockedReservation];
-			
-			// Send a yes message for the succeeding reservation
-			Message yes = new Message ();
-			yes.SetDestinationUsers (m_activeReservationSessions[slot.m_lockedReservation].m_initiator);
-			yes.SetMessageType ("calendar");
-			yes.SetSourceUserName (m_client.UserName);
-			yes.PushString (slot.m_slotNumber.ToString ());
-			yes.PushString (newres.m_sequenceNumber.ToString ());
-			yes.PushString ("yes");
+			// This slot is currently locked, only an abort can kill it.
+			if (slot.m_lockedReservation == reservationSequenceNumber)
+			{				
+				// Promote next reservation in precommit queue
+				if (slot.m_preCommitList.Count > 0)
+				{
+					slot.m_lockedReservation = slot.m_preCommitList.Keys[0]; // Lock top queue elements
+					slot.m_preCommitList.RemoveAt (0); // remove top element from queue.
+				
+					Reservation newres = m_activeReservationSessions[slot.m_lockedReservation];
 					
-			m_client.m_sendReceiveMiddleLayer.Send (yes);
+					// Send a yes message for the succeeding reservation
+					Message yes = new Message ();
+					yes.SetDestinationUsers (m_activeReservationSessions[slot.m_lockedReservation].m_initiator);
+					yes.SetMessageType ("calendar");
+					yes.SetSourceUserName (m_client.UserName);
+					yes.PushString (slot.m_slotNumber.ToString ());
+					yes.PushString (newres.m_sequenceNumber.ToString ());
+					yes.PushString ("yes");
+							
+					m_client.m_sendReceiveMiddleLayer.Send (yes);
+				}
+				else
+				{
+					// We don't have any more reservations for this slot, so
+					// let's keep it in the ACKNOWLEDGED state.
+					slot.m_calendarState = CalendarServiceClient.CalendarState.ACKNOWLEDGED;
+					
+					// Release locks
+					slot.m_lockedReservation = -1;
+				}
+			}
+			else
+			{
+				// This slot is in the precommit list				
+				slot.m_preCommitList.Remove (s);
+			}
 		}
 		
 		private void ReceiveReservationAbort (Message m,
@@ -767,15 +811,35 @@ namespace client
 			Reservation res = m_activeReservationSessions[reservationSequenceNumber];
 			
 			// if i am the initiator,
-			// then send every1 aborts.
-			
+			// then send every1 aborts.			
 			if (res.m_initiator.Equals (m_client.UserName))
 			{
+				//Perform my own cleanup,
+				res.m_slotNumberList.Remove (s);
+						
+				// The earlier reservation is now removed from this slot
+				slot.m_reservationsForThisSlot.Remove (res);				
+			
+				// If this was the last slot in contention for
+				// the reservation...
+				if (res.m_slotNumberList.Count == 0)
+				{
+					// ... then the reservation should be in ABORTED state. Sigh.				
+					res.m_reservationState = CalendarServiceClient.ReservationState.ABORTED;
+				}
+				else
+				{
+					// Pick next tentatively booked slot and send out precommit messages
+					SendPreCommitMessage (res, res.m_slotNumberList[0]);
+				}
 				
+				// TODO:send everyone abort messages.
 			}
 			else
 			{
-				
+				// Abort the reservation entry for this particular slot.
+				ReservationAbortCohort (reservationSequenceNumber, s);
+	
 			}
 			// else
 			// clear up data structures

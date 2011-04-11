@@ -111,6 +111,7 @@ namespace client
 			m_client1.Reserve (description, userlist, slotlist);
 			}
 			
+			System.Threading.Thread.Sleep (5000);
 		}
 		
 		
