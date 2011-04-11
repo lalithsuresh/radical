@@ -122,7 +122,7 @@ namespace client
 		// All client side APIs are listed belowS
 		
 		public bool Connect () 
-		{
+		{			
 			return m_connectionServiceClient.Connect ();
 		}
 		

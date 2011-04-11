@@ -40,13 +40,14 @@ namespace client
 			m_client.m_sendReceiveMiddleLayer.Send (m);
 		} 
 		
-		public void SendInfoMsgToPuppetMaster (string message) 
+		public void SendInfoMsgToPuppetMaster (string message, params object[] args) 
 		{
 			Message m = new Message ();
 			m.SetMessageType ("puppet_info");
 			m.SetSourceUserName (m_client.UserName);
 			m.SetDestinationUsers (PUPPET_MASTER);
-			m.PushString (message);
+			m.PushString (String.Format (message, args));
+			m_client.m_sendReceiveMiddleLayer.Send (m);
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs) 
@@ -57,7 +58,10 @@ namespace client
 			if (String.Compare (type, "connect", true) == 0)
 			{
 				DebugInfo ("Puppet Master says: Connect");
-				m_client.Connect ();
+				if (m_client.Connect ()) 
+				{					
+					SendInfoMsgToPuppetMaster ("{0} connected", m_client.UserName);
+				}
 			}
 			else if (String.Compare (type, "disconnect", true) == 0)
 			{
@@ -72,7 +76,7 @@ namespace client
 				
 				List<string> userlist = BuildList (userstringlist);
 				List<string> slotlist = BuildList (slotstringlist);
-				DebugInfo ("Puppet Master says: Reserve ({0} {1} {2})", 
+				DebugInfo ("Puppet Master says: Reserve (Description: {0} Users: {1} Slots: {2})", 
 				           description, userstringlist, slotstringlist);		
 				// m_client.Reserve (description, userlist, slotlist);
 			}

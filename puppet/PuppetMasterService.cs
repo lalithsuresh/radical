@@ -43,11 +43,7 @@ namespace puppet
 			{
 				DebugLogic ("No such client registered at puppet master: {0}", instruction.ApplyToUser);
 				return false;
-			}
-			
-			DebugLogic ("Commanding client {0} to {1}", 
-			            instruction.ApplyToUser, 
-			            instruction.Type);
+			}		
 			
 			Message m = new Message ();
 			m.SetSourceUserName ("puppetmaster");
@@ -78,12 +74,14 @@ namespace puppet
 			
 			if (m.GetMessageType ().Equals ("puppet_register")) 
 			{
-				DebugLogic ("Registering user {0} for remote control.", m.GetSourceUserName ());
+				string msg = String.Format ("Registering user {0} for remote control.", m.GetSourceUserName ());
+				m_puppetMaster.NotifySubscribers (msg);
 				Clients.Add(m.GetSourceUserName (), m.GetSourceUri ());
 			} 
 			else if (m.GetMessageType ().Equals ("puppet_info")) 
 			{
-				DebugInfo ("PuppetInfo [{0}] {1}", m.GetSourceUserName (), m.PopString ());
+				string msg = String.Format ("PuppetInfo [{0}] {1}", m.GetSourceUserName (), m.PopString ());
+				m_puppetMaster.NotifySubscribers (msg);
 			}
 			else
 			{

@@ -89,14 +89,14 @@ namespace puppet
 			if (InstructionSet.Count > 0)
 			{
 				PuppetInstruction instruction = InstructionSet.Dequeue ();
-				new NotificationEventArgs (String.Format ("{0} {1}", instruction.Type, 
-				                                          instruction.ApplyToUser));
+				NotifySubscribers (String.Format ("{0} {1}", instruction.Type, instruction.ApplyToUser));
 				m_puppetMasterService.CommandClient (instruction);
 			} 
 			else 
 			{
-				new NotificationEventArgs ("Instruction queue is empty.");
+				NotifySubscribers ("Instruction queue is empty.");
 			}
+						
 		}		
 		
 		public void Play () 
@@ -117,6 +117,14 @@ namespace puppet
 		public void RegisterNotificationSubscriber (ReceiveNotificationsCallbackType cb)
 		{
 			m_notificationCallback = cb;
+		}
+		
+		public void NotifySubscribers (string msg) 
+		{
+			if (!String.IsNullOrEmpty (msg)) 
+			{
+				m_notificationCallback(new NotificationEventArgs (msg));
+			}
 		}
 	}
 }

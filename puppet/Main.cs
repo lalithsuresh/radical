@@ -20,24 +20,22 @@ namespace puppet
 				Environment.Exit (0);
 			
 			PuppetMaster puppetMaster = new PuppetMaster();
-			puppetMaster.LoadConfig (args[0]);
+			puppetMaster.LoadConfig (args[0]);			
 			
-			
+			// load instructions
 			PuppetConfigurationReader configreader = new PuppetConfigurationReader ();
 			configreader.LoadFile (args[1]);
 			puppetMaster.InstructionSet = configreader.ParseAllInstructions ();	
 						
 			puppetMaster.InitPuppetMaster ();
-			//puppetMaster.Play ();
-			
 			
 			// initiate gui
 			Application.Init ();		
 			MainWindow win = new MainWindow ();
-			win.SetPuppetMaster(puppetMaster);
-			
+			win.SetPuppetMaster(puppetMaster);			
 			win.Show ();
 			Application.Run ();
+			
 			
 			
 			// terminate gracefully
