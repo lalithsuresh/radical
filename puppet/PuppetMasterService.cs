@@ -73,9 +73,9 @@ namespace puppet
 			Message m = eventargs.m_message;								
 			
 			if (m.GetMessageType ().Equals ("puppet_register")) 
-			{
-				string msg = String.Format ("Registering user {0} for remote control.", m.GetSourceUserName ());
-				m_puppetMaster.NotifySubscribers (msg);
+			{				
+				string msg = String.Format ("REGISTERED {0} for remote control.", m.GetSourceUserName ());				
+				m_puppetMaster.NotifySubscribers (msg, m.GetSourceUserName ());
 				Clients.Add(m.GetSourceUserName (), m.GetSourceUri ());
 			} 
 			else if (m.GetMessageType ().Equals ("puppet_info")) 

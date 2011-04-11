@@ -121,9 +121,14 @@ namespace puppet
 		
 		public void NotifySubscribers (string msg) 
 		{
-			if (!String.IsNullOrEmpty (msg)) 
+			NotifySubscribers (msg, null);
+		}
+		
+		public void NotifySubscribers (string msg, string username) 
+		{
+			if (!String.IsNullOrEmpty (msg) || !String.IsNullOrEmpty (username)) 
 			{
-				m_notificationCallback(new NotificationEventArgs (msg));
+				m_notificationCallback (new NotificationEventArgs (msg, username));
 			}
 		}
 	}

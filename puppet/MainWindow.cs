@@ -50,9 +50,16 @@ public partial class MainWindow : Gtk.Window
 	
 	public void NotificationUpdate (puppet.NotificationEventArgs msg) 
 	{	
-		if (msg.Notification.StartsWith ("CONNECT")) 
+		if (msg.UserName != null) 
 		{
-			m_userStore.AppendValues(msg.Notification);
+			if (msg.Notification.StartsWith ("REGISTERED")) 
+			{
+				m_userStore.AppendValues(msg.UserName);
+			}
+			else if (msg.Notification.StartsWith ("DISCONNECT")) 
+			{				
+				// TODO: don't know how to remove from tree view
+			}
 		}
 		TextIter iterator = textMain.Buffer.EndIter;
 		textMain.Buffer.Insert(ref iterator, String.Format ("\n{0}", msg.Notification));
