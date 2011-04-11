@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using common;
 using comm;
 
@@ -56,6 +57,9 @@ namespace puppet
 			switch (instruction.Type) 
 			{
 			case PuppetInstructionType.RESERVATION: 
+				m.PushString (BuildStringList (instruction.Slots));
+				m.PushString (BuildStringList (instruction.Users));
+				m.PushString (instruction.Description);
 				m.PushString (instruction.Type.ToString ());
 				break;				
 			default:
@@ -79,12 +83,29 @@ namespace puppet
 			} 
 			else if (m.GetMessageType ().Equals ("puppet_info")) 
 			{
-				DebugInfo ("[{0}] - {1}", m.GetSourceUserName (), m.PopString ());
+				DebugInfo ("PuppetInfo [{0}] {1}", m.GetSourceUserName (), m.PopString ());
 			}
 			else
 			{
 				DebugLogic ("Received unknown message."); 
 			}
+		}
+		
+		private string BuildStringList (List<string> list)  
+		{
+			StringBuilder builder = new StringBuilder ();
+			
+			for (int i = 0; i < list.Count; i++) 
+			{
+				builder.Append (list[i]);		
+				
+				if (i < list.Count-1) 
+				{
+					builder.Append (",");
+				}
+			}					
+			
+			return builder.ToString ();
 		}
 	}
 }

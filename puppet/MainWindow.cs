@@ -43,6 +43,13 @@ public partial class MainWindow : Gtk.Window
 		textMain.Buffer.Text = msg.Notification;
 	}
 	
+	protected virtual void OnButtonExitClicked (object sender, System.EventArgs e)
+	{
+		m_puppetMaster.Shutdown ();
+		Application.Quit ();	
+	}
+	
+	
 	
 	
 }

@@ -105,5 +105,6 @@ public partial class MainWindow {
         this.DeleteEvent += new Gtk.DeleteEventHandler(this.OnDeleteEvent);
         this.buttonStep.Clicked += new System.EventHandler(this.OnButtonStepClicked);
         this.buttonPlay.Clicked += new System.EventHandler(this.OnButtonPlayClicked);
+        this.buttonExit.Clicked += new System.EventHandler(this.OnButtonExitClicked);
     }
 }

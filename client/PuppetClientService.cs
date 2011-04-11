@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using common;
 using comm;
 
@@ -51,24 +52,47 @@ namespace client
 		public void Receive (ReceiveMessageEventArgs eventargs) 
 		{
 			Message m = eventargs.m_message;
-			string type = m.GetMessageType ();
+			string type = m.PopString ();				
 			
-			if (type.Equals ("connect"))
+			if (String.Compare (type, "connect", true) == 0)
 			{
-				DebugInfo ("Got connect command from Puppet Master");
+				DebugInfo ("Puppet Master says: Connect");
+				m_client.Connect ();
 			}
-			else if (type.Equals ("disconnect"))
+			else if (String.Compare (type, "disconnect", true) == 0)
 			{
-				DebugInfo ("Got disconnect command from Puppet Master");
+				DebugInfo ("Puppet Master says: Disconnect");
+				m_client.Disconnect ();
 			}
-			else if (type.Equals ("reservation")) 
-			{
-				DebugInfo ("Got reservation command from Puppet Master");				
+			else if (String.Compare (type, "reservation", true) == 0) 
+			{				
+				string description = m.PopString ();
+				string userstringlist = m.PopString ();
+				string slotstringlist = m.PopString ();
+				
+				List<string> userlist = BuildList (userstringlist);
+				List<string> slotlist = BuildList (slotstringlist);
+				DebugInfo ("Puppet Master says: Reserve ({0} {1} {2})", 
+				           description, userstringlist, slotstringlist);		
+				// m_client.Reserve (description, userlist, slotlist);
 			}
-			else if (type.Equals ("readCalendar")) 
+			else if (String.Compare (type, "readcalendar", true) == 0) 
 			{
-				DebugInfo ("Got readCalendar command from Puppet Master");
+				DebugInfo ("Puppet Master says: ReadCalendar");
+				// TODO implement read calendar interface
 			}
 		}
+		
+		private List<string> BuildList (string stringlist) 
+		{
+			List<string> list = new List<string> ();
+			string[] items = stringlist.Split (',');
+			for (int i = 0; i < items.Length; i++) 
+			{
+				list.Add (items[i].Trim ());
+			}
+			return list;
+		}
+				
 	}
 }
