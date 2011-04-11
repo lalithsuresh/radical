@@ -33,14 +33,14 @@ public partial class MainWindow : Gtk.Window
 	
 	protected virtual void OnButtonPlayClicked (object sender, System.EventArgs e)
 	{
-		textMain.Buffer.Text += "\nrunning...";
+		textMain.Buffer.Text = "running...";
 		
 		m_puppetMaster.Play ();
 	}
 	
 	public void NotificationUpdate (puppet.NotificationEventArgs msg) 
 	{
-		textMain.Buffer.Text += String.Format ("\n {0} ", msg);
+		textMain.Buffer.Text = msg.Notification;
 	}
 	
 	
