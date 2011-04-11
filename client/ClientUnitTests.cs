@@ -111,6 +111,11 @@ namespace client
 			m_client1.Reserve (description, userlist, slotlist);
 			}
 			
+			// Keep this high enough such that the coordinator is
+			// still running while the reservation protocol is in
+			// progress. Else, the unit tests go upto completion,
+			// terminates the coordinator, and the cohorts respond
+			// to a ghost.
 			System.Threading.Thread.Sleep (5000);
 		}
 		
