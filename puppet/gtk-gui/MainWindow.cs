@@ -14,9 +14,17 @@ public partial class MainWindow {
     
     private Gtk.VBox vbox1;
     
+    private Gtk.Label label1;
+    
+    private Gtk.HBox hbox2;
+    
     private Gtk.ScrolledWindow GtkScrolledWindow;
     
     private Gtk.TextView textMain;
+    
+    private Gtk.ScrolledWindow GtkScrolledWindow1;
+    
+    private Gtk.TreeView treeViewUsers;
     
     private Gtk.HBox hbox1;
     
@@ -30,13 +38,25 @@ public partial class MainWindow {
         Stetic.Gui.Initialize(this);
         // Widget MainWindow
         this.Name = "MainWindow";
-        this.Title = Mono.Unix.Catalog.GetString("MainWindow");
+        this.Title = Mono.Unix.Catalog.GetString("Radical PuppetMaster");
         this.WindowPosition = ((Gtk.WindowPosition)(4));
         // Container child MainWindow.Gtk.Container+ContainerChild
         this.vbox1 = new Gtk.VBox();
-        this.vbox1.Name = "vbox1";
         this.vbox1.Spacing = 6;
         // Container child vbox1.Gtk.Box+BoxChild
+        this.label1 = new Gtk.Label();
+        this.label1.Name = "label1";
+        this.label1.LabelProp = Mono.Unix.Catalog.GetString("One legendary gui... logs and stuff");
+        this.vbox1.Add(this.label1);
+        Gtk.Box.BoxChild w1 = ((Gtk.Box.BoxChild)(this.vbox1[this.label1]));
+        w1.Position = 0;
+        w1.Expand = false;
+        w1.Fill = false;
+        // Container child vbox1.Gtk.Box+BoxChild
+        this.hbox2 = new Gtk.HBox();
+        this.hbox2.Name = "hbox2";
+        this.hbox2.Spacing = 6;
+        // Container child hbox2.Gtk.Box+BoxChild
         this.GtkScrolledWindow = new Gtk.ScrolledWindow();
         this.GtkScrolledWindow.Name = "GtkScrolledWindow";
         this.GtkScrolledWindow.ShadowType = ((Gtk.ShadowType)(1));
@@ -49,9 +69,24 @@ public partial class MainWindow {
         this.textMain.WrapMode = ((Gtk.WrapMode)(2));
         this.textMain.Indent = 2;
         this.GtkScrolledWindow.Add(this.textMain);
-        this.vbox1.Add(this.GtkScrolledWindow);
-        Gtk.Box.BoxChild w2 = ((Gtk.Box.BoxChild)(this.vbox1[this.GtkScrolledWindow]));
-        w2.Position = 0;
+        this.hbox2.Add(this.GtkScrolledWindow);
+        Gtk.Box.BoxChild w3 = ((Gtk.Box.BoxChild)(this.hbox2[this.GtkScrolledWindow]));
+        w3.Position = 0;
+        // Container child hbox2.Gtk.Box+BoxChild
+        this.GtkScrolledWindow1 = new Gtk.ScrolledWindow();
+        this.GtkScrolledWindow1.Name = "GtkScrolledWindow1";
+        this.GtkScrolledWindow1.ShadowType = ((Gtk.ShadowType)(1));
+        // Container child GtkScrolledWindow1.Gtk.Container+ContainerChild
+        this.treeViewUsers = new Gtk.TreeView();
+        this.treeViewUsers.CanFocus = true;
+        this.treeViewUsers.Name = "treeViewUsers";
+        this.GtkScrolledWindow1.Add(this.treeViewUsers);
+        this.hbox2.Add(this.GtkScrolledWindow1);
+        Gtk.Box.BoxChild w5 = ((Gtk.Box.BoxChild)(this.hbox2[this.GtkScrolledWindow1]));
+        w5.Position = 1;
+        this.vbox1.Add(this.hbox2);
+        Gtk.Box.BoxChild w6 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox2]));
+        w6.Position = 1;
         // Container child vbox1.Gtk.Box+BoxChild
         this.hbox1 = new Gtk.HBox();
         this.hbox1.Name = "hbox1";
@@ -63,10 +98,10 @@ public partial class MainWindow {
         this.buttonStep.UseUnderline = true;
         this.buttonStep.Label = "Step";
         this.hbox1.Add(this.buttonStep);
-        Gtk.Box.BoxChild w3 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonStep]));
-        w3.Position = 0;
-        w3.Expand = false;
-        w3.Fill = false;
+        Gtk.Box.BoxChild w7 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonStep]));
+        w7.Position = 0;
+        w7.Expand = false;
+        w7.Fill = false;
         // Container child hbox1.Gtk.Box+BoxChild
         this.buttonPlay = new Gtk.Button();
         this.buttonPlay.CanFocus = true;
@@ -74,11 +109,11 @@ public partial class MainWindow {
         this.buttonPlay.UseUnderline = true;
         this.buttonPlay.Label = Mono.Unix.Catalog.GetString("Play");
         this.hbox1.Add(this.buttonPlay);
-        Gtk.Box.BoxChild w4 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonPlay]));
-        w4.Position = 1;
-        w4.Expand = false;
-        w4.Fill = false;
-        w4.Padding = ((uint)(5));
+        Gtk.Box.BoxChild w8 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonPlay]));
+        w8.Position = 1;
+        w8.Expand = false;
+        w8.Fill = false;
+        w8.Padding = ((uint)(5));
         // Container child hbox1.Gtk.Box+BoxChild
         this.buttonExit = new Gtk.Button();
         this.buttonExit.CanFocus = true;
@@ -86,15 +121,15 @@ public partial class MainWindow {
         this.buttonExit.UseUnderline = true;
         this.buttonExit.Label = Mono.Unix.Catalog.GetString("Exit");
         this.hbox1.Add(this.buttonExit);
-        Gtk.Box.BoxChild w5 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonExit]));
-        w5.Position = 2;
-        w5.Expand = false;
-        w5.Fill = false;
+        Gtk.Box.BoxChild w9 = ((Gtk.Box.BoxChild)(this.hbox1[this.buttonExit]));
+        w9.Position = 2;
+        w9.Expand = false;
+        w9.Fill = false;
         this.vbox1.Add(this.hbox1);
-        Gtk.Box.BoxChild w6 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox1]));
-        w6.Position = 2;
-        w6.Expand = false;
-        w6.Fill = false;
+        Gtk.Box.BoxChild w10 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox1]));
+        w10.Position = 2;
+        w10.Expand = false;
+        w10.Fill = false;
         this.Add(this.vbox1);
         if ((this.Child != null)) {
             this.Child.ShowAll();
