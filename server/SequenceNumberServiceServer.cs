@@ -1,12 +1,14 @@
 using System;
 using comm;
+using common;
 using System.Threading;
 using System.Runtime.CompilerServices;
 
 namespace server
 {
-	public class SequenceNumberServiceServer : IServiceServer
-	{
+	public class SequenceNumberServiceServer : PadicalObject, IServiceServer
+	{		
+		
 		private Server m_server; 
 		private long m_sequenceNumber; 
 		
@@ -25,6 +27,15 @@ namespace server
 			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sequencenumber", new ReceiveCallbackType (Receive));
 		}
 		
+		public void SetSequenceNumber (long number) 
+		{
+			if (!m_server.m_replicationService.IsMaster && m_sequenceNumber < number) 
+			{
+				DebugInfo ("Updating sequence number on replication request. Old: {0} New: {1}",
+				           m_sequenceNumber, number);
+				m_sequenceNumber = number;
+			}
+		}
 		
 		/**
 		 * Get a unique sequence number
@@ -33,6 +44,7 @@ namespace server
 		 */
 		public long GetSequenceNumber ()
 		{
+			// TODO: check if I am master and should reply to this, or forward
 			lock (this)
 			{
 				m_sequenceNumber++;
@@ -51,11 +63,15 @@ namespace server
 			response.SetSourceUri (m_server.UserName);
 			response.SetDestinationUsers (message.GetSourceUserName ());
 			response.SetMessageType ("sequencenumber");
+						
+			long nextSequenceNumber = GetSequenceNumber ();
+			response.PushString (nextSequenceNumber.ToString ());
 			
-			// In future, this will probably be a blocking call
-			response.PushString (GetSequenceNumber ().ToString ());
+			// this is implictly a blocking call
+			m_server.m_replicationService.ReplicateSequenceNumber (nextSequenceNumber);
 			
 			m_server.m_sendReceiveMiddleLayer.Send (response);
-		}
+		}		
+				
 	}
 }

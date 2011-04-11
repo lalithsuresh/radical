@@ -9,7 +9,8 @@ namespace server
 	{		
 		// Services Layer components
 		private UserTableServiceServer m_userTableService; 
-		private SequenceNumberServiceServer m_sequenceNumberService;
+		public SequenceNumberServiceServer m_sequenceNumberService;
+		public ReplicationServiceServer m_replicationService;
 		
 		// Communication Layer components
 		public SendReceiveMiddleLayer m_sendReceiveMiddleLayer; 
@@ -42,9 +43,9 @@ namespace server
 			UserName = ConfigReader.GetConfigurationValue ("username");
 			ServerPort = Int32.Parse (ConfigReader.GetConfigurationValue ("serverport"));
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1"));
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2"));
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3"));
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
 		}
 		
 		public void InitServer () 
@@ -65,9 +66,15 @@ namespace server
 			m_sequenceNumberService = new SequenceNumberServiceServer ();
 			m_sequenceNumberService.SetServer (this);
 			
-			// TODO: Determine current master
-			// (now it's only me) 
-			m_userTableService.UserConnect ("server1", ServerList [0]);
+			m_replicationService = new ReplicationServiceServer ();
+			m_replicationService.SetServer (this);
+			
+			// Register servers
+			m_userTableService.UserConnect ("server1", ServerList [0]);	
+			m_userTableService.UserConnect ("server2", ServerList [1]);	
+			m_userTableService.UserConnect ("server3", ServerList [2]);	
+			
+			m_replicationService.Start ();
 		}
 		
 		/**

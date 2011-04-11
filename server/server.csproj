@@ -40,6 +40,7 @@
     <Compile Include="IServiceServer.cs" />
     <Compile Include="SequenceNumberServiceServer.cs" />
     <Compile Include="UserTableServiceServer.cs" />
+    <Compile Include="ReplicationServiceServer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
