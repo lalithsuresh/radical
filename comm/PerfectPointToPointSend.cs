@@ -104,8 +104,7 @@ namespace comm
 			{
 				AsyncCallback cb = new AsyncCallback(MyCallBack);
                 RemoteAsyncDelegate d = new RemoteAsyncDelegate (p2p_send.Deliver);
-                IAsyncResult ar = d.BeginInvoke(m, cb, null);
-				//p2p_send.Deliver (m);
+				d.BeginInvoke(m, cb, null);
 				
 				e.WaitOne ();
 			}
