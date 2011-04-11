@@ -40,6 +40,11 @@ namespace client
 				{
 					// Return server 1. Will be changed later.
 					return m_client.ServerList [0]; 
+				} 
+				else if (user.Equals ("PUPPETMASTER"))
+				{
+					DebugUncond ("Returning address for puppet master {0}", m_client.PuppetMasterAddress);
+					return m_client.PuppetMasterAddress;
 				}
 				
 				// If not SERVER or in cache, create a new

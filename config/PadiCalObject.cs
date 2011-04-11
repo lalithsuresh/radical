@@ -21,7 +21,7 @@ namespace common
 				m_debugLevel = debuglevel;
 			}
 			else
-			{
+			{				
 				m_debugLevel = ""; // No debugging for this object
 			}
 		}

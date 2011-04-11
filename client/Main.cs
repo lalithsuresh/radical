@@ -26,9 +26,13 @@ namespace client
 			
 			
 			//FIXME: Remove later
+
+			
 			client.Connect ();
 			
+			/*
 			//System.Threading.Thread.Sleep (100);
+
 			if (client.UserName.Equals ("testclient1"))
 			{
 				
@@ -81,8 +85,8 @@ namespace client
 				slotlist.Add (8);
 				client.Reserve (description, userlist, slotlist);
 				}
-				*/
 			}
+			*/
 			
 			Console.ReadLine();			
 			
@@ -90,3 +94,4 @@ namespace client
 	}
 }
 
+   

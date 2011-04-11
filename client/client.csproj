@@ -45,6 +45,7 @@
     <Compile Include="ConnectionServiceClient.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="ClientUnitTests.cs" />
+    <Compile Include="PuppetClientService.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
