@@ -15,8 +15,8 @@ echo "Server1: $SERVER1, Server2: $SERVER2, Server3: $SERVER3"
 echo "Press Enter to exit."
 
 read -a foo
-kill $SERVER1
-kill $SERVER2
-kill $SERVER3
+#kill $SERVER1
+#kill $SERVER2
+#kill $SERVER3
 
 echo "Stopping all servers."
