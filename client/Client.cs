@@ -90,7 +90,7 @@ namespace client
 			
 			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
 			
-			Console.WriteLine ("My username {0}", UserName);
+			//Console.WriteLine ("My username {0}", UserName);
 		}
 		
 		// All client side APIs are listed belowS

@@ -23,20 +23,21 @@ namespace client
 			                                                           new ReceiveCallbackType (Receive));
 		}
 		
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public int RequestSequenceNumber ()
 		{
-			Message m = new Message ();
-			m.SetSourceUserName (m_client.UserName);
-			m.SetDestinationUsers ("SERVER");
-			m.SetMessageType ("sequencenumber");
-			
-			m_client.m_sendReceiveMiddleLayer.Send (m);
-			//This thread will block here until the reset event is sent.
-			oSignalEvent.WaitOne();
-			oSignalEvent.Reset ();
-			
-			return m_sequenceNumberToReturn;
+			lock (this){
+				Message m = new Message ();
+				m.SetSourceUserName (m_client.UserName);
+				m.SetDestinationUsers ("SERVER");
+				m.SetMessageType ("sequencenumber");
+				
+				m_client.m_sendReceiveMiddleLayer.Send (m);
+				//This thread will block here until the reset event is sent.
+				oSignalEvent.WaitOne();
+				oSignalEvent.Reset ();
+				
+				return m_sequenceNumberToReturn;
+			}
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)

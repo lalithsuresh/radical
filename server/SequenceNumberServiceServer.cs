@@ -31,11 +31,13 @@ namespace server
 		 * TODO: Talk with all servers before doing
 		 * this.
 		 */
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public long GetSequenceNumber ()
 		{
-			m_sequenceNumber++;
-			return m_sequenceNumber;
+			lock (this)
+			{
+				m_sequenceNumber++;
+				return m_sequenceNumber;
+			}
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
