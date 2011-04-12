@@ -40,7 +40,7 @@ namespace server
 			// re-enter.
 			if (!m_usertable.ContainsKey (username))
 			{
-				Console.WriteLine ("User has connected {0},{1}", username, uri);
+				DebugLogic ("Adds [{0},{1}] to database", username, uri);
 				m_usertable.Add(username, uri);
 			}
 		}
@@ -57,6 +57,9 @@ namespace server
 				DebugFatal ("Disconnect message received for non-registered user");
 			}
 			
+			// Remove user from DB
+			DebugLogic ("Removes [{0}] from database", username);
+				
 			m_usertable.Remove(username);
 		}
 		
@@ -99,8 +102,7 @@ namespace server
 				string user_request = m.PopString ();
 				string uri = GetUriForUser (user_request);
 				
-				Console.WriteLine ("Answering lookup for {0} with {1}", 
-				            user_request, uri);
+				DebugInfo ("Answering lookup for {0} with {1}", user_request, uri);
 				
 				Message response = new Message ();
 				response.SetMessageType ("lookup");
@@ -111,8 +113,7 @@ namespace server
 			}
 			else if (request_type.Equals ("connect")) 
 			{
-				// add user to DB
-				DebugLogic ("Adds [{0},{1}] to database", message_source, message_source_uri);
+				// add user to DB				
 				UserConnect (message_source, message_source_uri);
 				
 				// Send an ACK or the client starves to death
@@ -127,11 +128,8 @@ namespace server
 				SendReply (ack_message);
 			}
 			else if (request_type.Equals ("disconnect")) 
-			{
-				// Remove user from DB
-				DebugLogic ("Removes [{0},{1}] from database", message_source, message_source_uri);
-				
-				// remove from replicas 
+			{				
+				// remove from replicas (implicit block until 1 ack is received)
 				m_server.m_replicationService.ReplicateUserDisconnect (message_source);
 				
 				UserDisconnect (message_source);

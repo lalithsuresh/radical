@@ -13,10 +13,7 @@ namespace server
 		// members
 		private Server m_server;
 		private List<string> m_replicationList;
-		
-		// buffers
-		private List<string> m_pendingReplicationAcks;
-		
+				
 		// properties
 		public bool IsMaster {
 			get 
@@ -31,8 +28,7 @@ namespace server
 		}
 
 		public ReplicationServiceServer ()
-		{			
-			m_pendingReplicationAcks = new List<string> ();
+		{						
 		}
 		
 		public void SetServer (Server server) 
@@ -112,7 +108,7 @@ namespace server
 				else if (subtype.Equals ("sequencenumber_ack")) 
 				{							
 					DebugLogic ("ACK replication request: SequenceNumber");
-					m_pendingReplicationAcks.Remove (m.GetSourceUserName ());					
+								
 					m_oSignalEvent.Set ();					
 				}
 #endregion
@@ -127,7 +123,6 @@ namespace server
 				else if (subtype.Equals ("user_connect_ack"))
 				{
 					DebugLogic ("ACK replication request: UserConnect");
-					m_pendingReplicationAcks.Remove (m.GetSourceUserName ());
 					m_oSignalEvent.Set ();
 				}
 #endregion
@@ -141,7 +136,6 @@ namespace server
 				else if (subtype.Equals ("user_connect_ack"))
 				{
 					DebugLogic ("ACK replication request: UserDisconnect");
-					m_pendingReplicationAcks.Remove (m.GetSourceUserName ());
 					m_oSignalEvent.Set ();
 				}
 #endregion
@@ -159,15 +153,15 @@ namespace server
 		
 		private void DistributeReplicationMessage (Message m) 
 		{
-			foreach (string replicationServer in m_replicationList)
+			lock (this) 
 			{
-				m.SetDestinationUsers (replicationServer);
-				
-				m_pendingReplicationAcks.Add (replicationServer); // possible deadlock here
-																  // need unique tuple
-				m_server.m_sendReceiveMiddleLayer.Send (m);
+				foreach (string replicationServer in m_replicationList)
+				{
+					m.SetDestinationUsers (replicationServer);
+					m_server.m_sendReceiveMiddleLayer.Send (m);
+				}
+				Block ();
 			}
-			Block ();
 		}
 
 		private void HandleUserConnectReplication (string username, string uri, string replyTo)
@@ -212,6 +206,20 @@ namespace server
 			//This thread will block here until the reset event is sent.
 			m_oSignalEvent.WaitOne();
 			m_oSignalEvent.Reset ();
+		}
+		
+		
+	}
+		
+	class PendingAck
+	{
+		public string ReplicationServer {
+			get;
+			set;
+		}
+		public string Identifier {
+			get;
+			set;
 		}
 	}
 }
