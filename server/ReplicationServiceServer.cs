@@ -210,16 +210,5 @@ namespace server
 		
 		
 	}
-		
-	class PendingAck
-	{
-		public string ReplicationServer {
-			get;
-			set;
-		}
-		public string Identifier {
-			get;
-			set;
-		}
-	}
+
 }
