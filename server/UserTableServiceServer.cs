@@ -121,12 +121,19 @@ namespace server
 				ack_message.SetDestinationUsers (message_source);
 				ack_message.SetSourceUserName (m_server.UserName);
 				
+				// replicate message (implicit block)
+				m_server.m_replicationService.ReplicateUserConnect (message_source, message_source_uri);
+								
 				SendReply (ack_message);
 			}
 			else if (request_type.Equals ("disconnect")) 
 			{
 				// Remove user from DB
 				DebugLogic ("Removes [{0},{1}] from database", message_source, message_source_uri);
+				
+				// remove from replicas 
+				m_server.m_replicationService.ReplicateUserDisconnect (message_source);
+				
 				UserDisconnect (message_source);
 				
 				// TODO: Find a way to get an ACK across
@@ -139,6 +146,15 @@ namespace server
 		private void SendReply (Message m) 
 		{
 			m_server.m_sendReceiveMiddleLayer.Send (m);
+		}
+		
+		private void PrintUserTable ()
+		{
+			Console.WriteLine ("UserTable:");
+			foreach (string user in m_usertable.Keys) 
+			{
+				Console.WriteLine ("> {0}\t {1}", user, m_usertable[user]);
+			}
 		}
 	}
 }

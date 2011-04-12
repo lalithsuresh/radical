@@ -8,7 +8,7 @@ namespace server
 	public class Server : PadicalObject
 	{		
 		// Services Layer components
-		private UserTableServiceServer m_userTableService; 
+		public UserTableServiceServer m_userTableService; 
 		public SequenceNumberServiceServer m_sequenceNumberService;
 		public ReplicationServiceServer m_replicationService;
 		

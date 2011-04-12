@@ -28,7 +28,7 @@ namespace client
 			//FIXME: Remove later
 
 			
-			client.Connect ();
+			//client.Connect ();
 			
 			/*
 			//System.Threading.Thread.Sleep (100);
