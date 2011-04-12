@@ -43,8 +43,7 @@ namespace client
 		}
 		
 		public Client ()
-		{
-			LoadConfig ();
+		{			
 		}
 		
 		public void LoadConfig () 

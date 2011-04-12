@@ -14,6 +14,8 @@ namespace client
 		 */
 		public static void Main (string[] args)
 		{
+			Console.WriteLine ("args: {0}", args.Length);
+			
 			// some sanity checks
 			if (args.Length < 1) 
 			{
