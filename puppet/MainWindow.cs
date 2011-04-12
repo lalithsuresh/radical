@@ -32,7 +32,7 @@ public partial class MainWindow : Gtk.Window
 	}
 		
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
-	{
+	{		
 		Application.Quit ();
 		a.RetVal = true;
 	}
@@ -58,7 +58,7 @@ public partial class MainWindow : Gtk.Window
 			}
 			else if (msg.Notification.StartsWith ("DISCONNECT")) 
 			{				
-				// TODO: don't know how to remove from tree view
+				// TODO: mark user as disconnected
 			}
 		}
 		TextIter iterator = textMain.Buffer.EndIter;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using common;
 using comm;
@@ -10,6 +11,13 @@ namespace puppet
 	public class PuppetMasterService : PadicalObject
 	{
 		private PuppetMaster m_puppetMaster; 
+		private const int START_PORT = 12000;
+		private int m_currentPortOffset;
+		
+		public Dictionary<string, Process> SpawnedClients {
+			get;
+			set;
+		}
 		
 		public Dictionary<string, string> Clients {
 			get;
@@ -19,6 +27,8 @@ namespace puppet
 		public PuppetMasterService ()
 		{
 			Clients = new Dictionary<string, string> ();
+			SpawnedClients = new Dictionary<string, Process> ();
+			m_currentPortOffset = 0;
 		}
 		
 		public void SetPuppetMaster (PuppetMaster master)
@@ -41,7 +51,15 @@ namespace puppet
 		{
 			if (!Clients.ContainsKey(instruction.ApplyToUser)) 
 			{
-				DebugLogic ("No such client registered at puppet master: {0}", instruction.ApplyToUser);
+				if (instruction.Type == PuppetInstructionType.CONNECT)
+				{
+					DebugLogic ("Starting a new client: {0}", instruction.ApplyToUser);
+					SpawnClient (instruction.ApplyToUser);
+					// client will register with puppet master when initing, safe to return
+					return true;
+				}
+				
+				DebugLogic ("No such user is connected: {0}", instruction.ApplyToUser);
 				return false;
 			}		
 			
@@ -76,7 +94,7 @@ namespace puppet
 			{				
 				string msg = String.Format ("REGISTERED {0} for remote control.", m.GetSourceUserName ());				
 				m_puppetMaster.NotifySubscribers (msg, m.GetSourceUserName ());
-				Clients.Add(m.GetSourceUserName (), m.GetSourceUri ());
+				HandleClientRegistration (m.GetSourceUserName (), m.GetSourceUri ());				
 			} 
 			else if (m.GetMessageType ().Equals ("puppet_info")) 
 			{
@@ -87,6 +105,34 @@ namespace puppet
 			{
 				DebugLogic ("Received unknown message."); 
 			}
+		}
+		
+		private void HandleClientRegistration (string username, string uri)
+		{
+			Clients.Add(username, uri);
+		}
+		
+		private void SpawnClient (string username) 
+		{
+			Process client = new Process ();
+			client.StartInfo.Verb = "client.exe";
+			client.StartInfo.FileName = m_puppetMaster.ClientExecutable; 
+			client.StartInfo.Arguments = String.Format ("{0} {1} {2}", username, START_PORT+m_currentPortOffset, 
+			                                m_puppetMaster.GenericConfig);
+			client.StartInfo.UseShellExecute = false;
+			
+			try 
+			{
+				client.Start ();
+			} 
+			catch (InvalidOperationException ioe) 
+			{				
+				DebugLogic ("Could not start client: {0}\n{1}", username, ioe.Message);
+				Cleanup ();
+			}
+			
+			SpawnedClients.Add (username, client);
+			m_currentPortOffset++;
 		}
 		
 		private string BuildStringList (List<string> list)  
@@ -104,6 +150,14 @@ namespace puppet
 			}					
 			
 			return builder.ToString ();
+		}
+		
+		public void Cleanup () 
+		{
+			foreach (Process c in SpawnedClients.Values) 
+			{
+				c.Close ();
+			}
 		}
 	}
 }
