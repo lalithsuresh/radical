@@ -47,10 +47,16 @@ namespace client
 			LoadConfig ();
 		}
 		
-		public void LoadConfig ()
+		public void LoadConfig () 
 		{
-			UserName = ConfigReader.GetConfigurationValue ("username");
-			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
+			LoadConfig (ConfigReader.GetConfigurationValue ("username"),
+			            Int32.Parse (ConfigReader.GetConfigurationValue ("clientport")));
+		}
+		
+		public void LoadConfig (string username, int port)
+		{
+			UserName = username;
+			ClientPort = port;
 			ServerList = new List<string> ();
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
