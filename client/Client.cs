@@ -104,10 +104,14 @@ namespace client
 				m_puppetService.RegisterAsPuppet ();				
 			}
 			
-			/*
-			m_connectionServiceClient.Connect ();
 			
+			m_connectionServiceClient.Connect ();			
 			System.Threading.Thread.Sleep (3000);
+			DebugUncond ("I can haz sequence number... {0}", GetSequenceNumber ());
+			System.Threading.Thread.Sleep (3000);
+			m_connectionServiceClient.Disconnect ();
+			
+			/*
 			
 			DebugUncond ("lookup() returned this: {0}", m_lookupService.Lookup ("testclient1"));
 			
@@ -129,7 +133,7 @@ namespace client
 		
 		public bool Connect () 
 		{			
-			return m_connectionServiceClient.Connect ();
+			return m_connectionServiceClient.Connect ();			
 		}
 		
 		public bool Disconnect () 
@@ -146,6 +150,11 @@ namespace client
 		{
 			// TODO: Don't forget to do Sanity checks
 			m_calendarService.Reserve (description, userlist, slotlist);
+		}
+		
+		public void ReadCalendar (string username) 
+		{
+			// TODO: implement this
 		}
 	}
 }

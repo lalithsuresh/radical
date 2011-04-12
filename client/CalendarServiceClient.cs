@@ -28,11 +28,12 @@ namespace client
 		/* Given a slot number, return the slot object
 		 */
 		private Dictionary <int, Slot> m_numberToSlotMap;
-
+				
 		public CalendarServiceClient ()
 		{
 			m_activeReservationSessions = new Dictionary<int, Reservation> ();
 			m_numberToSlotMap = new Dictionary<int, Slot> ();
+		//	m_deferredSendTimer = new Timer (DeferredSend, null, 0, 5000);
 		}
 		
 		public void SetClient (Client client)
@@ -252,9 +253,9 @@ namespace client
 			reservationRequest.PushString (reservation.m_sequenceNumber.ToString ());
 			reservationRequest.PushString ("reservationrequest");			
 		
-			m_client.m_sendReceiveMiddleLayer.Send (reservationRequest);
+			SendMessage (reservationRequest);
 		}
-		
+				
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
 			lock (this)
@@ -425,7 +426,7 @@ namespace client
 						
 				DebugLogic ("Sending an ack to: {0}", src);
 	
-				m_client.m_sendReceiveMiddleLayer.Send (ack);
+				SendMessage (ack);
 				m_activeReservationSessions.Add (reservationSequenceNumber, reservation);
 			}
 			else
@@ -440,7 +441,7 @@ namespace client
 				
 				DebugLogic ("Sending a nack to: {0}", src);
 
-				m_client.m_sendReceiveMiddleLayer.Send (nack);
+				SendMessage (nack);
 			}
 		}
 		
@@ -569,7 +570,7 @@ namespace client
 			precommitMsg.PushString (s.ToString ());
 			precommitMsg.PushString (res.m_sequenceNumber.ToString ());
 			precommitMsg.PushString ("precommit");
-			m_client.m_sendReceiveMiddleLayer.Send (precommitMsg);
+			SendMessage (precommitMsg);
 			
 			res.m_acksForSlot.Clear ();
 		}
@@ -631,7 +632,7 @@ namespace client
 					
 					slot.m_lockedReservation = reservationSequenceNumber;
 					
-					m_client.m_sendReceiveMiddleLayer.Send (yes);
+					SendMessage (yes);
 				}
 				else if (slot.m_lockedReservation != -1)
 				{
@@ -686,7 +687,7 @@ namespace client
 				docommitMsg.PushString (s.ToString ());
 				docommitMsg.PushString (reservationSequenceNumber.ToString ());
 				docommitMsg.PushString ("docommit");
-				m_client.m_sendReceiveMiddleLayer.Send (docommitMsg);
+				SendMessage (docommitMsg);
 				
 				// If you have to send this, then you can commit.
 				// TODO: Handle 2/1, 1/2 deadlock.
@@ -734,7 +735,7 @@ namespace client
 				abortmsg.PushString (reservationSequenceNumber.ToString ());
 				abortmsg.PushString ("abort");
 				
-				m_client.m_sendReceiveMiddleLayer.Send (abortmsg);
+				SendMessage (abortmsg);
 				ReservationAbortCohort (i, s);
 			}
 			
@@ -779,7 +780,7 @@ namespace client
 					yes.PushString (newres.m_sequenceNumber.ToString ());
 					yes.PushString ("yes");
 							
-					m_client.m_sendReceiveMiddleLayer.Send (yes);
+					SendMessage (yes);
 				}
 				else
 				{
@@ -847,6 +848,11 @@ namespace client
 			// - if this reservation had a lock, then clear it, and promote the
 			//   next one.
 			// - else, just empty from precommit list.
+		}
+		
+		private void SendMessage (Message m)
+		{
+			m_client.m_sendReceiveMiddleLayer.Send (m);
 		}
 	}
 }

@@ -5,8 +5,6 @@ using comm;
 
 namespace client
 {
-
-
 	public class PuppetClientService : PadicalObject
 	{
 		private const string PUPPET_MASTER = "PUPPETMASTER";

@@ -54,9 +54,10 @@ namespace client
 			
 			//FIXME: Remove later
 
-			/*
-			client.Connect ();
 			
+			//client.Connect ();
+			
+			/*
 			//System.Threading.Thread.Sleep (100);
 
 			if (client.UserName.Equals ("testclient1"))
@@ -78,7 +79,7 @@ namespace client
 				client.Reserve (description, userlist, slotlist);
 				}
 				
-				
+				/*
 				// This test should book slot 2 as opposed to slot 1
 				{
 				List<string> userlist = new List<string> ();
@@ -111,9 +112,9 @@ namespace client
 				slotlist.Add (8);
 				client.Reserve (description, userlist, slotlist);
 				}
-				
 			}
 			*/
+			
 			Console.ReadLine();			
 			
 		}
@@ -126,3 +127,4 @@ namespace client
 	}
 }
 
+   
