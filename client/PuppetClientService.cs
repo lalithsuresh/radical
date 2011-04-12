@@ -23,8 +23,8 @@ namespace client
 			
 			m_client = client;
 			
-			m_client.m_sendReceiveMiddleLayer.RegisterReceiveCallback("puppetmaster", 
-			                                                          new ReceiveCallbackType(Receive));
+			m_client.m_puppetSendReceiveMiddleLayer.RegisterReceiveCallback("puppetmaster", 
+			                                        	                    new ReceiveCallbackType(Receive));
 						
 		}
 		
@@ -35,7 +35,7 @@ namespace client
 			m.SetSourceUserName (m_client.UserName);
 			m.SetDestinationUsers (PUPPET_MASTER);
 			
-			m_client.m_sendReceiveMiddleLayer.Send (m);
+			m_client.m_puppetSendReceiveMiddleLayer.Send (m);
 		} 
 		
 		public void SendInfoMsgToPuppetMaster (string message, params object[] args) 
@@ -45,7 +45,7 @@ namespace client
 			m.SetSourceUserName (m_client.UserName);
 			m.SetDestinationUsers (PUPPET_MASTER);
 			m.PushString (String.Format (message, args));
-			m_client.m_sendReceiveMiddleLayer.Send (m);
+			m_client.m_puppetSendReceiveMiddleLayer.Send (m);
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs) 

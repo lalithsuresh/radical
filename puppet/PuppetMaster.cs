@@ -79,7 +79,7 @@ namespace puppet
 			m_connectionService.SetPuppetMaster (this);
 			
 			DebugInfo ("Started puppet master on {0}", PuppetPort);			
-			m_connectionService.Connect ();
+			//m_connectionService.Connect ();
 			DebugInfo ("Puppet master registered with servers");
 			
 		}	
