@@ -118,17 +118,21 @@ namespace client
 				m_puppetService.SetClient (this);
 				m_puppetService.RegisterAsPuppet ();
 				
+				// Automatically connect when spawned
+				Connect ();
+				
 				DebugInfo ("Started puppet service");
 			}
 			
 			
+			/*
 			m_connectionServiceClient.Connect ();			
 			System.Threading.Thread.Sleep (3000);
 			DebugUncond ("I can haz sequence number... {0}", GetSequenceNumber ());
 			System.Threading.Thread.Sleep (3000);
 			m_connectionServiceClient.Disconnect ();
 			
-			/*
+			
 			
 			DebugUncond ("lookup() returned this: {0}", m_lookupService.Lookup ("testclient1"));
 			

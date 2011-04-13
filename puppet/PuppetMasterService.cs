@@ -127,8 +127,7 @@ namespace puppet
 			} 
 			catch (InvalidOperationException ioe) 
 			{				
-				DebugLogic ("Could not start client: {0}\n{1}", username, ioe.Message);
-				Cleanup ();
+				DebugLogic ("Could not start client: {0}\n{1}", username, ioe.Message);				
 			}
 			
 			SpawnedClients.Add (username, client);
@@ -156,7 +155,7 @@ namespace puppet
 		{
 			foreach (Process c in SpawnedClients.Values) 
 			{
-				c.Close ();
+				c.Kill ();
 			}
 		}
 	}

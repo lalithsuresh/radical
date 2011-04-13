@@ -55,6 +55,7 @@ public partial class MainWindow : Gtk.Window
 			if (msg.Notification.StartsWith ("REGISTERED")) 
 			{
 				m_userStore.AppendValues(msg.UserName);
+				return;
 			}
 			else if (msg.Notification.StartsWith ("DISCONNECT")) 
 			{				
