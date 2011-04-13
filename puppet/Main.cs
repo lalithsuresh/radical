@@ -37,7 +37,6 @@ namespace puppet
 			Application.Run ();					
 			
 			// terminate gracefully
-			Console.ReadLine ();
 			puppetMaster.Shutdown ();
 			Environment.Exit (0);
 		}

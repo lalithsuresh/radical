@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Messaging;
@@ -11,7 +12,8 @@ namespace comm
 {
 	public class PerfectPointToPointSend : PadicalObject
 	{ 
-		private const string CHANNEL_NAME = "Radical";
+		private string CHANNEL_NAME = "Radical";
+		private IDictionary m_channelProperties = new Hashtable ();
         public ManualResetEvent e = new ManualResetEvent(false);
 
 		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
@@ -25,6 +27,17 @@ namespace comm
 		
 		public PerfectPointToPointSend ()
 		{
+			m_channelProperties["name"] = "tcpRadical";
+			CHANNEL_NAME = "Radical";	
+		}
+		
+		public PerfectPointToPointSend (bool isPuppetChannel) 
+		{
+			if (isPuppetChannel) 
+			{				
+				m_channelProperties["name"] = "tcpPuppet";				
+				CHANNEL_NAME = "Puppet";
+			} 			
 		}
 		
 		/**
@@ -37,7 +50,9 @@ namespace comm
 			if (demuxer == null) 
 			{
 				DebugFatal ("Received null demuxer");
-			}
+			}		
+			
+			m_channelProperties["port"] = port.ToString ();
 			
 			string useDummyRecipient = ConfigReader.GetConfigurationValue ("dummyrecipient");
 			if (useDummyRecipient != null && useDummyRecipient.Equals ("true"))
@@ -48,13 +63,9 @@ namespace comm
 			// create sending interfaces
 			m_pointToPoint = new PointToPointInterface ();
 			m_pointToPoint.Init (demuxer);
-			
-			// Channel name is Radical + username
-			// CHANNEL_NAME = "Radical" + ConfigReader.GetConfigurationValue ("username");
-			
-			// register tcp channel and connect p2p interface
 						
-			m_channel = new TcpChannel (port);
+			// register tcp channel and connect p2p interface				
+			m_channel = new TcpChannel (m_channelProperties, null, null);
 			ChannelServices.RegisterChannel (m_channel, false);
 			RemotingServices.Marshal (m_pointToPoint, CHANNEL_NAME, typeof(PointToPointInterface));
 			

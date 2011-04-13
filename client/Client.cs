@@ -7,8 +7,11 @@ namespace client
 {
 	public class Client : PadicalObject
 	{
+		// puppet properties
 		private bool m_isPuppetControlled;
 		public PuppetClientService m_puppetService;
+		public PerfectPointToPointSend m_puppetPerfectPointToPointSend;
+		public SendReceiveMiddleLayer m_puppetSendReceiveMiddleLayer;
 		
 		// Eventually make these not-so-public
 		public PerfectPointToPointSend m_perfectPointToPointSend;
@@ -43,14 +46,19 @@ namespace client
 		}
 		
 		public Client ()
-		{
-			LoadConfig ();
+		{			
 		}
 		
-		public void LoadConfig ()
+		public void LoadConfig () 
 		{
-			UserName = ConfigReader.GetConfigurationValue ("username");
-			ClientPort = Int32.Parse (ConfigReader.GetConfigurationValue ("clientport"));
+			LoadConfig (ConfigReader.GetConfigurationValue ("username"),
+			            Int32.Parse (ConfigReader.GetConfigurationValue ("clientport")));
+		}
+		
+		public void LoadConfig (string username, int port)
+		{
+			UserName = username;
+			ClientPort = port;
 			ServerList = new List<string> ();
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
@@ -77,33 +85,53 @@ namespace client
 			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, ClientPort);
 			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
 			
+			DebugInfo ("Started communication services");	
+			
 			// Services
 			//m_groupMulticast = new GroupMulticast ();
 			m_calendarService = new CalendarServiceClient ();
-			m_calendarService.SetClient (this);
+			m_calendarService.SetClient (this);			
+			DebugInfo ("Started calendar service");
 			
 			m_lookupService = new LookupServiceClient ();
 			m_lookupService.SetClient (this);
-			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);
+			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);			
+			DebugInfo ("Started lookup service");
 			
 			m_sequenceNumberService = new SequenceNumberServiceClient (); 
 			m_sequenceNumberService.SetClient (this);
+			DebugInfo ("Started numbering service");
+			
 			m_connectionServiceClient = new ConnectionServiceClient ();
 			m_connectionServiceClient.SetClient (this);
+			DebugInfo ("Started connection service");
 			
 			if (m_isPuppetControlled) {
 				DebugInfo ("Client may be controlled by Puppet Master");
+				m_puppetSendReceiveMiddleLayer = new SendReceiveMiddleLayer ();
+				m_puppetPerfectPointToPointSend = new PerfectPointToPointSend (true);
+				m_puppetPerfectPointToPointSend.Start (m_puppetSendReceiveMiddleLayer, ClientPort+2000);
+				m_puppetSendReceiveMiddleLayer.SetPointToPointInterface (m_puppetPerfectPointToPointSend);
+				m_puppetSendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);
+					
 				m_puppetService = new PuppetClientService ();
 				m_puppetService.SetClient (this);
-				m_puppetService.RegisterAsPuppet ();				
+				m_puppetService.RegisterAsPuppet ();
+				
+				// Automatically connect when spawned
+				Connect ();
+				
+				DebugInfo ("Started puppet service");
 			}
 			
-			
-			m_connectionServiceClient.Connect ();						
+		
+			/*
+			m_connectionServiceClient.Connect ();			
+			System.Threading.Thread.Sleep (3000);
+			DebugUncond ("I can haz sequence number... {0}", GetSequenceNumber ());
 			System.Threading.Thread.Sleep (3000);
 			m_connectionServiceClient.Disconnect ();
 			
-			/*
 			
 			DebugUncond ("lookup() returned this: {0}", m_lookupService.Lookup ("testclient1"));
 			

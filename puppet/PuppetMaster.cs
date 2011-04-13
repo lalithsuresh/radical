@@ -34,6 +34,16 @@ namespace puppet
 			set;
 		}
 		
+		public string GenericConfig {
+			get;
+			set;
+		}
+		
+		public string ClientExecutable {
+			get;
+			set;
+		}
+		
 		public List<string> ServerList {
 			get;
 			set;
@@ -52,6 +62,9 @@ namespace puppet
 		{
 			PuppetPort = Int32.Parse (ConfigReader.GetConfigurationValue ("puppetport"));
 			UserName = ConfigReader.GetConfigurationValue ("username");
+			GenericConfig = ConfigReader.GetConfigurationValue ("generic_config");
+			ClientExecutable = ConfigReader.GetConfigurationValue ("client_executable");
+			
 			ServerList = new List<string> ();
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
@@ -79,7 +92,7 @@ namespace puppet
 			m_connectionService.SetPuppetMaster (this);
 			
 			DebugInfo ("Started puppet master on {0}", PuppetPort);			
-			m_connectionService.Connect ();
+			//m_connectionService.Connect ();
 			DebugInfo ("Puppet master registered with servers");
 			
 		}	
@@ -111,6 +124,7 @@ namespace puppet
 		public void Shutdown () 
 		{
 			DebugLogic ("Shutdown.");
+			m_puppetMasterService.Cleanup ();
 			m_perfectPointToPointSend.Stop ();
 		}
 		
