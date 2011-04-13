@@ -99,9 +99,7 @@ namespace client
 			}
 			
 			
-			m_connectionServiceClient.Connect ();			
-			System.Threading.Thread.Sleep (3000);
-			DebugUncond ("I can haz sequence number... {0}", GetSequenceNumber ());
+			m_connectionServiceClient.Connect ();						
 			System.Threading.Thread.Sleep (3000);
 			m_connectionServiceClient.Disconnect ();
 			

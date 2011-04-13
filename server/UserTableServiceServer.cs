@@ -43,6 +43,8 @@ namespace server
 				DebugLogic ("Adds [{0},{1}] to database", username, uri);
 				m_usertable.Add(username, uri);
 			}
+			
+			//PrintUserTable ();
 		}
 		
 		public void UserDisconnect (string username) 
@@ -61,6 +63,8 @@ namespace server
 			DebugLogic ("Removes [{0}] from database", username);
 				
 			m_usertable.Remove(username);
+			
+			//PrintUserTable ();
 		}
 		
 		public string GetUriForUser (string username) 

@@ -44,6 +44,7 @@ namespace server
 		
 		public void Start () 
 		{
+			// TODO: fix failure detection
 			m_replicationList = new List<string> ();
 			m_replicationList.Add ("server2");
 			m_replicationList.Add ("server3");
@@ -63,7 +64,7 @@ namespace server
 		public void ReplicateUserConnect (string username, string uri) 
 		{
 			DebugInfo ("Sending UserConnect replication request");
-			Message m = PrepareReplicationMessage ();
+			Message m = new Message ();
 			m.PushString (uri);
 			m.PushString (username);
 			m.PushString ("user_connect");
@@ -73,7 +74,7 @@ namespace server
 		public void ReplicateUserDisconnect (string username) 
 		{
 			DebugInfo ("Sending UserDisconnect replication request");
-			Message m = PrepareReplicationMessage ();
+			Message m = new Message ();
 			m.PushString (username);
 			m.PushString ("user_disconnect");
 			DistributeReplicationMessage (m);
@@ -83,7 +84,7 @@ namespace server
 		{															
 			DebugInfo ("Sending sequence number ({0}) replication request", number);
 			
-			Message m = PrepareReplicationMessage ();
+			Message m = new Message ();
 			m.PushString (number.ToString ());
 			m.PushString ("sequencenumber"); // subtyped message				
 			
@@ -115,7 +116,7 @@ namespace server
 #region user_connect
 				else if (subtype.Equals ("user_connect"))
 				{
-					DebugLogic ("Got user_connect replication request from {0}", m.GetSourceUserName ());
+					DebugLogic ("Got user_connect replication request for {0}", m.GetSourceUserName ());
 					string username = m.PopString ();
 					string uri = m.PopString ();
 					HandleUserConnectReplication (username, uri, m.GetSourceUserName ());
@@ -129,11 +130,11 @@ namespace server
 #region user_disconnect
 				else if (subtype.Equals ("user_disconnect"))
 				{
-					DebugLogic ("Got user_disconnect replication request from {0}", m.GetSourceUserName ());
+					DebugLogic ("Got user_disconnect replication request for {0}", m.GetSourceUserName ());
 					string username = m.PopString ();
 					HandleUserDisconnectReplication (username, m.GetSourceUserName ());
 				}
-				else if (subtype.Equals ("user_connect_ack"))
+				else if (subtype.Equals ("user_disconnect_ack"))
 				{
 					DebugLogic ("ACK replication request: UserDisconnect");
 					m_oSignalEvent.Set ();
@@ -142,25 +143,21 @@ namespace server
 			}
 		
 		}
-		
-		private Message PrepareReplicationMessage () 
-		{
-			Message m = new Message ();
-			m.SetMessageType ("replicate");			
-			m.SetSourceUserName (m_server.UserName);
-			return m;
-		}
+				
 		
 		private void DistributeReplicationMessage (Message m) 
 		{
 			lock (this) 
 			{
 				foreach (string replicationServer in m_replicationList)
-				{
-					m.SetDestinationUsers (replicationServer);
-					m_server.m_sendReceiveMiddleLayer.Send (m);
+				{		
+					Message replMsg = (Message) m.Clone ();
+					replMsg.SetMessageType ("replicate");
+					replMsg.SetSourceUserName (m_server.UserName);
+					replMsg.SetDestinationUsers (replicationServer);					
+					m_server.m_sendReceiveMiddleLayer.Send (replMsg);
+					Block ();
 				}
-				Block ();
 			}
 		}
 

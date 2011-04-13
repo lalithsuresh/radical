@@ -1,10 +1,11 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 
 namespace comm
 {
 	[Serializable]
-	public class Message
+	public class Message : ICloneable
 	{
 		private string m_type;
 		private string m_sourceUserName;
@@ -97,6 +98,34 @@ namespace comm
 				return null;
 			}
 		}
+		
+		public override string ToString ()
+		{
+			StringBuilder sb = new StringBuilder ();
+			sb.AppendLine (string.Format("[Message] {0} ", GetMessageType ()));
+			
+			sb.AppendLine ("To: ");
+			foreach (string s in m_recipientUserNames) 
+			{
+				sb.AppendLine (s);
+			}
+			
+			sb.AppendLine ("Stack: ");
+			foreach (string s in m_items) 
+			{
+				sb.AppendLine (s);
+			}
+			
+			return sb.ToString ();
+		}
+		
+		public object Clone ()
+		{
+			Message m = new Message ();
+			m.m_items = this.m_items;
+			return m;
+		}
+
 	}
 }
 
