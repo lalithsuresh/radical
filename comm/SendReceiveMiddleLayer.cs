@@ -93,7 +93,8 @@ namespace comm
 			}
 		}
 		
-		private void Send (Message m, string uri)
+		// Use this to send out directly
+		public void Send (Message m, string uri)
 		{
 			try
 			{
@@ -104,6 +105,13 @@ namespace comm
 				m_deferredSendMessages.Add (m);
 				m_deferredSendUris.Add (uri);
 			}
+		}
+		
+		// Use this Send mechanism to _not_ retry for failed
+		// send attempts
+		public void UnreliableSend (Message m, string uri)
+		{
+			m_perfectPointToPoint.Send(m, uri);		
 		}
 		
 		private void DeferredSend (object state)
