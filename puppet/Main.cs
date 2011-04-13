@@ -34,12 +34,9 @@ namespace puppet
 			MainWindow win = new MainWindow ();
 			win.SetPuppetMaster(puppetMaster);			
 			win.Show ();
-			Application.Run ();
-			
-			
+			Application.Run ();					
 			
 			// terminate gracefully
-			Console.ReadLine ();
 			puppetMaster.Shutdown ();
 			Environment.Exit (0);
 		}
