@@ -86,9 +86,10 @@ namespace server
 		}
 		
 		public void Shutdown () 
-		{
-			DebugLogic ("Shutdown.");
+		{			
+			m_replicationService.Stop ();
 			m_perfectPointToPointSend.Stop ();	
+			DebugLogic ("Shutdown complete");
 			Environment.Exit(1);
 		}
 	}

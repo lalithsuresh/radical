@@ -60,6 +60,10 @@ public partial class MainWindow : Gtk.Window
 			else if (msg.Notification.StartsWith ("DISCONNECT")) 
 			{				
 				// TODO: mark user as disconnected
+				foreach (var item in treeViewUsers.AllChildren) {
+					Console.WriteLine (item);
+				}
+				
 			}
 		}
 		TextIter iterator = textMain.Buffer.EndIter;
