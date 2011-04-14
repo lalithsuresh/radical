@@ -69,17 +69,10 @@ namespace server
 			StartPingService();
 			
 			// Sleep for a while to see if there are other servers alive
-			Thread.Sleep (m_pingTimer.Interval*2);
+			Thread.Sleep (m_pingTimer.Interval*3);
 			
 			// determine who is master
-			if (!MasterExists ())
-			{
-				ChooseNewMaster (null);
-			} 
-			else
-			{
-				DetermineExistingMaster ();
-			}
+			CurrentMaster = DetermineMaster ();
 			
 			// I am alive
 			UpdateServerStatus (m_server.UserName, true);
@@ -143,7 +136,7 @@ namespace server
 			{
 				string subtype = m.PopString ();				
 				
-#region sequencenumber
+#region replicate
 				if (subtype.Equals ("sequencenumber")) 
 				{
 					DebugLogic ("Got sequence number replication request from {0}", m.GetSourceUserName ());
@@ -155,8 +148,6 @@ namespace server
 								
 					m_oSignalEvent.Set ();					
 				}
-#endregion
-#region user_connect
 				else if (subtype.Equals ("user_connect"))
 				{
 					DebugLogic ("Got user_connect replication request for {0}", m.GetSourceUserName ());
@@ -169,8 +160,6 @@ namespace server
 					DebugLogic ("ACK replication request: UserConnect");
 					m_oSignalEvent.Set ();
 				}
-#endregion
-#region user_disconnect
 				else if (subtype.Equals ("user_disconnect"))
 				{
 					DebugLogic ("Got user_disconnect replication request for {0}", m.GetSourceUserName ());
@@ -327,33 +316,31 @@ namespace server
 			}
 		}
 		
-		private void DetermineExistingMaster () 
+		private string DetermineMaster () 
 		{
-			foreach (string server in m_serverStatus.Keys)
+			foreach (string serverUri in m_server.ServerList)
 			{
-				if (m_serverStatus[server])
+				string serverName = m_serverUriToServerNameMap[serverUri];
+				if (!serverName.Equals (m_server.UserName))
 				{
-					Message m = new Message ();
-					m.SetMessageType ("whoismaster");
-					m.SetDestinationUsers (server);
-					m.SetSourceUserName (m_server.UserName);
-					m_server.m_sendReceiveMiddleLayer.Send (m);
-					Block ();
-					if (!m_masterReplyBuffer.Equals ("empty"))
-					{
-						CurrentMaster = m_masterReplyBuffer;
-						m_masterReplyBuffer = "empty";
-						return;
+					try {
+						Message m = new Message ();
+						m.SetMessageType ("whoismaster");
+						m.SetDestinationUsers (serverName);
+						m.SetSourceUserName (m_server.UserName);
+						m_server.m_sendReceiveMiddleLayer.UnreliableSend (m, serverUri);
+						Block ();
+						return m_masterReplyBuffer;
+					}
+					catch (Exception) 
+					{						
+						continue;
 					}
 				}
 			}
 			
-			DebugFatal ("Could not find existing master.");
-			
-			// for all servers alive
-			// request master status
-			// block until replies arrive
-			// pick master
+			DebugLogic ("I'm the only server alive. I am master.");
+			return m_server.UserName;			
 		}
 		
 		private bool MasterExists ()
@@ -371,20 +358,6 @@ namespace server
 		 */
 		private void ChooseNewMaster (string oldMaster) 
 		{
-			if (String.IsNullOrEmpty (oldMaster))
-			{
-				// be sure...				
-				if (!MasterExists ()) 
-				{
-					CurrentMaster = "server1";					
-				}
-				else 
-				{
-					DebugFatal ("Could not determine master with accuracy.");
-				}
-				return;
-			}
-			
 			if (oldMaster.Equals ("server1")) 
 			{
 				CurrentMaster = "server2";		
