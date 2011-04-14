@@ -134,8 +134,8 @@ namespace comm
 			int i = 0;
 			while (i < count)
 			{				
-				Message m = m_deferredSendMessages[i];
-				string uri = m_deferredSendUris[i];							
+				Message m = msgarr[i];
+				string uri = uriarr[i];
 				
 				DebugInfo ("DeferredSend for message of typ {0}, queue size {1}", m.GetMessageType (), m_deferredSendMessages.Count);
 				m_deferredSendMessages.Remove (m);

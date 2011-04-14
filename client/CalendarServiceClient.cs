@@ -251,7 +251,7 @@ namespace client
 			
 			reservationRequest.PushString (reservation.m_slotNumberList.Count.ToString ());
 			reservationRequest.PushString (reservation.m_sequenceNumber.ToString ());
-			reservationRequest.PushString ("reservationrequest");			
+			reservationRequest.PushString ("reservationrequest");	
 		
 			SendMessage (reservationRequest);
 		}
@@ -634,15 +634,29 @@ namespace client
 					
 					SendMessage (yes);
 				}
-				else if (slot.m_lockedReservation != -1)
+				else if (slot.m_lockedReservation != -1 && slot.m_lockedReservation < s)
 				{
-					// Some reservation is already locked, so wait.
+					// Some reservation older is already locked, so wait.
 					slot.m_preCommitList.Add (reservationSequenceNumber, res);
 				}
 				else
 				{
-					// Handle weird case. For now, bail out.
-					DebugFatal ("Crashing. Can't handle weird case.");
+					// A newer reservation has been locked. For now,
+					// we try and ABORT the newer one in favour of the older one.
+					// But the optimisation here would be for coordinators to
+					// initiate an is-there-a-deadlock check, which the cohort
+					// would ask the coordinator to initiate.
+					Message abortmsg = new Message ();
+				
+					abortmsg.SetDestinationUsers (m_activeReservationSessions[reservationSequenceNumber].m_initiator);
+					abortmsg.SetMessageType ("calendar");
+					abortmsg.SetSourceUserName (m_client.UserName);
+					abortmsg.PushString (s.ToString ()); // we need to mention the slot that is being aborted
+					abortmsg.PushString (slot.m_lockedReservation.ToString ());
+					abortmsg.PushString ("abort");
+				
+					SendMessage (abortmsg);
+					ReservationAbortCohort (slot.m_lockedReservation, s);
 				}
 			}
 		}
@@ -811,9 +825,12 @@ namespace client
 			Slot slot = m_numberToSlotMap[s];
 			Reservation res = m_activeReservationSessions[reservationSequenceNumber];
 			
-			// if i am the initiator,
-			// then send every1 aborts.			
-			if (res.m_initiator.Equals (m_client.UserName))
+			// if i am the initiator, and the reservation has not already committed,
+			// or has not already been aborted by someone else,
+			// then send every1 aborts.
+			if (res.m_initiator.Equals (m_client.UserName)
+			    && res.m_reservationState != CalendarServiceClient.ReservationState.COMMITTED
+			    && res.m_reservationState != CalendarServiceClient.ReservationState.ABORTED)
 			{
 				//Perform my own cleanup,
 				res.m_slotNumberList.Remove (s);
@@ -839,15 +856,8 @@ namespace client
 			else
 			{
 				// Abort the reservation entry for this particular slot.
-				ReservationAbortCohort (reservationSequenceNumber, s);
-	
+				ReservationAbortCohort (reservationSequenceNumber, s);	
 			}
-			// else
-			// clear up data structures
-			// - remove reservation object from slots
-			// - if this reservation had a lock, then clear it, and promote the
-			//   next one.
-			// - else, just empty from precommit list.
 		}
 		
 		private void SendMessage (Message m)
