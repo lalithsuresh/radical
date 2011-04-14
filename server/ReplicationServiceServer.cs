@@ -275,43 +275,48 @@ namespace server
 			foreach (string server in m_server.ServerList)
 			{
 				string serverName = m_serverUriToServerNameMap[server];
-				try 
-				{
-					Message m = new Message ();
-					m.SetSourceUserName (m_server.UserName);
-					m.SetMessageType ("ping");
-					m.SetDestinationUsers (serverName);
-					m_server.m_sendReceiveMiddleLayer.UnreliableSend (m, server);									
-					
-					// if server was previously unavailable
-					//   add to replication list
-					if (!m_serverStatus[serverName])
+				
+				if (!serverName.Equals (m_server.UserName))
+				{					
+					try 
 					{
-						AddToReplicationList (serverName);
-					}
-					
-					UpdateServerStatus (serverName, true);
-				}
-				catch (Exception)
-				{
-					DebugInfo ("Could not reach: {0}", server);
-					
-					// update serverStatus list
-					UpdateServerStatus (serverName, false);		
-					RemoveFromReplicationList (serverName);
-										
-					// if server is master, update current master
-					if (serverName.Equals (CurrentMaster)) 
-					{
-						ChooseNewMaster (serverName);
+						Message m = new Message ();
+						m.SetSourceUserName (m_server.UserName);
+						m.SetMessageType ("ping");
+						m.SetDestinationUsers (serverName);
+						m_server.m_sendReceiveMiddleLayer.UnreliableSend (m, server);									
 						
-						// if I became master..? 
-						if (IsMaster) 
+						// if server was previously unavailable
+						//   add to replication list
+						if (!m_serverStatus[serverName])
 						{
-							DebugInfo ("I am master");
+							AddToReplicationList (serverName);
 						}
-					} 
-					
+						
+						UpdateServerStatus (serverName, true);
+					}
+					catch (Exception)
+					{
+						DebugInfo ("Could not reach: {0}", server);
+						
+						// update serverStatus list
+						UpdateServerStatus (serverName, false);		
+						RemoveFromReplicationList (serverName);
+											
+						// if server is master, update current master
+						if (serverName.Equals (CurrentMaster)) 
+						{
+							ChooseNewMaster (serverName);
+							
+							// if I became master..? 
+							if (IsMaster) 
+							{
+								DebugInfo ("I am master");
+								RemoveFromReplicationList (m_server.UserName);
+							}
+						} 
+						
+					}
 				}
 			}
 		}
@@ -339,20 +344,10 @@ namespace server
 				}
 			}
 			
-			DebugLogic ("I'm the only server alive. I am master.");
+			DebugLogic ("I'm the only server alive. I am master.");			
 			return m_server.UserName;			
 		}
-		
-		private bool MasterExists ()
-		{
-			foreach (bool status in m_serverStatus.Values) 
-			{
-				if (status)
-					return true;
-			}
-			return false;
-		}
-		
+			
 		/*
 		 * Deterministic but non-scalable way of electing a new master
 		 */
