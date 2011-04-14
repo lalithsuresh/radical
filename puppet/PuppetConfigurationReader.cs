@@ -87,6 +87,10 @@ namespace puppet
 			
 			if (type[0].Equals ("connect")) 
 			{
+				if (type[1].StartsWith ("central"))
+				{
+					return null;
+				}
 				instruction.Type = PuppetInstructionType.CONNECT;
 				instruction.ApplyToUser = type[1].Trim ();				
 			}
@@ -118,33 +122,31 @@ namespace puppet
 		
 		private static bool AttachReservationData (PuppetInstruction instruction, string line) 
 		{
-			// parse "reservation {Description: string; Users: list,of,users; Slots: 1,2,3,...,N}"
+			// parse: "reservation {GroupMeeting; user1, user2; 13, 25 }"
 			try 
 			{
 				// description
-				string[] r = line.Substring (10).Split (';');
-				string[] data = r[0].Split (':');				
-				instruction.Description = data[1].Trim ();
+				string[] r = line.Substring (10).Split (';');			
+				instruction.Description = r[0].Substring(3).Trim ();				
 				
 				// apply to user
-				data = r[1].Split (':')[1].Split (',');				
-				instruction.ApplyToUser = data[0].Trim ();
+				string[] data = r[1].Split (',');				
+				instruction.ApplyToUser = data[0].Trim ();				
 				
 				// users
 				instruction.Users = new List<string>();
 				instruction.Users.Add (data[0]); // first user is initiator
 				for (int i = 1; i < data.Length; i++) 
 				{
-					instruction.Users.Add (data[i].Trim ()); // all other users		
+					instruction.Users.Add (data[i].Trim ()); // all other users							
 				}				
 				
 				// slots				
-				data = r[2].Split (':');
-				string[] slots = data[1].Substring (0,data[1].Length-1).Split (',');
+				string[] slots = r[2].Substring (0,r[2].Length-1).Split (',');
 				instruction.Slots = new List<string>();
 				for (int i = 0; i < data.Length; i++) 
 				{
-					instruction.Slots.Add (slots[i].Trim ());
+					instruction.Slots.Add (slots[i].Trim ());				
 				}
 			} 
 			catch (Exception) 
