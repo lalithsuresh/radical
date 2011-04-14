@@ -26,6 +26,7 @@ namespace client
 		{	
 			ConfigReader.ReadFile ("/home/nightstrike/programming/mono/radical/client/client.config");
 			m_client1 = new Client();
+			m_client1.LoadConfig();
 			m_client1.InitClient ();
 		}
 		
