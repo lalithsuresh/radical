@@ -105,15 +105,15 @@ namespace server
 		
 		public void ReplicateUserConnect (string username, string uri) 
 		{
-			//if (IsMaster) 
-			//{
+			if (IsMaster) 
+			{
 				DebugInfo ("Sending UserConnect replication request");
 				Message m = new Message ();
 				m.PushString (uri);
 				m.PushString (username);
 				m.PushString ("user_connect");
 				DistributeReplicationMessage (m);
-			//}
+			}
 		}
 				
 		public void ReplicateUserDisconnect (string username) 

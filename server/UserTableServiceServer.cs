@@ -123,6 +123,13 @@ namespace server
 			}
 			else if (request_type.Equals ("connect")) 
 			{
+				if (m_server.m_replicationService.IsMaster) 
+				{
+					// TODO: don't reply, in future, tell who is master, or redirect question
+					DebugInfo ("Got request intended for master. Not replying.");
+					return;
+				}
+				
 				// add user to DB				
 				UserConnect (message_source, message_source_uri);
 				
@@ -138,7 +145,13 @@ namespace server
 				SendReply (ack_message);
 			}
 			else if (request_type.Equals ("disconnect")) 
-			{				
+			{	
+				if (m_server.m_replicationService.IsMaster) 
+				{
+					// TODO: don't reply, in future, tell who is master, or redirect question
+					DebugInfo ("Got request intended for master. Not replying.");
+					return;
+				}
 				// remove from replicas (implicit block until 1 ack is received)
 				m_server.m_replicationService.ReplicateUserDisconnect (message_source);
 				
