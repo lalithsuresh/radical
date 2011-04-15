@@ -163,7 +163,7 @@ namespace comm
 		public void RegisterFailureCallback (String service, ReceiveCallbackType cb)
 		{
 			DebugLogic ("Registered subscriber for {0} events", service);
-			m_registerReceiveMap.Add (service, cb);
+			m_registerFailureReceiveMap.Add (service, cb);
 		}
 	}
 }
