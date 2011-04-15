@@ -103,6 +103,16 @@ namespace server
 			m_pingTimer.Stop ();
 		}
 		
+		public void SendImNotMasterMessage (string username)
+		{
+			Message m = new Message ();
+			m.SetMessageType ("notmaster");
+			m.SetDestinationUsers (username);
+			m.SetSourceUserName (m_server.UserName);
+			m.PushString (CurrentMaster);
+			m_server.m_sendReceiveMiddleLayer.Send (m);
+		}
+		
 		public void ReplicateUserConnect (string username, string uri) 
 		{
 			if (IsMaster) 
@@ -221,6 +231,11 @@ namespace server
 			else if (m.GetMessageType ().Equals ("whoismaster_ack"))
 			{
 				m_masterReplyBuffer = m.PopString ();
+				if (m_masterReplyBuffer.Equals ("empty"))
+				{
+					DebugFatal ("There are other servers alive, but I could not determine who is master.\n" +
+						"Try starting me again.");
+				}
 				m_oSignalEvent.Set ();
 			}
 			else if (m.GetMessageType ().Equals ("sync_usertable"))

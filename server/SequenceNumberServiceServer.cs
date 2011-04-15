@@ -54,15 +54,18 @@ namespace server
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
+			Message message = eventargs.m_message;
+						
 			if (!m_server.m_replicationService.IsMaster) 
 			{
-				// TODO: don't reply, in future, tell who is master, or redirect question
-				DebugInfo ("Got request intended for master. Not replying.");
+				// TODO: reply, in future: redirect question? 
+				DebugInfo ("Got request intended for master.");
+				m_server.m_replicationService.SendImNotMasterMessage (message.GetSourceUserName ());
 				return;
 			}
+			
 			// All we need from the request is the source
 			// uri.
-			Message message = eventargs.m_message;
 			DebugInfo ("Server {0} got request for sequence number from {1}", m_server.UserName, message.GetSourceUserName ());
 			
 			// Create response to the requester
