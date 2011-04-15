@@ -74,15 +74,37 @@ namespace client
 				
 				List<string> userlist = BuildList (userstringlist);
 				List<string> slotlist = BuildList (slotstringlist);
+				
+				List<int> slots = ConvertToInts(slotlist);
+				
 				DebugInfo ("Puppet Master says: Reserve (Description: {0} Users: {1} Slots: {2})", 
-				           description, userstringlist, slotstringlist);		
-				// m_client.Reserve (description, userlist, slotlist);
+				           description, userstringlist, slotstringlist);	
+				
+				m_client.Reserve (description, userlist, slots);
 			}
 			else if (String.Compare (type, "readcalendar", true) == 0) 
 			{
 				DebugInfo ("Puppet Master says: ReadCalendar");
+				SendInfoMsgToPuppetMaster ("There's nothing in the calendar.");
 				// TODO implement read calendar interface
 			}
+		}
+		
+		private List<int> ConvertToInts (List<string> slotlist) 
+		{
+			List<int> ints = new List<int> ();
+			foreach (string s in slotlist)
+			{
+				try 
+				{
+					ints.Add (Int32.Parse (s));
+				} 
+				catch (FormatException)
+				{
+					DebugFatal ("Could not convert slot (string) from message to slot (int)");
+				}
+			}
+			return ints;
 		}
 		
 		private List<string> BuildList (string stringlist) 

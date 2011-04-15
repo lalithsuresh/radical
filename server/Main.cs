@@ -19,8 +19,14 @@ namespace server
 			server.LoadConfig (args[0]);
 			server.InitServer (); 
 			
+			// keep alive
+			string input = Console.ReadLine ();
+			while (!input.Equals ("exit"))
+			{
+				input = Console.ReadLine ();
+			}
+						
 			// terminate gracefully
-			Console.ReadLine ();
 			server.Shutdown (); 
 		}
 	}
