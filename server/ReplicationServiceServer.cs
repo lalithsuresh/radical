@@ -280,6 +280,9 @@ namespace server
 		
 		private void DistributeReplicationMessage (Message m) 
 		{
+			if (m_replicationList.Count == 0)
+				return;
+			
 			lock (this) 
 			{
 				foreach (string replicationServer in m_replicationList)

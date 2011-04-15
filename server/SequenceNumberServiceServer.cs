@@ -54,7 +54,7 @@ namespace server
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
-			if (m_server.m_replicationService.IsMaster) 
+			if (!m_server.m_replicationService.IsMaster) 
 			{
 				// TODO: don't reply, in future, tell who is master, or redirect question
 				DebugInfo ("Got request intended for master. Not replying.");
