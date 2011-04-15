@@ -864,5 +864,16 @@ namespace client
 		{
 			m_client.m_sendReceiveMiddleLayer.Send (m);
 		}
+		
+		public string ReadCalendar ()
+		{
+			string ret = "";
+			foreach (int i in m_numberToSlotMap.Keys)
+			{
+				ret = ret + i.ToString () + ":" + m_numberToSlotMap[i].m_calendarState.ToString () + ", ";
+			}
+			
+			return ret;
+		}
 	}
 }
