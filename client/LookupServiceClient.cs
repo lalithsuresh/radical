@@ -21,6 +21,8 @@ namespace client
 			m_client = client;
 			m_client.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("lookup",
 			                                                           new ReceiveCallbackType (Receive));
+			m_client.m_sendReceiveMiddleLayer.RegisterFailureCallback ("lookup",
+			                                                           new ReceiveCallbackType (ReceiveFailure));
 		}
 		
 		public string Lookup (string user)
@@ -39,7 +41,7 @@ namespace client
 				if (user.Equals ("SERVER"))
 				{
 					// Return server 1. Will be changed later.
-					return m_client.ServerList [0]; 
+					return m_client.CurrentMasterServer;
 				} 
 				else if (user.Equals ("PUPPETMASTER"))
 				{
@@ -68,6 +70,16 @@ namespace client
 				
 				return m_lookupResponse;
 			}
+		}
+		
+		public void ReceiveFailure (ReceiveMessageEventArgs eventargs)
+		{
+			Message m = eventargs.m_message;
+			
+			// Update response string and manually
+			// reset the waiting Lookup() thread
+			m_client.RotateMaster ();
+			m_client.m_sendReceiveMiddleLayer.Send (m, m_client.CurrentMasterServer);
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)

@@ -16,6 +16,7 @@ namespace comm
 	{
 		// services registered
 		private Dictionary<string, ReceiveCallbackType> m_registerReceiveMap = new Dictionary<string, ReceiveCallbackType> ();
+		private Dictionary<string, ReceiveCallbackType> m_registerFailureReceiveMap = new Dictionary<string, ReceiveCallbackType> ();
 		
 		// comm components
 		private PerfectPointToPointSend m_perfectPointToPoint;
@@ -102,8 +103,15 @@ namespace comm
 			}
 			catch
 			{
-				m_deferredSendMessages.Add (m);
-				m_deferredSendUris.Add (uri);
+				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ()))
+				{
+					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
+				}
+				else
+				{
+					m_deferredSendMessages.Add (m);
+					m_deferredSendUris.Add (uri);
+				}
 			}
 		}
 		
@@ -147,6 +155,12 @@ namespace comm
 		}
 		
 		public void RegisterReceiveCallback (String service, ReceiveCallbackType cb)
+		{
+			DebugLogic ("Registered subscriber for {0} events", service);
+			m_registerReceiveMap.Add (service, cb);
+		}
+		
+		public void RegisterFailureCallback (String service, ReceiveCallbackType cb)
 		{
 			DebugLogic ("Registered subscriber for {0} events", service);
 			m_registerReceiveMap.Add (service, cb);
