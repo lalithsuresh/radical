@@ -125,8 +125,9 @@ namespace server
 			{
 				if (!m_server.m_replicationService.IsMaster) 
 				{
-					// TODO: don't reply, in future, tell who is master, or redirect question
-					DebugInfo ("Got request intended for master. Not replying.");
+					// TODO: reply, in future: redirect question? 
+					DebugInfo ("Got request intended for master.");
+					m_server.m_replicationService.SendImNotMasterMessage (m.GetSourceUserName ());
 					return;
 				}
 				
@@ -148,10 +149,12 @@ namespace server
 			{	
 				if (!m_server.m_replicationService.IsMaster) 
 				{
-					// TODO: don't reply, in future, tell who is master, or redirect question
-					DebugInfo ("Got request intended for master. Not replying.");
+					// TODO: reply, in future: redirect question? 
+					DebugInfo ("Got request intended for master.");
+					m_server.m_replicationService.SendImNotMasterMessage (m.GetSourceUserName ());
 					return;
 				}
+				
 				// remove from replicas (implicit block until 1 ack is received)
 				m_server.m_replicationService.ReplicateUserDisconnect (message_source);
 				
