@@ -48,14 +48,19 @@ namespace server
 				m_server = server;
 			}
 			
+			// register messages to listen too
 			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("replicate",
-			                                                           new ReceiveCallbackType(Receive));
+			                                                           new ReceiveCallbackType (Receive));
 			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("ping",
-			                                                           new ReceiveCallbackType(Receive));
+			                                                           new ReceiveCallbackType (Receive));
 			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("whoismaster",
-			                                                           new ReceiveCallbackType(Receive));						
+			                                                           new ReceiveCallbackType (Receive));						
 			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("whoismaster_ack",
-			                                                           new ReceiveCallbackType(Receive));
+			                                                           new ReceiveCallbackType (Receive));
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sync_usertable",
+			                                                           new ReceiveCallbackType (Receive));
+			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sync_usertable_ack",
+			                                                           new ReceiveCallbackType (Receive));
 			
 			// TODO: This map should be done elsewhere and less statically
 			m_serverUriToServerNameMap.Add (m_server.ServerList[0], "server1");			
@@ -63,25 +68,33 @@ namespace server
 			m_serverUriToServerNameMap.Add (m_server.ServerList[2], "server3");
 		}
 		
+		/**
+		 * Bootstrap the server
+		 */
 		public void Start () 
 		{			
-			// Build replication list
+			// Start failure detector - also manages replication list
 			StartPingService();
 			
 			// Sleep for a while to see if there are other servers alive
+			// and let remoting services start
 			Thread.Sleep (m_pingTimer.Interval*3);
 			
 			// determine who is master
-			CurrentMaster = DetermineMaster ();
-			
-			// I am alive
-			UpdateServerStatus (m_server.UserName, true);
+			CurrentMaster = DetermineMaster ();		
 			
 			if (!IsMaster) 
-			{				
+			{
+				// retreive user table from master
 				DebugInfo ("Synchronizing with Master {0}", CurrentMaster);
+				SynchronizeUserTable ();
+				DebugInfo ("Synchronized user table with master.");		
+				
+				// sequence number is updated on each request
 			}
 			
+			// I am alive and ready
+			UpdateServerStatus (m_server.UserName, true);			
 			DebugInfo ("[{0}] Replication Service activated. Master is: {1}", m_server.UserName, CurrentMaster);
 		}
 		
@@ -92,15 +105,15 @@ namespace server
 		
 		public void ReplicateUserConnect (string username, string uri) 
 		{
-			if (IsMaster) 
-			{
+			//if (IsMaster) 
+			//{
 				DebugInfo ("Sending UserConnect replication request");
 				Message m = new Message ();
 				m.PushString (uri);
 				m.PushString (username);
 				m.PushString ("user_connect");
 				DistributeReplicationMessage (m);
-			}
+			//}
 		}
 				
 		public void ReplicateUserDisconnect (string username) 
@@ -124,6 +137,15 @@ namespace server
 				m.PushString (number.ToString ());
 				m.PushString ("sequencenumber"); // subtyped message								
 				DistributeReplicationMessage (m);
+			}
+		}
+		
+		public void PrintReplicationList ()
+		{
+			Console.WriteLine ("ReplicationList:");
+			foreach (string server in m_replicationList) 
+			{
+				Console.WriteLine ("> {0}", server);
 			}
 		}
 		
@@ -180,6 +202,8 @@ namespace server
 				m.SetMessageType ("whoismaster_ack");
 				m.SetDestinationUsers (m.GetSourceUserName ());
 				m.SetSourceUserName (m_server.UserName);
+				
+				// TODO: only reply if we've bootstrapped
 				if (String.IsNullOrEmpty (CurrentMaster)) 
 				{
 					m.PushString ("empty");
@@ -190,6 +214,7 @@ namespace server
 					m.PushString (CurrentMaster);
 					reply = CurrentMaster;
 				}
+				
 				m_server.m_sendReceiveMiddleLayer.Send (m);
 				DebugInfo ("Got question: Who is master? Replying: {0}", reply);
 			}
@@ -198,7 +223,58 @@ namespace server
 				m_masterReplyBuffer = m.PopString ();
 				m_oSignalEvent.Set ();
 			}
+			else if (m.GetMessageType ().Equals ("sync_usertable"))
+			{
+				if (IsMaster)
+				{
+					DebugLogic ("Got sync request from {0}", m.GetSourceUserName ());
+					// TODO: need to lock usertable and pause replying to connect/disconnect requests
+					Message reply = PackUserTable();
+					reply.SetMessageType ("sync_usertable_ack");
+					reply.SetDestinationUsers (m.GetSourceUserName ());
+					reply.SetSourceUserName (m_server.UserName);			
+					m_server.m_sendReceiveMiddleLayer.Send (reply);	
+				}
+			}
+			else if (m.GetMessageType ().Equals ("sync_usertable_ack"))
+			{
+				UnPackUserTable (m);
+				DebugLogic ("Installing usertable from current master.");
+				m_oSignalEvent.Set ();
+			}
 		
+		}
+		
+		private void UnPackUserTable (Message ack) 
+		{			
+			int size = Int32.Parse (ack.PopString ());
+			for (int i = 0; i < size; i++)
+			{
+				string[] tuple = ack.PopString ().Split (',');
+				m_server.m_userTableService.UserConnect (tuple[0], tuple[1]);				
+			}			
+		}
+		
+		private void SynchronizeUserTable ()
+		{
+			Message m = new Message ();
+			m.SetMessageType ("sync_usertable");
+			m.SetDestinationUsers (CurrentMaster);
+			m.SetSourceUserName (m_server.UserName);
+			m_server.m_sendReceiveMiddleLayer.Send (m);
+			Block ();
+		}
+		
+		private Message PackUserTable ()
+		{
+			Message m = new Message ();			
+			foreach (string user in m_server.m_userTableService.UserTable.Keys)
+			{
+				m.PushString (String.Format ("{0},{1}", user,
+				                             m_server.m_userTableService.UserTable[user]));				
+			}
+			m.PushString (m_server.m_userTableService.UserTable.Count.ToString ());
+			return m;
 		}
 				
 		
@@ -213,8 +289,8 @@ namespace server
 					replMsg.SetSourceUserName (m_server.UserName);
 					replMsg.SetDestinationUsers (replicationServer);					
 					m_server.m_sendReceiveMiddleLayer.Send (replMsg);
-					Block ();
 				}
+				Block ();
 			}
 		}
 

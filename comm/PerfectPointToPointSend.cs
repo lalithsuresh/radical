@@ -41,6 +41,15 @@ namespace comm
 		}
 		
 		/**
+		 * This constructor is experimental and for stress testing only!
+		 */
+		public PerfectPointToPointSend (string channelName)
+		{
+			CHANNEL_NAME = channelName;
+			m_channelProperties["name"] = String.Format("tcp{0}",channelName);
+		}
+		
+		/**
 		 * Start a remote listening interface on a specific port
 		 * Servers: use unique ports
 		 * Clients: may use same port (unless run on same machine)
@@ -74,7 +83,7 @@ namespace comm
 		
 		public void Stop ()
 		{
-			RemotingServices.Disconnect (m_pointToPoint);
+			RemotingServices.Disconnect (m_pointToPoint);			
 		}
 		
 		public string GetURI () 

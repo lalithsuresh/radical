@@ -75,6 +75,8 @@ namespace server
 			m_userTableService.UserConnect ("server3", ServerList [2]);	
 			
 			m_replicationService.Start ();
+			
+			DebugUncond ("Started. Available commands: \"exit\", \"status\"");
 		}
 		
 		/**

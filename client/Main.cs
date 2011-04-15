@@ -14,8 +14,6 @@ namespace client
 		 */
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("args: {0}", args.Length);
-			
 			// some sanity checks
 			if (args.Length < 1) 
 			{
@@ -26,6 +24,17 @@ namespace client
 			Client client = new Client ();
 			
 			if (args.Length == 1) {
+				// only for stress testing				
+				if (args[0].Equals ("--stress")) 
+				{	
+					StressTestClient stc = new StressTestClient ();
+					stc.Run ();
+					Console.ReadLine ();
+					Console.WriteLine ("Exiting stress test");
+					Environment.Exit (0);
+				}				
+				
+				// normal case
 				if (!ConfigReader.ReadFile (args[0]))
 					Environment.Exit (0);
 				
@@ -33,6 +42,7 @@ namespace client
 			} 
 			else if (args.Length == 3) 
 			{
+				// start from puppet master
 				if (!ConfigReader.ReadFile (args[2]))
 					Environment.Exit (0);
 								

@@ -73,6 +73,12 @@ namespace server
 			
 			m_server.m_sendReceiveMiddleLayer.Send (response);
 		}		
+		
+		public void PrintSequenceNumber () 
+		{
+			Console.WriteLine ("Sequence number: ");
+			Console.WriteLine ("> {0}", m_sequenceNumber);
+		}
 				
 	}
 }

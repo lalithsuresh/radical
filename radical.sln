@@ -39,6 +39,6 @@ Global
 		{969E6067-A73F-4671-8AD7-2B32EAAFE19C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = puppet\puppet.csproj
+		StartupItem = client\client.csproj
 	EndGlobalSection
 EndGlobal

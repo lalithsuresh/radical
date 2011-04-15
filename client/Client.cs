@@ -9,6 +9,7 @@ namespace client
 	{
 		// puppet properties
 		private bool m_isPuppetControlled;
+		private bool m_isStressTestClient = false;
 		public PuppetClientService m_puppetService;
 		public PerfectPointToPointSend m_puppetPerfectPointToPointSend;
 		public SendReceiveMiddleLayer m_puppetSendReceiveMiddleLayer;
@@ -74,13 +75,25 @@ namespace client
 			{
 				m_isPuppetControlled = false;
 			}
+			
+			if (!String.IsNullOrEmpty (ConfigReader.GetConfigurationValue ("stresstest")))
+			{
+				m_isStressTestClient = true;
+			}
 		}
 		
 		public void InitClient ()
 		{
 			// Communication Layer
 			m_sendReceiveMiddleLayer = new SendReceiveMiddleLayer();
-			m_perfectPointToPointSend = new PerfectPointToPointSend();
+			if (m_isStressTestClient) 
+			{
+				m_perfectPointToPointSend = new PerfectPointToPointSend (UserName);
+			} 
+			else
+			{
+				m_perfectPointToPointSend = new PerfectPointToPointSend();
+			}
 			
 			m_perfectPointToPointSend.Start(m_sendReceiveMiddleLayer, ClientPort);
 			m_sendReceiveMiddleLayer.SetPointToPointInterface(m_perfectPointToPointSend);
@@ -125,13 +138,15 @@ namespace client
 			}
 			
 		
+			
 			/*
 			m_connectionServiceClient.Connect ();			
 			System.Threading.Thread.Sleep (3000);
 			DebugUncond ("I can haz sequence number... {0}", GetSequenceNumber ());
-			System.Threading.Thread.Sleep (3000);
-			m_connectionServiceClient.Disconnect ();
 			
+			
+			System.Threading.Thread.Sleep (30000);
+			m_connectionServiceClient.Disconnect ();
 			
 			DebugUncond ("lookup() returned this: {0}", m_lookupService.Lookup ("testclient1"));
 			
@@ -175,6 +190,11 @@ namespace client
 		public void ReadCalendar (string username) 
 		{
 			// TODO: implement this
+		}
+		
+		public void Stop ()
+		{
+			m_perfectPointToPointSend.Stop ();
 		}
 	}
 }

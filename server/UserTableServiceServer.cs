@@ -13,6 +13,12 @@ namespace server
 		private Server m_server;
 		private Dictionary<string, string> m_usertable;
 		
+		public Dictionary<string,string> UserTable {
+			get 
+			{
+				return m_usertable;
+			}			
+		}
 		
 		public UserTableServiceServer () 
 		{
@@ -150,7 +156,7 @@ namespace server
 			m_server.m_sendReceiveMiddleLayer.Send (m);
 		}
 		
-		private void PrintUserTable ()
+		public void PrintUserTable ()
 		{
 			Console.WriteLine ("UserTable:");
 			foreach (string user in m_usertable.Keys) 

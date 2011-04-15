@@ -23,6 +23,13 @@ namespace server
 			string input = Console.ReadLine ();
 			while (!input.Equals ("exit"))
 			{
+				if (input.Equals ("status"))
+				{
+					server.m_userTableService.PrintUserTable ();
+					server.m_replicationService.PrintReplicationList ();
+					server.m_sequenceNumberService.PrintSequenceNumber ();
+				}
+				
 				input = Console.ReadLine ();
 			}
 						

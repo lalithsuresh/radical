@@ -49,7 +49,7 @@ namespace comm
 		}
 		
 		public void Deliver (Message m) 
-		{
+		{						
 			DebugInfo ("Got: {0}", m.GetType());
 			
 			// Extract the message type from the message
@@ -63,7 +63,7 @@ namespace comm
 			else
 			{
 				DebugFatal ("Received a message with an unknown type");
-			}
+			}			
 		}
 		
 		/**
