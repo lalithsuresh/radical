@@ -61,7 +61,7 @@ namespace client
 			return true;
 			// TODO: For now, no need to block on disconnect
 		}
-		
+				
 		public void ReceiveFailure (ReceiveMessageEventArgs eventargs)
 		{
 			Message m = eventargs.m_message;

@@ -30,6 +30,7 @@ namespace comm
 		public SendReceiveMiddleLayer ()
 		{
 			m_deferredSendTimer = new Timer (DeferredSend, null, 5000, 5000);
+			RegisterReceiveCallback ("resend", new ReceiveCallbackType (ResendToAnotherNode));
 		}
 		
 		public void SetPointToPointInterface (PerfectPointToPointSend p2p) 
@@ -86,7 +87,7 @@ namespace comm
 				DebugInfo ("Lookup returned {0}", destination_uri);
 				
 				destinationUris.Add (destination_uri);
-			}	
+			}
 			
 			foreach (string uri in destinationUris)
 			{				
@@ -103,16 +104,16 @@ namespace comm
 			}
 			catch
 			{
-				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ()))
-				{
-					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
-				}
-				else
-				{
-					m_deferredSendMessages.Add (m);
-					m_deferredSendUris.Add (uri);
-				}
+				m_deferredSendMessages.Add (m);
+				m_deferredSendUris.Add (uri);				
 			}
+		}
+		
+		public void ResendToAnotherNode (ReceiveMessageEventArgs eventargs)
+		{
+			Message m = eventargs.m_message;
+			string uri = m.PopString ();
+			Send (m.MessageForResending, uri);
 		}
 		
 		// Use this Send mechanism to _not_ retry for failed
@@ -149,7 +150,15 @@ namespace comm
 				m_deferredSendMessages.Remove (m);
 				m_deferredSendUris.Remove (uri);
 				
-				Send (m, uri);
+				
+				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ()))
+				{
+					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
+				}
+				else
+				{
+					Send (m, uri);
+				}
 				i++;
 			}
 		}

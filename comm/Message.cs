@@ -14,6 +14,12 @@ namespace comm
 		private List<string> m_recipientUserNames;
 		private Stack<object> m_items;
 		
+		// TODO: Might want to get rid of this
+		public Message MessageForResending {
+			get;
+			set;			
+		}
+				
 		public Message ()
 		{
 			m_items = new Stack<object>();

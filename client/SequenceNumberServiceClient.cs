@@ -22,7 +22,7 @@ namespace client
 			m_client.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sequencenumber",
 			                                                           new ReceiveCallbackType (Receive));
 			m_client.m_sendReceiveMiddleLayer.RegisterFailureCallback ("sequencenumber",
-			                                                           new ReceiveCallbackType (ReceiveFailure));
+			                                                           new ReceiveCallbackType (ReceiveFailure));		
 		}
 		
 		public int RequestSequenceNumber ()
