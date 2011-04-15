@@ -25,6 +25,11 @@ namespace client
 			                                                           new ReceiveCallbackType (ReceiveFailure));
 		}
 		
+		public void RotateMaster ()
+		{
+			m_client.RotateMaster ();
+		}
+		
 		public string Lookup (string user)
 		{
 			lock (this){

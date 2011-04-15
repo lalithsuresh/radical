@@ -112,7 +112,7 @@ namespace comm
 		public void ResendToAnotherNode (ReceiveMessageEventArgs eventargs)
 		{
 			DebugLogic ("Resending to another node");
-			Message m = eventargs.m_message;
+			Message m = eventargs.m_message;			
 			string uri = m.PopString ();
 			Send (m.MessageForResending, uri);
 		}
