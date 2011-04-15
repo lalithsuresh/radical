@@ -22,7 +22,7 @@ namespace client
 		public LookupServiceClient m_lookupService;
 		public SequenceNumberServiceClient m_sequenceNumberService;
 		public ConnectionServiceClient m_connectionServiceClient;
-		
+				
 		// Client properties.
 		// C# naming conventions require us to abandon
 		// our own naming conventions. -- Lalith x-(
@@ -41,6 +41,11 @@ namespace client
 			set;
 		}
 		
+		public string CurrentMasterServer {
+			get;
+			set;
+		}
+		
 		public string PuppetMasterAddress {
 			get;
 			set;
@@ -48,6 +53,13 @@ namespace client
 		
 		public Client ()
 		{			
+		}
+		
+		public void RotateMaster ()
+		{
+			int i = ServerList.IndexOf (CurrentMasterServer);		
+			i = i + 1;
+			CurrentMasterServer = ServerList[i % ServerList.Count];
 		}
 		
 		public void LoadConfig () 

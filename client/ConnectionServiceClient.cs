@@ -22,6 +22,10 @@ namespace client
 			                                                           new ReceiveCallbackType (Receive));
 			m_client.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("disconnect",
 			                                                           new ReceiveCallbackType (Receive));
+			m_client.m_sendReceiveMiddleLayer.RegisterFailureCallback ("connect",
+			                                                           new ReceiveCallbackType (ReceiveFailure));
+			m_client.m_sendReceiveMiddleLayer.RegisterFailureCallback ("disconnect",
+			                                                           new ReceiveCallbackType (ReceiveFailure));
 		}
 		
 		public bool Connect ()
@@ -56,6 +60,16 @@ namespace client
 			
 			return true;
 			// TODO: For now, no need to block on disconnect
+		}
+		
+		public void ReceiveFailure (ReceiveMessageEventArgs eventargs)
+		{
+			Message m = eventargs.m_message;
+			
+			// Update response string and manually
+			// reset the waiting Lookup() thread
+			m_client.RotateMaster ();
+			m_client.m_sendReceiveMiddleLayer.Send (m, m_client.CurrentMasterServer);
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)

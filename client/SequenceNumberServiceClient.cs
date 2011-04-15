@@ -21,6 +21,8 @@ namespace client
 			m_client = client;
 			m_client.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sequencenumber",
 			                                                           new ReceiveCallbackType (Receive));
+			m_client.m_sendReceiveMiddleLayer.RegisterFailureCallback ("sequencenumber",
+			                                                           new ReceiveCallbackType (ReceiveFailure));
 		}
 		
 		public int RequestSequenceNumber ()
@@ -38,6 +40,16 @@ namespace client
 				
 				return m_sequenceNumberToReturn;
 			}
+		}
+		
+		public void ReceiveFailure (ReceiveMessageEventArgs eventargs)
+		{
+			Message m = eventargs.m_message;
+			
+			// Update response string and manually
+			// reset the waiting Lookup() thread
+			m_client.RotateMaster ();
+			m_client.m_sendReceiveMiddleLayer.Send (m, m_client.CurrentMasterServer);
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
