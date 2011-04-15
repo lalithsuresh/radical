@@ -76,7 +76,7 @@ namespace client
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
-			
+			CurrentMasterServer = ServerList[0];
 			string puppetControlled = ConfigReader.GetConfigurationValue ("puppetmaster");
 			if (puppetControlled != null)
 			{

@@ -60,7 +60,7 @@ namespace server
 			{
 				// TODO: reply, in future: redirect question? 
 				DebugInfo ("Got request intended for master.");
-				m_server.m_replicationService.SendImNotMasterMessage (message.GetSourceUserName ());
+				m_server.m_replicationService.SendImNotMasterMessage (message);
 				return;
 			}
 			

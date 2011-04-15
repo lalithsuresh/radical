@@ -85,7 +85,9 @@ namespace client
 			else if (String.Compare (type, "readcalendar", true) == 0) 
 			{
 				DebugInfo ("Puppet Master says: ReadCalendar");
-				SendInfoMsgToPuppetMaster (m_client.ReadCalendar ());				
+				string ret = m_client.ReadCalendar ();
+				DebugInfo ("ReadCalendar: {0}", ret);
+				SendInfoMsgToPuppetMaster (ret);
 			}
 		}
 		

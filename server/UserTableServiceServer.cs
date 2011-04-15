@@ -127,7 +127,7 @@ namespace server
 				{
 					// TODO: reply, in future: redirect question? 
 					DebugInfo ("Got request intended for master.");
-					m_server.m_replicationService.SendImNotMasterMessage (m.GetSourceUserName ());
+					m_server.m_replicationService.SendImNotMasterMessage (m);
 					return;
 				}
 				
@@ -151,7 +151,7 @@ namespace server
 				{
 					// TODO: reply, in future: redirect question? 
 					DebugInfo ("Got request intended for master.");
-					m_server.m_replicationService.SendImNotMasterMessage (m.GetSourceUserName ());
+					m_server.m_replicationService.SendImNotMasterMessage (m);
 					return;
 				}
 				

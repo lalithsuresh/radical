@@ -103,13 +103,15 @@ namespace server
 			m_pingTimer.Stop ();
 		}
 		
-		public void SendImNotMasterMessage (string username)
+		public void SendImNotMasterMessage (Message msg)
 		{
+			DebugInfo ("Asking {0} to resend to {1}", msg.GetSourceUserName (), CurrentMaster);
 			Message m = new Message ();
-			m.SetMessageType ("notmaster");
-			m.SetDestinationUsers (username);
+			m.SetMessageType ("resend");
+			m.SetDestinationUsers (msg.GetSourceUserName ());
+			m.MessageForResending = msg;
 			m.SetSourceUserName (m_server.UserName);
-			m.PushString (CurrentMaster);
+			m.PushString (m_server.m_userTableService.Lookup (CurrentMaster));
 			m_server.m_sendReceiveMiddleLayer.Send (m);
 		}
 		
