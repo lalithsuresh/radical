@@ -184,9 +184,9 @@ namespace client
 			m_calendarService.Reserve (description, userlist, slotlist);
 		}
 		
-		public void ReadCalendar (string username) 
+		public string ReadCalendar () 
 		{
-			// TODO: implement this
+			return m_calendarService.ReadCalendar ();
 		}
 	}
 }
