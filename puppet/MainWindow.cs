@@ -65,10 +65,12 @@ public partial class MainWindow : Gtk.Window
 				}
 				
 			}
-		}
+		} 
+		
 		TextIter iterator = textMain.Buffer.EndIter;
 		textMain.Buffer.Insert(ref iterator, String.Format ("\n{0}", msg.Notification));
-		textMain.ScrollToIter(textMain.Buffer.EndIter, 0, false, 0, 0);
+		textMain.ScrollToIter(textMain.Buffer.EndIter, 0, false, 0, 0);		
+		
 	}
 	
 	protected virtual void OnButtonExitClicked (object sender, System.EventArgs e)
