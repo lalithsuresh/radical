@@ -56,10 +56,10 @@ namespace client
 		}
 		
 		public void RotateMaster ()
-		{
+		{			
 			int i = ServerList.IndexOf (CurrentMasterServer);		
 			i = i + 1;
-			CurrentMasterServer = ServerList[i % ServerList.Count];
+			CurrentMasterServer = ServerList[i % ServerList.Count];			
 		}
 		
 		public void LoadConfig () 
@@ -120,7 +120,8 @@ namespace client
 			
 			m_lookupService = new LookupServiceClient ();
 			m_lookupService.SetClient (this);
-			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);			
+			m_sendReceiveMiddleLayer.SetLookupCallback (m_lookupService.Lookup);		
+			m_sendReceiveMiddleLayer.SetRotateMasterCallback (m_lookupService.RotateMaster);
 			DebugInfo ("Started lookup service");
 			
 			m_sequenceNumberService = new SequenceNumberServiceClient (); 

@@ -128,6 +128,10 @@ namespace comm
 		public object Clone ()
 		{
 			Message m = new Message ();
+			m.SetSourceUri (this.GetSourceUri ());
+			m.SetSourceUserName (this.GetSourceUserName ());
+			m.SetMessageType (this.GetMessageType ());
+			m.SetDestinationUsers (this.GetDestinationUsers ());			
 			m.m_items = this.m_items;
 			return m;
 		}

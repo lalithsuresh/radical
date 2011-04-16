@@ -65,7 +65,7 @@ namespace client
 		public void ReceiveFailure (ReceiveMessageEventArgs eventargs)
 		{
 			Message m = eventargs.m_message;
-			
+			DebugLogic ("Master is now {0}", m_client.CurrentMasterServer);
 			// Update response string and manually
 			// reset the waiting Lookup() thread
 			m_client.RotateMaster ();
