@@ -1,0 +1,53 @@
+RADICAL - Really Awesome Distributed Internet Calendar
+
+Prologue: 
+	This application is developed as a course project of PADI 
+	(a Distributed Systems) course. 
+
+	A client can without intervention from a central source schedule events
+	with other clients. It uses a central server to locate other connected 
+	clients, but the scheduling is fully decentralised. 
+
+	The server runs in groups of three. Its data is replicated within
+	the group. At most one server failure is tolerated. 
+
+	To faciliate local testing, a so called Puppet Master is available. This
+	runs a simplistic GUI which reads an instruction file (puppet/example.txt)
+	and starts clients, sends instructions to them, and displays their results. 
+
+Requirements: 
+	This has only been tested with Mono. 
+	GTK# required for the Puppet Master.
+	A bunch of free ports on 12000 and 14000 if you run the Puppet Master.
+
+Running: 
+	Always start one server first, then two replicas. The servers will determine
+	who is the master and do initial bootstrapping. Each server has its own 
+	configuration file. Examples are provided for local usage. 
+
+	Clients, Servers, and the Puppet Master all requires a configuration file. 
+	They should be self-explanatory. Make sure that if you want to run the Puppet 
+	Master you must specify the full path of the client executable and a special 
+	"generic" configuration file. 
+
+	Clients may be started manually and register with the Puppet Master. In this
+	case, make sure the Puppet Master is started first. 
+
+Debugging: 
+	It is possible to activate debugging through each configuration file. Add or 
+	uncomment classes that you want to enable debugging for. 
+
+Testing: 
+	It is easiest to test the whole thing using the Puppet Master and an example
+	script. There is also a mechanism to stress test the servers by running
+	many many clients (client.exe --stress). Values for testing are hard coded though. 
+	Check StressTestClient.cs if you're interested. 
+
+Developing: 	
+	Use Monodevelop 2.2 or later. 
+	Requires GTK# to compile and run the Puppet Master GUI.
+
+Authors: 
+	Lalith Suresh <suresh.lalith@gmail.com>
+	Marcus Ljungblad <marcus@ljungblad.com>
+	Bruno Pereira 
