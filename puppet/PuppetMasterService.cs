@@ -98,7 +98,7 @@ namespace puppet
 			} 
 			else if (m.GetMessageType ().Equals ("puppet_info")) 
 			{
-				string msg = String.Format ("PuppetInfo [{0}] {1}", m.GetSourceUserName (), m.PopString ());
+				string msg = String.Format ("[{0}] {1}", m.GetSourceUserName (), m.PopString ());
 				m_puppetMaster.NotifySubscribers (msg, m.GetSourceUserName ());
 			}
 			else
@@ -155,7 +155,14 @@ namespace puppet
 		{
 			foreach (Process c in SpawnedClients.Values) 
 			{
-				c.Kill ();
+				try 
+				{
+					c.Kill ();
+				} 
+				catch (InvalidOperationException)
+				{
+					DebugInfo ("Client {0} already killed.", c.StartInfo.Arguments);
+				}
 			}
 		}
 	}

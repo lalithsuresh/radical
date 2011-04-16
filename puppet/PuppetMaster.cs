@@ -55,7 +55,7 @@ namespace puppet
 		}
 		
 		public PuppetMaster ()
-		{		
+		{			
 		}
 		
 		public void LoadConfig (string config) 

@@ -147,10 +147,11 @@ namespace client
 				// Automatically connect when spawned
 				Connect ();
 				
+				m_puppetService.SendInfoMsgToPuppetMaster ("Ready to rock \\o/");
+				
 				DebugInfo ("Started puppet service");
 			}
-			
-		
+					
 			
 			/*
 			m_connectionServiceClient.Connect ();			

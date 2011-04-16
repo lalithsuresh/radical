@@ -33,6 +33,51 @@ public partial class MainWindow : Gtk.Window
 		
 		m_puppetMaster.RegisterNotificationSubscriber (new puppet.ReceiveNotificationsCallbackType 
 		                                               (NotificationUpdate));
+		
+		
+		/*
+		Gtk.TreeViewColumn userColumn = new Gtk.TreeViewColumn ();
+		userColumn.Title = "User";
+		Gtk.CellRendererText userColumnCell = new Gtk.CellRendererText ();
+		userColumn.PackStart (userColumnCell, true);
+		userColumn.SetCellDataFunc (userColumnCell, new Gtk.TreeCellDataFunc (RenderUser));
+		
+		
+		Gtk.TreeViewColumn statusColumn = new Gtk.TreeViewColumn ();
+		statusColumn.Title = "Status";
+		Gtk.CellRendererText statusColumnCell = new Gtk.CellRendererText ();
+		statusColumn.PackStart (statusColumnCell, true);
+		statusColumn.SetCellDataFunc (statusColumnCell, new Gtk.TreeCellDataFunc (RenderStatus));
+		
+		
+		m_userStore = new Gtk.ListStore (typeof (string));		
+		
+		treeViewUsers.Model = m_userStore;
+		treeViewUsers.AppendColumn (userColumn);
+		//treeViewUsers.AppendColumn (statusColumn);
+		
+		ShowAll ();
+		*/
+	}
+	
+	protected void RenderUser (Gtk.TreeViewColumn column, Gtk.CellRenderer cell, Gtk.TreeModel model, Gtk.TreeIter iter)
+	{
+		puppet.UserStatus us = (puppet.UserStatus) model.GetValue (iter, 0);
+		(cell as Gtk.CellRendererText).Text = us.UserName;
+	}
+	
+	protected void RenderStatus (Gtk.TreeViewColumn column, Gtk.CellRenderer cell, Gtk.TreeModel model, Gtk.TreeIter iter)
+	{
+		puppet.UserStatus us = (puppet.UserStatus) model.GetValue (iter, 0);
+		if (us.Status.Equals ("offline"))
+		{
+			(cell as Gtk.CellRendererText).Foreground = "red";
+		}
+		else 
+		{
+			(cell as Gtk.CellRendererText).Foreground = "darkgreen";
+		}
+		(cell as Gtk.CellRendererText).Text = us.Status;
 	}
 		
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
@@ -59,11 +104,19 @@ public partial class MainWindow : Gtk.Window
 		{
 			if (msg.Notification.StartsWith ("REGISTERED")) 
 			{
-				m_userStore.AppendValues(msg.UserName);				
+				//puppet.UserStatus u = new puppet.UserStatus (msg.UserName, "online");				
+				m_userStore.AppendValues (msg.UserName);		
 			}
 			else if (msg.Notification.StartsWith ("DISCONNECT")) 
 			{								
-				// TODO: mark user disconnected
+				// TODO: mark user disconnected				
+				/*foreach (object[] o in m_userStore)
+				{
+					if (o[0].Equals (msg.UserName))
+					{
+						o[1] = "offline";
+					}					
+				}*/				
 			}
 		} 
 		
