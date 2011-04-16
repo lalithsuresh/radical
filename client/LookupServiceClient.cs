@@ -22,7 +22,7 @@ namespace client
 			m_client.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("lookup",
 			                                                           new ReceiveCallbackType (Receive));
 			m_client.m_sendReceiveMiddleLayer.RegisterFailureCallback ("lookup",
-			                                                           new ReceiveCallbackType (ReceiveFailure));
+			                                                           new ReceiveCallbackType (ReceiveFailure));			
 		}
 		
 		public void RotateMaster ()

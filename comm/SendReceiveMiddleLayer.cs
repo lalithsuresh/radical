@@ -11,13 +11,14 @@ namespace comm
 {
 	public delegate void ReceiveCallbackType(ReceiveMessageEventArgs e);
 	public delegate string LookupCallbackType(string user);
+	public delegate void RotateMasterCallbackType();
 	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
 		// services registered
 		private Dictionary<string, ReceiveCallbackType> m_registerReceiveMap = new Dictionary<string, ReceiveCallbackType> ();
 		private Dictionary<string, ReceiveCallbackType> m_registerFailureReceiveMap = new Dictionary<string, ReceiveCallbackType> ();
-		
+				
 		// comm components
 		private PerfectPointToPointSend m_perfectPointToPoint;
 		private List<Message> m_deferredSendMessages = new List<Message> ();
@@ -26,6 +27,7 @@ namespace comm
 		
 		// lookup callback
 		private LookupCallbackType m_lookupCallback;
+		private RotateMasterCallbackType m_rotateMasterCallback;
 		
 		public SendReceiveMiddleLayer ()
 		{
@@ -48,6 +50,11 @@ namespace comm
 		public void SetLookupCallback (LookupCallbackType cb)
 		{
 			m_lookupCallback = cb;
+		}
+		
+		public void SetRotateMasterCallback (RotateMasterCallbackType cb)
+		{
+			m_rotateMasterCallback = cb;
 		}
 		
 		public void Deliver (Message m) 
@@ -104,7 +111,8 @@ namespace comm
 			}
 			catch
 			{
-				m_deferredSendMessages.Add (m);
+				Message msgclone = (Message) m.Clone ();
+				m_deferredSendMessages.Add (msgclone);
 				m_deferredSendUris.Add (uri);				
 			}
 		}
@@ -114,6 +122,7 @@ namespace comm
 			DebugLogic ("Resending to another node");
 			Message m = eventargs.m_message;			
 			string uri = m.PopString ();
+			m_rotateMasterCallback ();
 			Send (m.MessageForResending, uri);
 		}
 		
@@ -125,7 +134,7 @@ namespace comm
 		}
 		
 		private void DeferredSend (object state)
-		{
+		{			
 			// Retry every 5 seconds
 			
 			// TODO: Verify if the below sequence is race condition
@@ -139,21 +148,24 @@ namespace comm
 			{
 				DebugFatal ("#DeferredMessages != #DeferredUris");
 			}
-				
-			int count = m_deferredSendMessages.Count;
+							
+			msgarr = m_deferredSendMessages.ToArray ();
+			uriarr = m_deferredSendUris.ToArray ();
+			
+			int count = m_deferredSendMessages.Count;			
 			int i = 0;
 			while (i < count)
 			{				
 				Message m = msgarr[i];
 				string uri = uriarr[i];
+								
+				DebugInfo ("DeferredSend for message of type {0}", m.GetMessageType ());
 				
-				DebugInfo ("DeferredSend for message of typ {0}, queue size {1}", m.GetMessageType (), m_deferredSendMessages.Count);
 				m_deferredSendMessages.Remove (m);
 				m_deferredSendUris.Remove (uri);
 				
-				
 				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ()))
-				{
+				{						
 					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
 				}
 				else
@@ -172,7 +184,7 @@ namespace comm
 		
 		public void RegisterFailureCallback (String service, ReceiveCallbackType cb)
 		{
-			DebugLogic ("Registered subscriber for {0} events", service);
+			DebugLogic ("Registered failure subscriber for {0} events", service);
 			m_registerFailureReceiveMap.Add (service, cb);
 		}
 	}
