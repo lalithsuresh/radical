@@ -23,10 +23,13 @@ namespace comm
 		private PerfectPointToPointSend m_perfectPointToPoint;
 		private List<Message> m_deferredSendMessages = new List<Message> ();
 		private List<string> m_deferredSendUris = new List<string> ();
+		private List<string> m_deferredSendDestination = new List<string> ();
 		private Timer m_deferredSendTimer;
 		
 		// lookup callback
 		private LookupCallbackType m_lookupCallback;
+		
+		// rotate master callback
 		private RotateMasterCallbackType m_rotateMasterCallback;
 		
 		public SendReceiveMiddleLayer ()
@@ -86,6 +89,7 @@ namespace comm
 			// inspect message destinations, if multiple, use group_multicast else just send with p2p
 			List<string> destinations = m.GetDestinationUsers ();
 			List<string> destinationUris = new List<string> ();
+			List<string> destinationcopy = new List<string> ();
 			foreach (string destination in destinations) 
 			{
 				DebugInfo ("Performing lookup for {0}", destination);
@@ -94,16 +98,18 @@ namespace comm
 				DebugInfo ("Lookup returned {0}", destination_uri);
 				
 				destinationUris.Add (destination_uri);
+				destinationcopy.Add (destination);
 			}
 			
 			foreach (string uri in destinationUris)
 			{				
-				Send (m, uri);				
+				Send (m, uri, destinationcopy[0]);
+				destinationcopy.RemoveAt (0);
 			}
 		}
 		
 		// Use this to send out directly
-		public void Send (Message m, string uri)
+		public void Send (Message m, string uri, string destination)
 		{
 			try
 			{
@@ -113,7 +119,7 @@ namespace comm
 			{
 				Message msgclone = (Message) m.Clone ();
 				m_deferredSendMessages.Add (msgclone);
-				m_deferredSendUris.Add (uri);				
+				m_deferredSendUris.Add (destination);
 			}
 		}
 		
@@ -123,7 +129,7 @@ namespace comm
 			Message m = eventargs.m_message;			
 			string uri = m.PopString ();
 			m_rotateMasterCallback ();
-			Send (m.MessageForResending, uri);
+			Send (m.MessageForResending, uri, "SERVER");
 		}
 		
 		// Use this Send mechanism to _not_ retry for failed
@@ -164,13 +170,17 @@ namespace comm
 				m_deferredSendMessages.Remove (m);
 				m_deferredSendUris.Remove (uri);
 				
-				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ()))
+				// Always do another lookup since
+				// the other end might be on a 
+				// different uri after reconnection
+				string bleh = m_lookupCallback (uri);
+				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ())				    )
 				{						
 					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
 				}
 				else
 				{
-					Send (m, uri);
+					Send (m, bleh, uri);
 				}
 				i++;
 			}

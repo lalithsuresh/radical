@@ -84,7 +84,7 @@ namespace client
 			// Update response string and manually
 			// reset the waiting Lookup() thread
 			m_client.RotateMaster ();
-			m_client.m_sendReceiveMiddleLayer.Send (m, m_client.CurrentMasterServer);
+			m_client.m_sendReceiveMiddleLayer.Send (m, m_client.CurrentMasterServer, "SERVER");
 		}
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
