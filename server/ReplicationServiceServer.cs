@@ -112,7 +112,7 @@ namespace server
 			m.MessageForResending = msg;
 			m.SetSourceUserName (m_server.UserName);
 			m.PushString (m_server.m_userTableService.Lookup (CurrentMaster));
-			m_server.m_sendReceiveMiddleLayer.Send (m);
+			m_server.m_sendReceiveMiddleLayer.Send (m,msg.GetSourceUri (), msg.GetSourceUserName ());
 		}
 		
 		public void ReplicateUserConnect (string username, string uri) 
