@@ -55,7 +55,7 @@ namespace puppet
 		}
 		
 		public PuppetMaster ()
-		{		
+		{			
 		}
 		
 		public void LoadConfig (string config) 
@@ -130,7 +130,7 @@ namespace puppet
 		
 		public void RegisterNotificationSubscriber (ReceiveNotificationsCallbackType cb)
 		{
-			m_notificationCallback = cb;
+			m_notificationCallback += cb;
 		}
 		
 		public void NotifySubscribers (string msg) 

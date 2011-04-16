@@ -728,6 +728,12 @@ namespace client
 			
 			DebugLogic ("Reservation ID: {0}, Slot: {1} has COMMITTED", reservationSequenceNumber, s);
 			
+			if (m_client.m_isPuppetControlled)
+			{
+				m_client.m_puppetService.SendInfoMsgToPuppetMaster ("Reservation ID: {0}, Slot: {1} has COMMITTED", 
+				                                                    reservationSequenceNumber, s);
+			}
+			
 			// Perform cleanup of all reservation objects
 			foreach (int i in res.m_slotNumberList)
 			{

@@ -8,7 +8,7 @@ namespace client
 	public class Client : PadicalObject
 	{
 		// puppet properties
-		private bool m_isPuppetControlled;
+		public bool m_isPuppetControlled;
 		private bool m_isStressTestClient = false;
 		public PuppetClientService m_puppetService;
 		public PerfectPointToPointSend m_puppetPerfectPointToPointSend;
@@ -147,10 +147,11 @@ namespace client
 				// Automatically connect when spawned
 				Connect ();
 				
+				m_puppetService.SendInfoMsgToPuppetMaster ("Ready to rock \\o/");
+				
 				DebugInfo ("Started puppet service");
 			}
-			
-		
+					
 			
 			/*
 			m_connectionServiceClient.Connect ();			
@@ -180,13 +181,16 @@ namespace client
 		// All client side APIs are listed belowS
 		
 		public bool Connect () 
-		{			
+		{		
+			m_perfectPointToPointSend.Unpause ();
 			return m_connectionServiceClient.Connect ();			
 		}
 		
 		public bool Disconnect () 
 		{
-			return m_connectionServiceClient.Disconnect ();
+			bool status = m_connectionServiceClient.Disconnect ();
+			m_perfectPointToPointSend.Pause ();
+			return status;
 		}
 		
 		public int GetSequenceNumber ()
@@ -196,7 +200,18 @@ namespace client
 		
 		public void Reserve (string description, List<string> userlist, List<int> slotlist)
 		{
-			// TODO: Don't forget to do Sanity checks
+			// sanity checks
+			if (String.IsNullOrEmpty (description))			
+				DebugFatal ("Reservation Description is not valid.");				
+			
+			if (userlist.Count == 0 || slotlist.Count == 0)
+				DebugFatal ("User or slot list of invalid length.");
+			
+			foreach (string user in userlist) {
+				if (String.IsNullOrEmpty (user))
+					DebugFatal ("Invalid user in user list.");
+			}
+			
 			m_calendarService.Reserve (description, userlist, slotlist);
 		}
 		

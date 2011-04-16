@@ -64,7 +64,11 @@ namespace client
 			else if (String.Compare (type, "disconnect", true) == 0)
 			{
 				DebugInfo ("Puppet Master says: Disconnect");
-				m_client.Disconnect ();
+				if (m_client.Disconnect ()) 
+				{
+					SendInfoMsgToPuppetMaster ("{0} disconnected", m_client.UserName);
+				}
+				
 			}
 			else if (String.Compare (type, "reservation", true) == 0) 
 			{				
@@ -82,7 +86,7 @@ namespace client
 				
 				m_client.Reserve (description, userlist, slots);
 			}
-			else if (String.Compare (type, "readcalendar", true) == 0) 
+			else if (String.Compare (type, "read_calendar", true) == 0) 
 			{
 				DebugInfo ("Puppet Master says: ReadCalendar");
 				string ret = m_client.ReadCalendar ();
