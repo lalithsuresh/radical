@@ -22,7 +22,6 @@ namespace comm
 		// comm components
 		private PerfectPointToPointSend m_perfectPointToPoint;
 		private List<Message> m_deferredSendMessages = new List<Message> ();
-		private List<string> m_deferredSendUris = new List<string> ();
 		private List<string> m_deferredSendDestination = new List<string> ();
 		private Timer m_deferredSendTimer;
 		
@@ -119,7 +118,7 @@ namespace comm
 			{
 				Message msgclone = (Message) m.Clone ();
 				m_deferredSendMessages.Add (msgclone);
-				m_deferredSendUris.Add (destination);
+				m_deferredSendDestination.Add (destination);
 			}
 		}
 		
@@ -147,40 +146,40 @@ namespace comm
 			// free.
 			
 			Message [] msgarr = new Message [m_deferredSendMessages.Count];
-			string [] uriarr = new string [m_deferredSendUris.Count];
+			string [] dstarr = new string [m_deferredSendDestination.Count];
 			
 			// sanity check
-			if (m_deferredSendMessages.Count != m_deferredSendUris.Count)
+			if (m_deferredSendMessages.Count != m_deferredSendDestination.Count)
 			{
 				DebugFatal ("#DeferredMessages != #DeferredUris");
 			}
 							
 			msgarr = m_deferredSendMessages.ToArray ();
-			uriarr = m_deferredSendUris.ToArray ();
+			dstarr = m_deferredSendDestination.ToArray ();
 			
 			int count = m_deferredSendMessages.Count;			
 			int i = 0;
 			while (i < count)
 			{				
 				Message m = msgarr[i];
-				string uri = uriarr[i];
+				string dst = dstarr[i];
 								
 				DebugInfo ("DeferredSend for message of type {0}", m.GetMessageType ());
 				
 				m_deferredSendMessages.Remove (m);
-				m_deferredSendUris.Remove (uri);
+				m_deferredSendDestination.Remove (dst);
 				
 				// Always do another lookup since
 				// the other end might be on a 
 				// different uri after reconnection
-				string bleh = m_lookupCallback (uri);
+				string uri = m_lookupCallback (dst);
 				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ())				    )
 				{						
 					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
 				}
 				else
 				{
-					Send (m, bleh, uri);
+					Send (m, uri, dst);
 				}
 				i++;
 			}
