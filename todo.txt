@@ -1,40 +1,37 @@
-Todo for Radical
-
-- Persistant storage of calendar
-  - de/serialise to bytes
-- Calendar maintains a number of lists, one for each state of slot
-  - free only if not in any of above lists
-- Cache/store messages sent
-- What happens if you cannot deliver a message 
-  - error messages? 
-  - how long do we wait? do we have to wait? live without timeouts
-
-- Lookup for batch users
-- prevent registering restricted name
-- method synchronization and blocking calls
-- fix recv msg type in client (connect ACKs)
-- Better way to ack disconnect msgs
-- check return type for lookup response
-
-Puppet master
-- add PuppetServiceClient to client project
-- PuppetMaster has two services: PuppetMasterService and StatisticsService (for evaluation purposes of the protocol) 
-
-
-Related but not project specific notes
-/////////////////////////////////////
-ChatServer
-- void SendMsg (string nick, string msg) 
-- void Register (string nick, string clientURL) 
-
-ChatClient
-- void ReceiveMsg (string nick, string msg)
-
-Dirty items in Remoting
-- Not possible to send from a remoting call... so called remoting loops
--- Basically a remote call is triggered from a remote call. The channel will be locked. 
-
-- The only thing which can change a GUI is the thread which created it. Solution: 
- 
-public delegate void DelegateAddMessage(string nick, string msg);
-Form1.Invoke(new DelegateAddMessage(Form1.AddMsg), new Object[] { nick, msg });
+puppet/LookupServicePuppet.cs:30:				// TODO: Return server 1. Will be changed later
+puppet/MainWindow.cs:112:				// TODO: mark user disconnected				
+puppet/ConnectionServicePuppet.cs:47:			// TODO: Don't forget to notify all peers about leave at this point
+puppet/ConnectionServicePuppet.cs:57:			// TODO: For now, no need to block on disconnect
+puppet/ConnectionServicePuppet.cs:62:			// TODO: Change to connect ACK type or something
+comm/SendReceiveMiddleLayer.cs:85:			// TODO: Later, we want to perform whole lookups
+comm/SendReceiveMiddleLayer.cs:95:				// TODO: If server returns NO SUCH USER, then bail out
+comm/SendReceiveMiddleLayer.cs:145:			// TODO: Verify if the below sequence is race condition
+comm/Message.cs:17:		// TODO: Might want to get rid of this
+client/ClientUnitTests.cs:14:	 * TODO: Launch server instances from within
+client/ClientUnitTests.cs:49:			// TODO: send a gazillion of these
+client/LookupServiceClient.cs:36:				// TODO: This should later move into a lookup for
+client/LookupServiceClient.cs:38:				// TODO: It should also implement a cache
+client/LookupServiceClient.cs:40:				// TODO: Avoid restricted "SERVER" username
+client/CalendarServiceClient.cs:158:			// TODO: Probably need sanity checks here
+client/CalendarServiceClient.cs:171:			// TODO: Make sure m_client VALIDATES the inputs?
+client/CalendarServiceClient.cs:172:			// TODO: At this point, we assume all requested slots are free.
+client/CalendarServiceClient.cs:201:					// TODO: Probably need internal methods for this
+client/CalendarServiceClient.cs:226:			 * - SubType TODO: Later register more types up there.
+client/CalendarServiceClient.cs:265:				 * - SubType TODO: Later register more types up there.
+client/CalendarServiceClient.cs:366:					// TODO: Probably need internal methods for this
+client/CalendarServiceClient.cs:465:			 * 		to ABORTED. TODO: Should we notify others?
+client/CalendarServiceClient.cs:595:			 * 			your neighbours. TODO: Might need ping
+client/CalendarServiceClient.cs:707:				// TODO: Handle 2/1, 1/2 deadlock.
+client/CalendarServiceClient.cs:860:				// TODO:send everyone abort messages.
+client/ConnectionServiceClient.cs:52:			// TODO: Don't forget to notify all peers about leave at this point
+client/ConnectionServiceClient.cs:62:			// TODO: For now, no need to block on disconnect
+client/ConnectionServiceClient.cs:77:			// TODO: Change to connect ACK type or something
+server/UserTableServiceServer.cs:128:					// TODO: reply, in future: redirect question? 
+server/UserTableServiceServer.cs:152:					// TODO: reply, in future: redirect question? 
+server/UserTableServiceServer.cs:163:				// TODO: Find a way to get an ACK across
+server/ReplicationServiceServer.cs:65:			// TODO: This map should be done elsewhere and less statically
+server/ReplicationServiceServer.cs:218:				// TODO: only reply if we've bootstrapped
+server/ReplicationServiceServer.cs:248:					// TODO: need to lock usertable and pause replying to connect/disconnect requests
+server/SequenceNumberServiceServer.cs:42:		 * TODO: Talk with all servers before doing
+server/SequenceNumberServiceServer.cs:47:			// TODO: check if I am master and should reply to this, or forward
+server/SequenceNumberServiceServer.cs:61:				// TODO: reply, in future: redirect question? 
