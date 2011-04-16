@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Gtk;
 
 public partial class MainWindow : Gtk.Window
@@ -10,6 +11,9 @@ public partial class MainWindow : Gtk.Window
 	// gui elements
 	protected Gtk.ListStore m_userStore;
 	
+	// data sources
+	
+	
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
@@ -17,7 +21,7 @@ public partial class MainWindow : Gtk.Window
 		// add column to tree
 		treeViewUsers.AppendColumn ("Users", new Gtk.CellRendererText (), "text", 0);
 		
-		// set model for tree
+		// set model for tree		
 		m_userStore = new Gtk.ListStore(typeof (string));
 		treeViewUsers.Model = m_userStore;
 		this.ShowAll ();
@@ -49,37 +53,30 @@ public partial class MainWindow : Gtk.Window
 	}
 	
 	public void NotificationUpdate (puppet.NotificationEventArgs msg) 
-	{	
+	{		
+		Console.WriteLine ("MSG: {0}", msg.Notification);
 		if (msg.UserName != null) 
 		{
 			if (msg.Notification.StartsWith ("REGISTERED")) 
 			{
-				m_userStore.AppendValues(msg.UserName);
-				return;
+				m_userStore.AppendValues(msg.UserName);				
 			}
 			else if (msg.Notification.StartsWith ("DISCONNECT")) 
-			{				
-				// TODO: mark user as disconnected
-				foreach (var item in treeViewUsers.AllChildren) {
-					Console.WriteLine (item);
-				}
-				
+			{								
+				// TODO: mark user disconnected
 			}
 		} 
 		
-		TextIter iterator = textMain.Buffer.EndIter;
-		textMain.Buffer.Insert(ref iterator, String.Format ("\n{0}", msg.Notification));
-		textMain.ScrollToIter(textMain.Buffer.EndIter, 0, false, 0, 0);		
-		
+		Gtk.Application.Invoke (delegate {
+			TextIter iterator = textMain.Buffer.EndIter;
+			textMain.Buffer.Insert(ref iterator, String.Format ("\n{0}", msg.Notification));
+			textMain.ScrollToIter(textMain.Buffer.EndIter, 0, false, 0, 0);					
+		});	
 	}
 	
 	protected virtual void OnButtonExitClicked (object sender, System.EventArgs e)
 	{
 		Application.Quit ();
 	}
-	
-	
-	
-	
+		
 }
-

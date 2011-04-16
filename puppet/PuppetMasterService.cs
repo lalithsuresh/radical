@@ -99,7 +99,7 @@ namespace puppet
 			else if (m.GetMessageType ().Equals ("puppet_info")) 
 			{
 				string msg = String.Format ("PuppetInfo [{0}] {1}", m.GetSourceUserName (), m.PopString ());
-				m_puppetMaster.NotifySubscribers (msg);
+				m_puppetMaster.NotifySubscribers (msg, m.GetSourceUserName ());
 			}
 			else
 			{
