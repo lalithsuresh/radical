@@ -16,11 +16,20 @@ namespace comm
 		private IDictionary m_channelProperties = new Hashtable ();
         public ManualResetEvent e = new ManualResetEvent(false);
 
+		// members
 		private SendReceiveMiddleLayer m_sendReceiveMiddleLayer;
 		private TcpChannel m_channel;
 		private PointToPointInterface m_pointToPoint; 
+		private ObjRef m_marshalRef;
+		
+		// delegates
 	    public delegate void RemoteAsyncDelegate(Message m);
 
+		// properties
+		public bool Paused {
+			get;
+			set;
+		}
 		
 		// for debugging/development purposes only
 		private PointToPointInterface m_dummy = null;
@@ -59,7 +68,9 @@ namespace comm
 			if (demuxer == null) 
 			{
 				DebugFatal ("Received null demuxer");
-			}		
+			}
+			
+			Paused = false;
 			
 			m_channelProperties["port"] = port.ToString ();
 			
@@ -76,7 +87,7 @@ namespace comm
 			// register tcp channel and connect p2p interface				
 			m_channel = new TcpChannel (m_channelProperties, null, null);
 			ChannelServices.RegisterChannel (m_channel, false);
-			RemotingServices.Marshal (m_pointToPoint, CHANNEL_NAME, typeof(PointToPointInterface));
+			m_marshalRef = RemotingServices.Marshal (m_pointToPoint, CHANNEL_NAME, typeof(PointToPointInterface));
 			
 			return true;
 		}
@@ -84,6 +95,26 @@ namespace comm
 		public void Stop ()
 		{
 			RemotingServices.Disconnect (m_pointToPoint);			
+		}
+		
+		public void Pause ()
+		{
+			if (!Paused) 
+			{
+				DebugInfo ("Pausing communication layer.");
+				RemotingServices.Unmarshal (m_marshalRef);
+				Paused = true;
+			}
+		}
+		
+		public void Unpause ()
+		{
+			if (Paused)
+			{
+				DebugInfo ("Ready to rock \\o/ again.");
+				m_marshalRef = RemotingServices.Marshal (m_pointToPoint, CHANNEL_NAME, typeof(PointToPointInterface));			
+				Paused = false;
+			}
 		}
 		
 		public string GetURI () 
