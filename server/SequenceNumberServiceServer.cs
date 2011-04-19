@@ -39,7 +39,7 @@ namespace server
 			}
 			else 
 			{
-				DebugLogic ("My sequence number is newer, use mine.");
+				DebugLogic ("Sequence number already up to date / use mine");
 				return false;
 			}
 		}
@@ -74,10 +74,17 @@ namespace server
 			response.SetMessageType ("sequencenumber");
 						
 			long nextSequenceNumber = GetSequenceNumber ();
-			response.PushString (nextSequenceNumber.ToString ());
+			
 			
 			// this is implictly a blocking call
-			m_server.m_replicationService.ReplicateSequenceNumber (nextSequenceNumber);
+			long sequenceNumberResponse = m_server.m_replicationService.ReplicateSequenceNumber (nextSequenceNumber);
+			
+			if (sequenceNumberResponse > nextSequenceNumber)
+			{				
+				nextSequenceNumber = sequenceNumberResponse;
+			}
+				
+			response.PushString (nextSequenceNumber.ToString ());
 			
 			m_server.m_sendReceiveMiddleLayer.Send (response);
 		}		

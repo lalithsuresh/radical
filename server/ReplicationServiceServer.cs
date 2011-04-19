@@ -20,6 +20,7 @@ namespace server
 		
 		// buffer
 		private string m_masterReplyBuffer;
+		private long m_sequenceNumberOutBuffer;
 				
 		// properties
 		public bool IsMaster {
@@ -145,16 +146,24 @@ namespace server
 			//}			
 		}
 		
-		public void ReplicateSequenceNumber (long number) 
+		public long ReplicateSequenceNumber (long number) 
 		{
 			//if (ShouldIReplicate ()) 
 			//{
-				DebugInfo ("Sending sequence number ({0}) replication request", number);			
-				Message m = new Message ();
-				m.PushString (number.ToString ());
-				m.PushString ("sequencenumber"); // subtyped message								
-				DistributeReplicationMessage (m);
-			//}
+			DebugInfo ("Sending sequence number ({0}) replication request", number);			
+			Message m = new Message ();
+			m.PushString (number.ToString ());
+			m.PushString ("sequencenumber"); // subtyped message
+			
+			m_sequenceNumberOutBuffer = number;
+			
+			// here's the lock - wait majority
+			DistributeReplicationMessage (m);					
+			
+			// align my view of sequence number if necessary
+			m_server.m_sequenceNumberService.SetSequenceNumber (m_sequenceNumberOutBuffer);
+			
+			return m_sequenceNumberOutBuffer;
 		}
 		
 		public void PrintReplicationList ()
@@ -183,8 +192,8 @@ namespace server
 				}
 				else if (subtype.Equals ("sequencenumber_ack")) 
 				{							
-					DebugLogic ("ACK replication request: SequenceNumber");
-								
+					DebugLogic ("ACK replication request: SequenceNumber");	
+					m_sequenceNumberOutBuffer = long.Parse(m.PopString ());
 					m_oSignalEvent.Set ();					
 				}
 				else if (subtype.Equals ("user_connect"))
@@ -302,8 +311,7 @@ namespace server
 			m.PushString (m_server.m_userTableService.UserTable.Count.ToString ());
 			m.PushString (m_server.m_sequenceNumberService.GetSequenceNumber ().ToString ());
 			return m;
-		}
-				
+		}						
 		
 		private void DistributeReplicationMessage (Message m) 
 		{
@@ -322,7 +330,7 @@ namespace server
 				}
 				
 				// wait for quorum
-				Block ();
+				Block ();							
 			}
 		}
 
@@ -351,17 +359,22 @@ namespace server
 		}
 		
 		private void HandleSequenceNumberReplication (string number, string replyTo) 
-		{			
+		{	
+			Message ack = new Message ();
+			ack.SetMessageType ("replicate");
+			ack.SetDestinationUsers (replyTo);
+			ack.SetSourceUserName (m_server.UserName);
+			
 			if (m_server.m_sequenceNumberService.SetSequenceNumber (Int32.Parse (number))) 
 			{
-				Message ack = new Message ();
-				ack.SetMessageType ("replicate");
-				ack.SetDestinationUsers (replyTo);
-				ack.SetSourceUserName (m_server.UserName);
-				ack.PushString (number);
-				ack.PushString ("sequencenumber_ack");	
-				m_server.m_sendReceiveMiddleLayer.Send (ack);
+				ack.PushString (number);				
 			}
+			else 
+			{
+				ack.PushString (m_server.m_sequenceNumberService.GetSequenceNumber ().ToString ());
+			}
+			ack.PushString ("sequencenumber_ack");
+			m_server.m_sendReceiveMiddleLayer.Send (ack);
 		}
 		
 		private void Block ()
