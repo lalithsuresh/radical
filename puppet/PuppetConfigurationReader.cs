@@ -143,7 +143,7 @@ namespace puppet
 				// slots				
 				string[] slots = r[2].Substring (0,r[2].Length-1).Split (',');
 				instruction.Slots = new List<string>();
-				for (int i = 0; i < data.Length; i++) 
+				for (int i = 0; i < slots.Length; i++) 
 				{
 					instruction.Slots.Add (slots[i].Trim ());				
 				}
