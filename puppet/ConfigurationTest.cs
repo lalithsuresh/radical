@@ -21,11 +21,22 @@ namespace puppet
 		[Test()]
 		public void ParseSimpleReservationLine ()
 		{
-			string line = "reservation {GroupMeeting; user1; 50}";
+			string line = "reservation {GroupMeeting; user1; 50 }";
 			PuppetInstruction instr = configreader.ParseInstruction (line);
 			Assert.IsTrue (String.Equals(instr.ApplyToUser, "user1"));
 			Assert.IsTrue (Int32.Parse (instr.Slots[0]) == 50);
 			//Assert.IsTrue (String.Equals(instr.Users[0], "user1"));
+			Assert.IsTrue (instr.Type == PuppetInstructionType.RESERVATION);
+		}
+		
+		[Test()]
+		public void ParseMediumReservationLine ()
+		{
+			string line = "reservation {R1; user1, user2; 50 }";
+			PuppetInstruction instr = configreader.ParseInstruction (line);
+			Assert.IsTrue (String.Equals(instr.ApplyToUser, "user1"));
+			Assert.IsTrue (Int32.Parse (instr.Slots[0]) == 50);
+			Assert.IsTrue (String.Equals(instr.Users[0], "user2"));
 			Assert.IsTrue (instr.Type == PuppetInstructionType.RESERVATION);
 		}
 
