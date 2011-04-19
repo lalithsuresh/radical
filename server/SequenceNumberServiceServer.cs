@@ -27,13 +27,20 @@ namespace server
 			m_server.m_sendReceiveMiddleLayer.RegisterReceiveCallback ("sequencenumber", new ReceiveCallbackType (Receive));
 		}
 		
-		public void SetSequenceNumber (long number) 
+		public bool SetSequenceNumber (long number) 
 		{
-			if (!m_server.m_replicationService.IsMaster && m_sequenceNumber < number) 
+			//if (!m_server.m_replicationService.IsMaster && m_sequenceNumber < number) 
+			if (m_sequenceNumber < number)
 			{
 				DebugInfo ("Updating sequence number on replication request. Old: {0} New: {1}",
 				           m_sequenceNumber, number);
 				m_sequenceNumber = number;
+				return true;
+			}
+			else 
+			{
+				DebugLogic ("My sequence number is newer, use mine.");
+				return false;
 			}
 		}
 		
@@ -54,15 +61,7 @@ namespace server
 		
 		public void Receive (ReceiveMessageEventArgs eventargs)
 		{
-			Message message = eventargs.m_message;
-						
-			if (!m_server.m_replicationService.IsMaster) 
-			{
-				// TODO: reply, in future: redirect question? 
-				DebugInfo ("Got request intended for master.");
-				m_server.m_replicationService.SendImNotMasterMessage (message);
-				return;
-			}
+			Message message = eventargs.m_message;									
 			
 			// All we need from the request is the source
 			// uri.

@@ -122,39 +122,39 @@ namespace server
 		
 		public void ReplicateUserConnect (string username, string uri) 
 		{
-			if (ShouldIReplicate ()) 
-			{
+			//if (ShouldIReplicate ()) 
+			//{
 				DebugInfo ("Sending UserConnect replication request");
 				Message m = new Message ();
 				m.PushString (uri);
 				m.PushString (username);
 				m.PushString ("user_connect");
 				DistributeReplicationMessage (m);
-			}
+			//}
 		}
 				
 		public void ReplicateUserDisconnect (string username) 
 		{
-			if (ShouldIReplicate ()) 
-			{
+			//if (ShouldIReplicate ()) 
+			//{
 				DebugInfo ("Sending UserDisconnect replication request");
 				Message m = new Message ();
 				m.PushString (username);
 				m.PushString ("user_disconnect");
 				DistributeReplicationMessage (m);
-			}			
+			//}			
 		}
 		
 		public void ReplicateSequenceNumber (long number) 
 		{
-			if (ShouldIReplicate ()) 
-			{
+			//if (ShouldIReplicate ()) 
+			//{
 				DebugInfo ("Sending sequence number ({0}) replication request", number);			
 				Message m = new Message ();
 				m.PushString (number.ToString ());
 				m.PushString ("sequencenumber"); // subtyped message								
 				DistributeReplicationMessage (m);
-			}
+			//}
 		}
 		
 		public void PrintReplicationList ()
@@ -211,6 +211,7 @@ namespace server
 					m_oSignalEvent.Set ();
 				}
 #endregion
+#region master-slave
 			} 
 			else if (m.GetMessageType ().Equals ("whoismaster"))
 			{		
@@ -251,7 +252,7 @@ namespace server
 				{
 					DebugLogic ("Got sync request from {0}", m.GetSourceUserName ());
 					// TODO: need to lock usertable and pause replying to connect/disconnect requests
-					Message reply = PackUserTable();
+					Message reply = PackSyncMessage ();
 					reply.SetMessageType ("sync_usertable_ack");
 					reply.SetDestinationUsers (m.GetSourceUserName ());
 					reply.SetSourceUserName (m_server.UserName);			
@@ -260,15 +261,18 @@ namespace server
 			}
 			else if (m.GetMessageType ().Equals ("sync_usertable_ack"))
 			{
-				UnPackUserTable (m);
+				UnPackSyncMessage (m);
 				DebugLogic ("Installing usertable from current master.");
 				m_oSignalEvent.Set ();
 			}
-		
+#endregion		
 		}
 		
-		private void UnPackUserTable (Message ack) 
+		private void UnPackSyncMessage (Message ack) 
 		{			
+			int sequenceNumber = Int32.Parse (ack.PopString ());
+			m_server.m_sequenceNumberService.SetSequenceNumber (sequenceNumber);
+			
 			int size = Int32.Parse (ack.PopString ());
 			for (int i = 0; i < size; i++)
 			{
@@ -287,7 +291,7 @@ namespace server
 			Block ();
 		}
 		
-		private Message PackUserTable ()
+		private Message PackSyncMessage ()
 		{
 			Message m = new Message ();			
 			foreach (string user in m_server.m_userTableService.UserTable.Keys)
@@ -296,6 +300,7 @@ namespace server
 				                             m_server.m_userTableService.UserTable[user]));				
 			}
 			m.PushString (m_server.m_userTableService.UserTable.Count.ToString ());
+			m.PushString (m_server.m_sequenceNumberService.GetSequenceNumber ().ToString ());
 			return m;
 		}
 				
@@ -315,6 +320,8 @@ namespace server
 					replMsg.SetDestinationUsers (replicationServer);					
 					m_server.m_sendReceiveMiddleLayer.Send (replMsg);
 				}
+				
+				// wait for quorum
 				Block ();
 			}
 		}
@@ -345,14 +352,16 @@ namespace server
 		
 		private void HandleSequenceNumberReplication (string number, string replyTo) 
 		{			
-			m_server.m_sequenceNumberService.SetSequenceNumber (Int32.Parse (number));				
-			Message ack = new Message ();
-			ack.SetMessageType ("replicate");
-			ack.SetDestinationUsers (replyTo);
-			ack.SetSourceUserName (m_server.UserName);
-			ack.PushString (number);
-			ack.PushString ("sequencenumber_ack");	
-			m_server.m_sendReceiveMiddleLayer.Send (ack);			
+			if (m_server.m_sequenceNumberService.SetSequenceNumber (Int32.Parse (number))) 
+			{
+				Message ack = new Message ();
+				ack.SetMessageType ("replicate");
+				ack.SetDestinationUsers (replyTo);
+				ack.SetSourceUserName (m_server.UserName);
+				ack.PushString (number);
+				ack.PushString ("sequencenumber_ack");	
+				m_server.m_sendReceiveMiddleLayer.Send (ack);
+			}
 		}
 		
 		private void Block ()

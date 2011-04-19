@@ -122,15 +122,7 @@ namespace server
 				SendReply(response);
 			}
 			else if (request_type.Equals ("connect")) 
-			{
-				if (!m_server.m_replicationService.IsMaster) 
-				{
-					// TODO: reply, in future: redirect question? 
-					DebugInfo ("Got request intended for master.");
-					m_server.m_replicationService.SendImNotMasterMessage (m);
-					return;
-				}
-				
+			{				
 				// add user to DB				
 				UserConnect (message_source, message_source_uri);
 				
@@ -140,21 +132,14 @@ namespace server
 				ack_message.SetDestinationUsers (message_source);
 				ack_message.SetSourceUserName (m_server.UserName);
 				
+				// no need to check if user has same name as that is not in spec
 				// replicate message (implicit block)
 				m_server.m_replicationService.ReplicateUserConnect (message_source, message_source_uri);
 								
 				SendReply (ack_message);
 			}
 			else if (request_type.Equals ("disconnect")) 
-			{	
-				if (!m_server.m_replicationService.IsMaster) 
-				{
-					// TODO: reply, in future: redirect question? 
-					DebugInfo ("Got request intended for master.");
-					m_server.m_replicationService.SendImNotMasterMessage (m);
-					return;
-				}
-				
+			{					
 				// remove from replicas (implicit block until 1 ack is received)
 				m_server.m_replicationService.ReplicateUserDisconnect (message_source);
 				
