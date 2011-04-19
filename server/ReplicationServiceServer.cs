@@ -115,9 +115,14 @@ namespace server
 			m_server.m_sendReceiveMiddleLayer.Send (m,msg.GetSourceUri (), msg.GetSourceUserName ());
 		}
 		
+		private bool ShouldIReplicate ()
+		{
+			return (IsMaster && m_replicationList.Count > 0);
+		}
+		
 		public void ReplicateUserConnect (string username, string uri) 
 		{
-			if (IsMaster) 
+			if (ShouldIReplicate ()) 
 			{
 				DebugInfo ("Sending UserConnect replication request");
 				Message m = new Message ();
@@ -130,7 +135,7 @@ namespace server
 				
 		public void ReplicateUserDisconnect (string username) 
 		{
-			if (IsMaster) 
+			if (ShouldIReplicate ()) 
 			{
 				DebugInfo ("Sending UserDisconnect replication request");
 				Message m = new Message ();
@@ -142,7 +147,7 @@ namespace server
 		
 		public void ReplicateSequenceNumber (long number) 
 		{
-			if (IsMaster) 
+			if (ShouldIReplicate ()) 
 			{
 				DebugInfo ("Sending sequence number ({0}) replication request", number);			
 				Message m = new Message ();
