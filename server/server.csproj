@@ -41,6 +41,7 @@
     <Compile Include="SequenceNumberServiceServer.cs" />
     <Compile Include="UserTableServiceServer.cs" />
     <Compile Include="ReplicationServiceServer.cs" />
+    <Compile Include="PuppetServerService.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
