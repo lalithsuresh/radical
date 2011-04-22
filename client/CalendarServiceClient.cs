@@ -212,7 +212,27 @@ namespace client
 				
 				// Update the slot's reservation list
 				m_numberToSlotMap[i].m_reservationsForThisSlot.Add (reservation);
-			}			
+			}
+			
+			//DebugUncond ("----->>>> {0} {1} <<---", userlist.Count, userlist[0]);
+			
+			// Special case, book with yourself
+			if (userlist.Count == 1 && userlist[0] == m_client.UserName)
+			{
+				// TODO: Check if slot is in action perhaps.
+				foreach (int i in slotlist)
+				{
+					Slot s = m_numberToSlotMap[i];
+					if (s.m_calendarState != CalendarServiceClient.CalendarState.ASSIGNED
+					    && s.m_calendarState != CalendarServiceClient.CalendarState.BOOKED)
+					{
+						s.m_calendarState = CalendarServiceClient.CalendarState.ASSIGNED;
+						reservation.m_reservationState = CalendarServiceClient.ReservationState.COMMITTED;
+						s.m_lockedReservation = i;
+						return;
+					}
+				}
+			}
 			
 			// 3) Disseminate reservation request
 			DebugLogic ("Dissemination reservation request " +
@@ -876,7 +896,8 @@ namespace client
 			string ret = "";
 			foreach (int i in m_numberToSlotMap.Keys)
 			{
-				ret = ret + i.ToString () + ":" + m_numberToSlotMap[i].m_calendarState.ToString () + ", ";
+				ret = ret + i.ToString () + ":" + m_numberToSlotMap[i].m_calendarState.ToString ()
+					+ m_activeReservationSessions[m_numberToSlotMap[i].m_lockedReservation].m_description + ", ";
 			}
 			
 			return ret;

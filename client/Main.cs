@@ -68,7 +68,7 @@ namespace client
 
 			
 			client.Connect ();
-			/*
+			
 			
 			//System.Threading.Thread.Sleep (100);
 
@@ -125,7 +125,7 @@ namespace client
 				client.Reserve (description, userlist, slotlist);
 				}
 			}
-			*/
+			
 			
 			Console.ReadLine();			
 			

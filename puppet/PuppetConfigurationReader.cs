@@ -134,7 +134,8 @@ namespace puppet
 				instruction.ApplyToUser = data[0].Trim ();				
 				
 				// users
-				instruction.Users = new List<string>();				
+				instruction.Users = new List<string>();	
+				instruction.Users.Add (instruction.ApplyToUser);
 				for (int i = 1; i < data.Length; i++) 
 				{
 					instruction.Users.Add (data[i].Trim ()); // all other users							
