@@ -234,6 +234,13 @@ namespace client
 				}
 			}
 			
+			// Else, trim yourself out of the list (position 0).
+			// Surely it is yourself, but sanity checks are good.
+			if (m_client.UserName.Equals (userlist[0]))
+			{
+				userlist.RemoveAt(0);
+			}
+			
 			// 3) Disseminate reservation request
 			DebugLogic ("Dissemination reservation request " +
 				"[Desc: {0}, Users: {1}, Slots: {2}]",description, userlist, slotlist);
