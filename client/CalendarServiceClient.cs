@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Text;
 using comm;
 using common;
 
@@ -900,14 +901,30 @@ namespace client
 		
 		public string ReadCalendar ()
 		{
-			string ret = "";
+			
+			StringBuilder sb = new StringBuilder ();			
+			
+			
 			foreach (int i in m_numberToSlotMap.Keys)
 			{
-				ret = ret + i.ToString () + ":" + m_numberToSlotMap[i].m_calendarState.ToString ()
-					+ m_activeReservationSessions[m_numberToSlotMap[i].m_lockedReservation].m_description + ", ";
+				
+				if (m_numberToSlotMap[i].m_calendarState != CalendarServiceClient.CalendarState.FREE)
+				{
+					sb.Append(String.Format ("Slot: {0} - State: {1} - Name: ", 
+				                         i, m_numberToSlotMap[i].m_calendarState.ToString ()
+				                         ));
+				
+					foreach (Reservation reservation in m_numberToSlotMap[i].m_reservationsForThisSlot)
+					{
+						sb.Append (reservation.m_description);
+					}
+				}
+				
+				sb.AppendLine ("");	
 			}
 			
-			return ret;
+			
+			return sb.ToString ();
 		}
 	}
 }
