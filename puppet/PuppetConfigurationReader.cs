@@ -87,10 +87,10 @@ namespace puppet
 			
 			if (type[0].Equals ("connect")) 
 			{
-				if (type[1].StartsWith ("central"))
-				{
-					return null;
-				}
+				//if (type[1].StartsWith ("central"))
+				//{
+				//	return null;
+				//}
 				instruction.Type = PuppetInstructionType.CONNECT;
 				instruction.ApplyToUser = type[1].Trim ();				
 			}

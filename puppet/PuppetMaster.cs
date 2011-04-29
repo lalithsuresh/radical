@@ -44,6 +44,17 @@ namespace puppet
 			set;
 		}
 		
+		public string ServerExecutable {
+			get;
+			set;
+		}
+		
+		public string ServerConfigFolder
+		{
+			get;
+			set;
+		}
+		
 		public List<string> ServerList {
 			get;
 			set;
@@ -64,6 +75,8 @@ namespace puppet
 			UserName = ConfigReader.GetConfigurationValue ("username");
 			GenericConfig = ConfigReader.GetConfigurationValue ("generic_config");
 			ClientExecutable = ConfigReader.GetConfigurationValue ("client_executable");
+			ServerExecutable = ConfigReader.GetConfigurationValue ("server_executable");
+			ServerConfigFolder = ConfigReader.GetConfigurationValue ("server_config_folder");
 			
 			ServerList = new List<string> ();
 			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");

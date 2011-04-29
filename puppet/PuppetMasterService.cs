@@ -53,10 +53,20 @@ namespace puppet
 			{
 				if (instruction.Type == PuppetInstructionType.CONNECT)
 				{
-					DebugLogic ("Starting a new client: {0}", instruction.ApplyToUser);
-					SpawnClient (instruction.ApplyToUser);
-					// client will register with puppet master when initing, safe to return
-					return true;
+					if (instruction.ApplyToUser.Contains ("central"))
+					{
+						DebugLogic ("Starting new server: {0}", instruction.ApplyToUser);
+						SpawnServer(instruction.ApplyToUser);
+						// server will self-register, safe to return
+						return true;
+					} 
+					else 
+					{
+						DebugLogic ("Starting a new client: {0}", instruction.ApplyToUser);
+						SpawnClient (instruction.ApplyToUser);
+						// client will register with puppet master when initing, safe to return
+						return true;
+					}
 				}
 				
 				DebugLogic ("No such user is connected: {0}", instruction.ApplyToUser);
@@ -132,6 +142,43 @@ namespace puppet
 			
 			SpawnedClients.Add (username, client);
 			m_currentPortOffset++;
+		}
+		
+		private void SpawnServer (string servername)
+		{
+			Process server = new Process ();
+			server.StartInfo.Verb = "server.exe";
+			server.StartInfo.FileName = m_puppetMaster.ServerExecutable;			
+			server.StartInfo.Arguments = String.Format ("{0}{1}", 
+			                                            m_puppetMaster.ServerConfigFolder,
+			                                            GetServerConfig(servername));
+			server.StartInfo.UseShellExecute = false;
+			
+			try 
+			{
+				server.Start ();
+			}
+			catch (InvalidOperationException ioe)
+			{
+				DebugFatal ("Could not start server: {0}\n{1}", servername, ioe.Message);			
+			}
+			
+			SpawnedClients.Add (servername, server);
+			
+		}
+		
+		private string GetServerConfig (string name)
+		{
+			if (name.Equals ("central-1"))
+				return "server.config";
+			else if (name.Equals ("central-2"))
+				return "server1.config";
+			else if (name.Equals ("central-3"))
+				return "server2.config";
+			else			
+				DebugFatal ("Could not determine server config filename");
+			
+			return null;
 		}
 		
 		private string BuildStringList (List<string> list)  
