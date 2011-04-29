@@ -51,7 +51,9 @@ namespace client
 		public void Receive (ReceiveMessageEventArgs eventargs) 
 		{
 			Message m = eventargs.m_message;
-			string type = m.PopString ();				
+			string type = m.PopString ();	
+			
+			DebugUncond ("Got {0} from puppetmaster", type);
 			
 			if (String.Compare (type, "connect", true) == 0)
 			{

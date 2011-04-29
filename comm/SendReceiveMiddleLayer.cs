@@ -11,7 +11,7 @@ namespace comm
 {
 	public delegate void ReceiveCallbackType(ReceiveMessageEventArgs e);
 	public delegate string LookupCallbackType(string user);
-	public delegate void RotateMasterCallbackType();
+	public delegate string RotateMasterCallbackType();
 	
 	public class SendReceiveMiddleLayer : PadicalObject
 	{
@@ -91,10 +91,10 @@ namespace comm
 			List<string> destinationcopy = new List<string> ();
 			foreach (string destination in destinations) 
 			{
-				DebugInfo ("Performing lookup for {0}", destination);
+				//DebugInfo ("Performing lookup for {0}", destination);
 				// TODO: If server returns NO SUCH USER, then bail out
 				string destination_uri = m_lookupCallback (destination); // for now, assume destination is uri
-				DebugInfo ("Lookup returned {0}", destination_uri);
+				//DebugInfo ("Lookup returned {0}", destination_uri);
 				
 				destinationUris.Add (destination_uri);
 				destinationcopy.Add (destination);
@@ -115,10 +115,10 @@ namespace comm
 				m_perfectPointToPoint.Send(m, uri);
 			}
 			catch
-			{
-				Message msgclone = (Message) m.Clone ();
-				m_deferredSendMessages.Add (msgclone);
+			{				
 				m_deferredSendDestination.Add (destination);
+				m_deferredSendMessages.Add (m);
+				DebugInfo ("Adding to deferred queue type:{0}, dst:{1}, size:{2}",m.GetMessageType (), destination, m_deferredSendMessages.Count);
 			}
 		}
 		
@@ -136,51 +136,47 @@ namespace comm
 		public void UnreliableSend (Message m, string uri)
 		{
 			m_perfectPointToPoint.Send(m, uri);		
-		}
+		}	
 		
-		private void DeferredSend (object state)
-		{			
-			// Retry every 5 seconds
+		public void DeferredSend (object state)
+		{
+			Message [] msgarr = new Message[m_deferredSendMessages.Count];
+			string [] dstarr = new string[m_deferredSendDestination.Count];
 			
-			// TODO: Verify if the below sequence is race condition
-			// free.
-			
-			Message [] msgarr = new Message [m_deferredSendMessages.Count];
-			string [] dstarr = new string [m_deferredSendDestination.Count];
-			
-			// sanity check
-			if (m_deferredSendMessages.Count != m_deferredSendDestination.Count)
+			if (m_deferredSendDestination.Count != m_deferredSendMessages.Count)
 			{
-				DebugFatal ("#DeferredMessages != #DeferredUris");
+				DebugFatal ("Number of deferred messages and destinations do not match");
 			}
-							
+			
 			msgarr = m_deferredSendMessages.ToArray ();
 			dstarr = m_deferredSendDestination.ToArray ();
 			
-			int count = m_deferredSendMessages.Count;			
-			int i = 0;
+			int count = m_deferredSendMessages.Count;
+			int i = 0;			
+			
+			m_deferredSendMessages.Clear ();
+			m_deferredSendDestination.Clear ();		
+			
+			DebugInfo ("INITIATING DEFERREDSEND for {0} {1} msgs", count, m_deferredSendDestination.Count);
+			
 			while (i < count)
-			{				
-				Message m = msgarr[i];
+			{
+				Message msg = msgarr[i];
 				string dst = dstarr[i];
-								
-				DebugInfo ("DeferredSend for message of type {0}", m.GetMessageType ());
 				
-				m_deferredSendMessages.Remove (m);
-				m_deferredSendDestination.Remove (dst);
-				
-				// Always do another lookup since
-				// the other end might be on a 
-				// different uri after reconnection
-				string uri = m_lookupCallback (dst);
-				if (m_registerFailureReceiveMap.ContainsKey (m.GetMessageType ())				    )
-				{						
-					m_registerFailureReceiveMap [m.GetMessageType ()] (new ReceiveMessageEventArgs (m));
+				DebugInfo ("DeferredSending msg type {0}, to {1}", msg.GetMessageType (), dst);
+				if (dst.Equals ("SERVER"))
+				{
+					string newserver = m_rotateMasterCallback();
+					DebugInfo ("Rotate server returned {0}", newserver);
+					Send (msg, newserver, dst);
 				}
 				else
 				{
-					Send (m, uri, dst);
+					string uriretry = m_lookupCallback (dst);
+					Send (msg, uriretry, dst);
 				}
+				
 				i++;
 			}
 		}

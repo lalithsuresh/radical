@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Text;
 using comm;
 using common;
 
@@ -212,7 +213,34 @@ namespace client
 				
 				// Update the slot's reservation list
 				m_numberToSlotMap[i].m_reservationsForThisSlot.Add (reservation);
-			}			
+			}
+			
+			//DebugUncond ("----->>>> {0} {1} <<---", userlist.Count, userlist[0]);
+			
+			// Special case, book with yourself
+			if (userlist.Count == 1 && userlist[0] == m_client.UserName)
+			{
+				// TODO: Check if slot is in action perhaps.
+				foreach (int i in slotlist)
+				{
+					Slot s = m_numberToSlotMap[i];
+					if (s.m_calendarState != CalendarServiceClient.CalendarState.ASSIGNED
+					    && s.m_calendarState != CalendarServiceClient.CalendarState.BOOKED)
+					{
+						s.m_calendarState = CalendarServiceClient.CalendarState.ASSIGNED;
+						reservation.m_reservationState = CalendarServiceClient.ReservationState.COMMITTED;
+						s.m_lockedReservation = i;
+						return;
+					}
+				}
+			}
+			
+			// Else, trim yourself out of the list (position 0).
+			// Surely it is yourself, but sanity checks are good.
+			if (m_client.UserName.Equals (userlist[0]))
+			{
+				userlist.RemoveAt(0);
+			}
 			
 			// 3) Disseminate reservation request
 			DebugLogic ("Dissemination reservation request " +
@@ -873,13 +901,30 @@ namespace client
 		
 		public string ReadCalendar ()
 		{
-			string ret = "";
+			
+			StringBuilder sb = new StringBuilder ();			
+			
+			
 			foreach (int i in m_numberToSlotMap.Keys)
 			{
-				ret = ret + i.ToString () + ":" + m_numberToSlotMap[i].m_calendarState.ToString () + ", ";
+				
+				if (m_numberToSlotMap[i].m_calendarState != CalendarServiceClient.CalendarState.FREE)
+				{
+					sb.Append(String.Format ("Slot: {0} - State: {1} - Name: ", 
+				                         i, m_numberToSlotMap[i].m_calendarState.ToString ()
+				                         ));
+				
+					foreach (Reservation reservation in m_numberToSlotMap[i].m_reservationsForThisSlot)
+					{
+						sb.Append (reservation.m_description);
+					}
+				}
+				
+				sb.AppendLine ("");	
 			}
 			
-			return ret;
+			
+			return sb.ToString ();
 		}
 	}
 }

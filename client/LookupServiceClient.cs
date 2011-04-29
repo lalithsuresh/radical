@@ -25,9 +25,10 @@ namespace client
 			                                                           new ReceiveCallbackType (ReceiveFailure));			
 		}
 		
-		public void RotateMaster ()
+		public string RotateMaster ()
 		{
 			m_client.RotateMaster ();
+			return m_client.CurrentMasterServer;
 		}
 		
 		public string Lookup (string user)
@@ -84,6 +85,7 @@ namespace client
 			// Update response string and manually
 			// reset the waiting Lookup() thread
 			m_client.RotateMaster ();
+			DebugUncond ("ReceiveFailure {0}", m_client.CurrentMasterServer);
 			m_client.m_sendReceiveMiddleLayer.Send (m, m_client.CurrentMasterServer, "SERVER");
 		}
 		

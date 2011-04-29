@@ -207,10 +207,10 @@ namespace client
 			if (userlist.Count == 0 || slotlist.Count == 0)
 				DebugFatal ("User or slot list of invalid length.");
 			
-			foreach (string user in userlist) {
-				if (String.IsNullOrEmpty (user))
-					DebugFatal ("Invalid user in user list.");
-			}
+			//foreach (string user in userlist) {
+				//if (String.IsNullOrEmpty (user))
+					//DebugFatal ("Invalid user in user list.");
+			//}
 			
 			m_calendarService.Reserve (description, userlist, slotlist);
 		}
