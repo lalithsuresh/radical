@@ -104,7 +104,7 @@ namespace server
 								
 				m_puppetService = new PuppetServerService ();
 				m_puppetService.SetServer (this);
-				m_puppetService.RegisterAsPuppet ();			
+				m_puppetService.RegisterAsPuppet ();
 				
 				m_puppetService.SendInfoMsgToPuppetMaster ("Ready to serve");
 			}

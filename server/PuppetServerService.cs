@@ -56,12 +56,14 @@ namespace server
 			if (String.Compare (type, "connect", true) == 0)
 			{
 				m_server.Unpause ();
+				SendInfoMsgToPuppetMaster ("Resumed main communication channel");
 				DebugInfo ("Puppet Master says: Start Server");
 			}
 			else if (String.Compare (type, "disconnect", true) == 0)
 			{
 				m_server.Pause ();
-				DebugInfo ("Puppet Master says: Stop Server");				
+				SendInfoMsgToPuppetMaster ("Paused main communication channel");
+				DebugInfo ("Puppet Master says: Stop Server");
 			}			
 		}
 		
