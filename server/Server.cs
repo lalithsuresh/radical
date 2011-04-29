@@ -54,9 +54,9 @@ namespace server
 			UserName = ConfigReader.GetConfigurationValue ("username");
 			ServerPort = Int32.Parse (ConfigReader.GetConfigurationValue ("serverport"));
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("central-1") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("central-2") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("central-3") + "/Radical");
 			
 			string puppetMaster = ConfigReader.GetConfigurationValue ("puppetmaster");
 			if (puppetMaster != null)
@@ -88,9 +88,9 @@ namespace server
 			m_replicationService.SetServer (this);
 			
 			// Register servers
-			m_userTableService.UserConnect ("server1", ServerList [0]);	
-			m_userTableService.UserConnect ("server2", ServerList [1]);	
-			m_userTableService.UserConnect ("server3", ServerList [2]);	
+			m_userTableService.UserConnect ("central-1", ServerList [0]);	
+			m_userTableService.UserConnect ("central-2", ServerList [1]);	
+			m_userTableService.UserConnect ("central-3", ServerList [2]);	
 			
 			m_replicationService.Start ();	
 			
@@ -101,7 +101,7 @@ namespace server
 				m_puppetPerfectPointToPointSend.Start (m_puppetSendReceiveMiddleLayer, ServerPort-100);
 				m_puppetSendReceiveMiddleLayer.SetPointToPointInterface (m_puppetPerfectPointToPointSend);
 				m_puppetSendReceiveMiddleLayer.SetLookupCallback (m_userTableService.Lookup);
-					
+								
 				m_puppetService = new PuppetServerService ();
 				m_puppetService.SetServer (this);
 				m_puppetService.RegisterAsPuppet ();			

@@ -71,7 +71,7 @@ namespace puppet
 				
 				DebugLogic ("No such user is connected: {0}", instruction.ApplyToUser);
 				return false;
-			}		
+			}							
 			
 			Message m = new Message ();
 			m.SetSourceUserName ("puppetmaster");

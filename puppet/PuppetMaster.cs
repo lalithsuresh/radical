@@ -79,9 +79,9 @@ namespace puppet
 			ServerConfigFolder = ConfigReader.GetConfigurationValue ("server_config_folder");
 			
 			ServerList = new List<string> ();
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server1") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server2") + "/Radical");
-			ServerList.Add (ConfigReader.GetConfigurationValue ("server3") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("central-1") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("central-2") + "/Radical");
+			ServerList.Add (ConfigReader.GetConfigurationValue ("central-3") + "/Radical");
 		}
 		
 		public void InitPuppetMaster() 

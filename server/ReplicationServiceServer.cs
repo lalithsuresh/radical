@@ -63,9 +63,9 @@ namespace server
 			                                                           new ReceiveCallbackType (Receive));
 			
 			// TODO: This map should be done elsewhere and less statically
-			m_serverUriToServerNameMap.Add (m_server.ServerList[0], "server1");			
-			m_serverUriToServerNameMap.Add (m_server.ServerList[1], "server2");
-			m_serverUriToServerNameMap.Add (m_server.ServerList[2], "server3");
+			m_serverUriToServerNameMap.Add (m_server.ServerList[0], "central-1");			
+			m_serverUriToServerNameMap.Add (m_server.ServerList[1], "central-2");
+			m_serverUriToServerNameMap.Add (m_server.ServerList[2], "central-3");
 		}
 		
 		/**
@@ -449,17 +449,17 @@ namespace server
 		 */
 		private void ChooseNewMaster (string oldMaster) 
 		{
-			if (oldMaster.Equals ("server1")) 
+			if (oldMaster.Equals ("central-1")) 
 			{
-				CurrentMaster = "server2";		
+				CurrentMaster = "central-2";		
 			}
-			else if (oldMaster.Equals ("server2"))
+			else if (oldMaster.Equals ("central-2"))
 			{
-				CurrentMaster = "server3";
+				CurrentMaster = "central-3";
 			}
-			else if (oldMaster.Equals ("server3"))
+			else if (oldMaster.Equals ("central-3"))
 			{
-				CurrentMaster = "server1";
+				CurrentMaster = "central-1";
 			}		
 			
 			DebugInfo ("New master is {0}, old was {1}", CurrentMaster, oldMaster);

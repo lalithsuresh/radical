@@ -7,7 +7,7 @@ namespace server
 {
 	public class PuppetServerService : PadicalObject, IServiceServer
 	{
-		private const string PUPPET_MASTER = "PUPPETMASTER";
+		public const string PUPPET_MASTER = "PUPPETMASTER";
 		private Server m_server; 
 
 		public PuppetServerService ()
@@ -34,7 +34,7 @@ namespace server
 			m.SetMessageType ("puppet_register");
 			m.SetSourceUserName (m_server.UserName);
 			m.SetDestinationUsers (PUPPET_MASTER);
-			
+			DebugInfo ("Registering server as puppet.... ");
 			m_server.m_puppetSendReceiveMiddleLayer.Send (m);
 		} 
 		

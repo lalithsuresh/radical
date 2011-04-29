@@ -79,6 +79,10 @@ namespace server
 			{
 				// crash
 				return "Bad Request";
+			} 
+			else if (username.Equals ("PUPPETMASTER"))
+			{			
+				return m_server.PuppetMasterAddress;
 			}
 			
 			if (!m_usertable.ContainsKey(username))
