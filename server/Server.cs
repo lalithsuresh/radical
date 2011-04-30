@@ -117,16 +117,20 @@ namespace server
 			DebugUncond ("Started. Available commands: \"exit\", \"status\"");			
 		}
 		
-		public void Pause ()
+		public bool Pause ()
 		{
 			m_replicationService.Stop ();
-			m_perfectPointToPointSend.Pause ();
+			m_replicationService = null;
+			return m_perfectPointToPointSend.Pause ();
 		}				
 		
-		public void Unpause ()
+		public bool Unpause ()
 		{
-			m_perfectPointToPointSend.Unpause ();
+			bool status = m_perfectPointToPointSend.Unpause ();
+			m_replicationService = new ReplicationServiceServer ();
+			m_replicationService.SetServer (this);
 			m_replicationService.Start ();
+			return status;
 		}
 		
 		/**

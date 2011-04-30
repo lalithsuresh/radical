@@ -67,11 +67,26 @@ namespace puppet
 						// client will register with puppet master when initing, safe to return
 						return true;
 					}
-				}
+				}				
 				
 				DebugLogic ("No such user is connected: {0}", instruction.ApplyToUser);
 				return false;
-			}							
+			}	
+			else if (instruction.Type == PuppetInstructionType.DISCONNECT 
+				     && instruction.ApplyToUser.Contains ("central"))
+			{
+				Clients.Remove (instruction.ApplyToUser);
+				try 
+				{
+					SpawnedClients[instruction.ApplyToUser].Kill ();
+					SpawnedClients.Remove (instruction.ApplyToUser);
+					return true;
+				} 
+				catch (InvalidOperationException)
+				{
+					DebugLogic ("Couldn't kill server: {0}", instruction.ApplyToUser);
+				}
+			}
 			
 			Message m = new Message ();
 			m.SetSourceUserName ("puppetmaster");
@@ -119,7 +134,7 @@ namespace puppet
 		
 		private void HandleClientRegistration (string username, string uri)
 		{
-			Clients.Add(username, uri);
+			Clients.Add(username, uri);			
 		}
 		
 		private void SpawnClient (string username) 

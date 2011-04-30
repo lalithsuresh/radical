@@ -70,6 +70,7 @@ namespace comm
 				DebugFatal ("Received null demuxer");
 			}
 			
+			// Default is active
 			Paused = false;
 			
 			m_channelProperties["port"] = port.ToString ();
@@ -97,24 +98,28 @@ namespace comm
 			RemotingServices.Disconnect (m_pointToPoint);			
 		}
 		
-		public void Pause ()
+		public bool Pause ()
 		{
 			if (!Paused) 
 			{
 				DebugInfo ("Pausing communication layer.");
 				RemotingServices.Unmarshal (m_marshalRef);
 				Paused = true;
+				return true;
 			}
+			return false;
 		}
 		
-		public void Unpause ()
+		public bool Unpause ()
 		{
 			if (Paused)
 			{
 				DebugInfo ("Ready to rock \\o/ again.");
 				m_marshalRef = RemotingServices.Marshal (m_pointToPoint, CHANNEL_NAME, typeof(PointToPointInterface));			
 				Paused = false;
+				return true;
 			}
+			return false;
 		}
 		
 		public string GetURI () 
