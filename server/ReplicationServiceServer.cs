@@ -10,12 +10,16 @@ namespace server
 	{
 		ManualResetEvent m_oSignalEvent = new ManualResetEvent (false);
 		
+		// constants
+		private const int FAIL_TOLERANCE = 2;
+		
 		// members
 		private Server m_server;
 		private List<string> m_replicationList;
 		private PingTimer m_pingTimer;
 		private Thread m_pingTimerThread;
 		private Dictionary<string, bool> m_serverStatus;
+		private Dictionary<string, int> m_serverStatusFailCount;
 		private Dictionary<string, string> m_serverUriToServerNameMap;
 		
 		// buffer
@@ -37,6 +41,7 @@ namespace server
 		public ReplicationServiceServer ()
 		{
 			m_serverStatus = new Dictionary<string, bool> ();
+			m_serverStatusFailCount = new Dictionary<string, int> ();
 			m_serverUriToServerNameMap = new Dictionary<string, string> ();
 			m_replicationList = new List<string> ();
 		}
@@ -66,36 +71,35 @@ namespace server
 			m_serverUriToServerNameMap.Add (m_server.ServerList[0], "central-1");			
 			m_serverUriToServerNameMap.Add (m_server.ServerList[1], "central-2");
 			m_serverUriToServerNameMap.Add (m_server.ServerList[2], "central-3");
+						
 		}
 		
 		/**
 		 * Bootstrap the server
 		 */
 		public void Start () 
-		{			
-			// Start failure detector - also manages replication list
-			StartPingService();
-			
-			// Sleep for a while to see if there are other servers alive
-			// and let remoting services start
-			Thread.Sleep (m_pingTimer.Interval*3);
-			
+		{									
 			// determine who is master
-			CurrentMaster = DetermineMaster ();		
+			CurrentMaster = DetermineMaster ();					
 			
 			if (!IsMaster) 
 			{
-				// retreive user table from master
 				DebugInfo ("Synchronizing with Master {0}", CurrentMaster);
-				SynchronizeUserTable ();
-				DebugInfo ("Synchronized user table with master.");		
-				
-				// sequence number is updated on each request
+				SynchronizeUserTable (); // includes sequence number
+				DebugInfo ("Synchronized with master.");		
 			}
 			
 			// I am alive and ready
 			UpdateServerStatus (m_server.UserName, true);			
 			DebugInfo ("[{0}] Replication Service activated. Master is: {1}", m_server.UserName, CurrentMaster);
+			
+			/* 
+			 * Start failure detector - also manages replication list
+			 * FD properties: 
+			 *  - detects server crash
+			 *  - does not detect slow responses
+			 */
+			StartPingService();
 		}
 		
 		public void Stop ()
@@ -154,7 +158,7 @@ namespace server
 		
 		public void PrintReplicationList ()
 		{
-			Console.WriteLine ("ReplicationList:");
+			Console.WriteLine ("ReplicationList: (Master is {0})", CurrentMaster);
 			foreach (string server in m_replicationList) 
 			{
 				Console.WriteLine ("> {0}", server);
@@ -359,7 +363,7 @@ namespace server
 		
 		
 		private void StartPingService () 
-		{
+		{			
 			m_pingTimer = new PingTimer ();
 			m_pingTimer.Interval = 1000;
 			m_pingTimer.OnPing += Ping;			
@@ -400,7 +404,7 @@ namespace server
 						RemoveFromReplicationList (serverName);
 											
 						// if server is master, update current master
-						if (serverName.Equals (CurrentMaster)) 
+						if (serverName.Equals (CurrentMaster) && m_serverStatusFailCount[serverName] >= FAIL_TOLERANCE) 
 						{
 							ChooseNewMaster (serverName);
 							
@@ -430,11 +434,18 @@ namespace server
 						m.SetDestinationUsers (serverName);
 						m.SetSourceUserName (m_server.UserName);
 						m_server.m_sendReceiveMiddleLayer.UnreliableSend (m, serverUri);
+						
 						Block ();
+						
+						if (m_masterReplyBuffer.Equals ("empty"))
+						{
+							continue; // ask next server
+						}
+						
 						return m_masterReplyBuffer;
 					}
-					catch (Exception) 
-					{						
+					catch (Exception) // UnreliableSend throws exception if dest is not reachable
+					{
 						continue;
 					}
 				}
@@ -479,12 +490,21 @@ namespace server
 		{
 			if (m_serverStatus.ContainsKey (server))
 			{
-				m_serverStatus.Remove (server);
-				m_serverStatus.Add (server, status);
+				m_serverStatus[server] = status;
+				
+				if (!status) 
+				{
+					m_serverStatusFailCount[server]++;
+				}
+				else 
+				{
+					m_serverStatusFailCount[server] = 0;
+				}
 			} 
 			else
 			{
 				m_serverStatus.Add (server, status);
+				m_serverStatusFailCount.Add (server, 0);
 			}
 		}
 	}
@@ -509,7 +529,7 @@ namespace server
 		}
 		
 		public Thread Start () 
-		{
+		{			
 			m_stop = false;
 			m_pingThread = new Thread (new ThreadStart (Run));
 			m_pingThread.IsBackground = true;

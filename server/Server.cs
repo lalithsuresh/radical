@@ -109,13 +109,9 @@ namespace server
 				m_puppetService.SendInfoMsgToPuppetMaster ("Ready to serve");
 			}
 			
+			DebugUncond ("Started. Available commands: \"exit\", \"status\"");
 		}
 		
-		public void Start ()
-		{
-			m_replicationService.Start ();
-			DebugUncond ("Started. Available commands: \"exit\", \"status\"");			
-		}
 		
 		public bool Pause ()
 		{
