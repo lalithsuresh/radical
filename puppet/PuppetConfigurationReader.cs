@@ -108,7 +108,7 @@ namespace puppet
 				instruction.Type = PuppetInstructionType.RESERVATION;
 														
 				if (PuppetConfigurationReader.AttachReservationData(instruction, line) == false)
-				{
+				{					
 					instruction = null;
 				}
 			}
@@ -128,25 +128,25 @@ namespace puppet
 				// description
 				string[] r = line.Substring (10).Split (';');			
 				instruction.Description = r[0].Substring(3).Trim ();				
-				
+					
 				// apply to user
 				string[] data = r[1].Split (',');				
 				instruction.ApplyToUser = data[0].Trim ();				
-				
+												
 				// users
 				instruction.Users = new List<string>();	
 				instruction.Users.Add (instruction.ApplyToUser);
 				for (int i = 1; i < data.Length; i++) 
-				{
+				{					
 					instruction.Users.Add (data[i].Trim ()); // all other users							
 				}				
-				
+							
 				// slots				
 				string[] slots = r[2].Substring (0,r[2].Length-1).Split (',');
 				instruction.Slots = new List<string>();
-				for (int i = 0; i < data.Length; i++) 
-				{
-					instruction.Slots.Add (slots[i].Trim ());				
+				for (int i = 0; i < slots.Length; i++) 
+				{					
+					instruction.Slots.Add (slots[i].Trim ());					
 				}
 			} 
 			catch (Exception) 
