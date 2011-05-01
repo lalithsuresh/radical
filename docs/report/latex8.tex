@@ -299,7 +299,8 @@ positively. The cohort then makes the following check:
 \item If pre-commit-queue is empty, and there is no reservation under lock,
 then lock this reservation and respond with a YES message.
 \item If there is a reservation under lock, then add to the pre-commit-queue
-if the reservation ID is newer than that under the lock.
+if the reservation ID is newer than that under the lock. Do not respond
+with any message at this point.
 \item Attempt to abort newer reservation in favour of older one. This is
 done by sending an ABORT message to the coordinator, and then waiting
 for a response from the coordinator before performing the ABORT itself.
@@ -311,9 +312,23 @@ in the queue.
 and change the respective slot's status to ASSIGNED.
 \end{enumerate}
 \end{itemize}
-This protocol does not lead to deadlocks as explained below <deadlock
-diagram and situation>.
-
+Step 2.c protects against a potential deadlock situation which can
+arise as follows:
+\begin{enumerate}
+\item Let there be a reservation R1 coordinated by node A, involving nodes
+B and C. Let there also be a reservation R2, coordinated by D, which
+has occured later than R1, involving nodes B and C as well.
+\item One possible scenario that can arise is as follows: B has a lock on
+reservation R1, and has R2 in its pre-commit queue. C has a lock on
+reservation R2 and now receives the pre-commit message for R1. At
+this point, note that reservation R2 cannot proceed since node B never
+sent a YES message for R2, even though node C already has. But in
+this event, node C sends out an ABORT message to its coordinator D,
+causing it to abort reservation R2. Node C then promotes reservation
+R1 from its pre-commit queue to its lock position, and responds with
+a YES message to node A for reservation R1.
+\item The older reservation R1 thus advances.
+\end{enumerate}
 
 \subsection{Server Side: Leader Election and Replication}
 

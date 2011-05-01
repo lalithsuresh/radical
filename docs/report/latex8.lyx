@@ -944,6 +944,7 @@ If pre-commit-queue is empty, and there is no reservation under lock, then
 \begin_layout Enumerate
 If there is a reservation under lock, then add to the pre-commit-queue if
  the reservation ID is newer than that under the lock.
+ Do not respond with any message at this point.
 \end_layout
 
 \begin_layout Enumerate
@@ -962,8 +963,32 @@ If the cohort receives a DOCOMMIT message, then commit the reservation and
 
 \end_deeper
 \begin_layout Standard
-This protocol does not lead to deadlocks as explained below <deadlock diagram
- and situation>.
+Step 2.c protects against a potential deadlock situation which can arise
+ as follows:
+\end_layout
+
+\begin_layout Enumerate
+Let there be a reservation R1 coordinated by node A, involving nodes B and
+ C.
+ Let there also be a reservation R2, coordinated by D, which has occured
+ later than R1, involving nodes B and C as well.
+\end_layout
+
+\begin_layout Enumerate
+One possible scenario that can arise is as follows: B has a lock on reservation
+ R1, and has R2 in its pre-commit queue.
+ C has a lock on reservation R2 and now receives the pre-commit message
+ for R1.
+ At this point, note that reservation R2 cannot proceed since node B never
+ sent a YES message for R2, even though node C already has.
+ But in this event, node C sends out an ABORT message to its coordinator
+ D, causing it to abort reservation R2.
+ Node C then promotes reservation R1 from its pre-commit queue to its lock
+ position, and responds with a YES message to node A for reservation R1.
+\end_layout
+
+\begin_layout Enumerate
+The older reservation R1 thus advances.
 \end_layout
 
 \begin_layout Subsection
