@@ -1,0 +1,1103 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+%  $Description: Author guidelines and sample document in LaTeX 2.09$ 
+%  $Author: ienne $
+%  $Date: 1995/09/15 15:20:59 $
+%  $Revision: 1.4 $
+\usepackage{latex8}\usepackage{times}
+
+%\documentstyle[times,art10,twocolumn,latex8]{article}
+%------------------------------------------------------------------------- 
+% take the % away on next line to produce the final camera-ready version 
+
+
+%------------------------------------------------------------------------- 
+\makeatother
+
+\usepackage{babel}
+
+\makeatother
+
+\usepackage{babel}
+\end_preamble
+\options times
+\use_default_options false
+\language english
+\inputencoding latin9
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 10
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 2
+\papersides 1
+\paperpagestyle empty
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+RADICal: Really Awesome Distributed Internet Calendar (RADICAL)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+author{Lalith Suresh P.
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%DEI
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Instituto Superior Tecnico
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Lisbon, Portugal
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%suresh.lalith@gmail.com
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+and Marcus Ljungblad
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%DEI
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Insituto Superior Tecnico
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Lisbon, Portugal
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%marcus@ljungblad.nu
+\backslash
+and Bruno Pereira
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%DEI
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Insituto Superior Tecnico
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Lisbon, Portugal
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%brunopereir4@gmail.com}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Abstract
+Shared calendar systems like Google Calendar are known to be an effective
+ way for people to schedule and coordinate events.
+ In this project, we design and implement RADICal, a peer-to-peer based
+ distributed calendar system.
+ RADICal allows clients to make event reservations amongst themselves in
+ an almost decentralised manner with minimal assistance from a central server.
+ 
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+The aim of this project is to design, implement and evaluate a shared calendar
+ system which has the following components: 
+\end_layout
+
+\begin_layout Itemize
+Multiple clients, each with their own calendars, who may contact one another
+ to schedule events together.
+ 
+\end_layout
+
+\begin_layout Itemize
+A centralised server which holds usernames and provides clients a sequence
+ number service.
+ 
+\end_layout
+
+\begin_layout Standard
+The rest of the paper is organised as follows: Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:systemarch"
+
+\end_inset
+
+ describes the architecture of the different components of the system, Section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Algorithms"
+
+\end_inset
+
+ explains the important algorithms that underly RADICal, and Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Conclusions"
+
+\end_inset
+
+ concludes the paper.
+\end_layout
+
+\begin_layout Section
+System Architecture
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:systemarch"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since there is a Client and Server entity for this system, we describe the
+ architecture of each separetely.
+ One of the main design goals is to allow easy testability and debugging
+ facilities within the system in order to ease development.
+ To a certain degree, we hope to achieve this through classic 'printf' style
+ debugging.
+ Every class in PADICal inherits from a class 
+\family typewriter
+PadiCalObject
+\family default
+, which has one virtual method named 
+\family typewriter
+Debug()
+\family default
+.
+ This method performs pretty printing of internal state of an object, and
+ follows the flow of logic through the stack.
+ All sub classes have to implement this method depending on the kind of
+ methods and state information they may hold.
+ Additionally, the NUnit framework is used during the development phase
+ to ensure methods do not misbehave when changes are introduced later.
+ The 
+\family typewriter
+Debug()
+\family default
+ method of different objects comprising of a client or server can be enabled
+ via a configuration file or through some interfaces we can provide to the
+ UI of the client.
+\end_layout
+
+\begin_layout Standard
+The client and the server follows a three-tier architectural decomposition.
+ From top to down, they are as follows: the interface layer, the services
+ layer, and the communications layer.
+ In the sections below, we first describe the client, the server, and the
+ components of each of the three layers that they comprise of.
+\end_layout
+
+\begin_layout Standard
+In addition to the client and the server, a puppet master will be introduced
+ to facilitate testing.
+ This component is not further discussed in this paper.
+\end_layout
+
+\begin_layout Subsection
+Client
+\end_layout
+
+\begin_layout Standard
+The client architecture is described in Figure.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:clientarch"
+
+\end_inset
+
+.
+ The working of the client has been decomposed into three layers, each of
+ which holds the appropriate working components.
+ This is described as follows:
+\end_layout
+
+\begin_layout Subsubsection
+Interface Layer
+\end_layout
+
+\begin_layout Standard
+The client's interface layer comprises of the following: 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+Client Interface
+\family default
+: The instantiation of this component handles user inputs.
+ The user can reserve events on the calendar, view the calendar and connect/disc
+onnect to the server.
+ This interface is also used by the puppet master to remotely control multiple
+ clients.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Services Layer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+CalendarService
+\family default
+: This is the abstraction for the calendar itself.
+ The event reservation and commit protocols are implemented within this
+ component.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+LookupService
+\family default
+: The Client performs lookups over the usernames of other participants using
+ this service.
+ The (IP,Port) tuples returned for each username are used to describe connection
+s and remote object invocations for every other component in the system.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ConnectionManager
+\family default
+: This component handles user login/sign-outs.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+SequenceNumberService
+\family default
+: This service provides a unique sequence number from the centralised servers.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Communications Layer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+SendReceiveMiddleLayer
+\family default
+: To abstract the underlying communication process from the services, we
+ use the 
+\family typewriter
+SendReceiveMiddleLayer
+\family default
+.
+ If there are multiple recipients to send a message to, this layer uses
+ the 
+\family typewriter
+GroupMulticast 
+\family default
+abstraction, else, uses the 
+\family typewriter
+PointToPoint 
+\family default
+abstraction.
+ It also acts as a demultiplexer (on the same lines as Linux's 
+\begin_inset Quotes eld
+\end_inset
+
+Layer 4/3 Demux
+\family typewriter
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\family default
+), to find the appropriate service layer recipient for a particular message.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+GroupMulticast
+\family default
+: This abstraction uses the 
+\family typewriter
+PointToPoint 
+\family default
+abstraction to deliver messages to a group of participants.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+PointToPoint
+\family default
+: This abstraction uses a remote invocation to send a message to a recipient.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement t
+wide false
+sideways false
+status open
+
+\begin_layout LyX-Code
+\begin_inset Graphics
+	filename client.eps
+	scale 25
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Client Architecture.
+ A three layer approach is used, with the following stack: An interface
+ layer (
+\family typewriter
+Client Interface
+\family default
+), a service layer (
+\family typewriter
+CalendarService, LookupService, ConnectionManager, SequenceNumberService
+\family default
+) and a communication layer (
+\family typewriter
+SendReceiveMiddleLayer, PointToPoint, GroupMulticast
+\family default
+).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:clientarch"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Server
+\end_layout
+
+\begin_layout Standard
+The Radical server consists of one master and three replicas.
+ Each replica is strongly consistent with the master and updated on each
+ write.
+ In this section we describe the architecture of the servers, including
+ the replicas and its leader election process.
+ The services provided by the server are: a user to (IP, Port) lookup table
+ and sequence numbering.
+ A server instance may be in one of two states: master or replica.
+ As a master, the instance is the primary and the only node responsible
+ for serving clients with data.
+ We assume that at most one instance may fail at any time during normal
+ execution, including the master.
+ If the master instance becomes unavailable, a new master is automatically
+ elected among the three replicas.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset Float figure
+placement t
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename server.eps
+	scale 25
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Server Architecture.
+ A 3 layer approach is used, with the following stack: An interface layer
+ (
+\family typewriter
+ServerInterface
+\family default
+), a service layer (
+\family typewriter
+ReplicationService, UserLookupService, SequenceNumberService
+\family default
+) and a communication layer (
+\family typewriter
+SendReceiveMiddleLayer, PointToPoint, GroupMulticast
+\family default
+).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:serverarch"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Interface Layer
+\end_layout
+
+\begin_layout Standard
+The server's interface layer comprises of the following: 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+Server Interface
+\family default
+: The instantiation of this class handles user inputs.
+ The user can view server state, the currently active replica, and the currently
+ logged on users.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Services Layer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ReplicationService
+\family default
+: This is the abstraction for the strongly consistent replication service.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+UserLookupService
+\family default
+: This service handles both connect/disconnects from the clients, and also
+ provides the required username to (IP, Port) lookup service for them.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+SequenceNumberService
+\family default
+: This service provides a unique sequence number to the clients.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Communications Layer
+\end_layout
+
+\begin_layout Itemize
+The components of the server communications layer remains the same as that
+ of the client.
+ 
+\end_layout
+
+\begin_layout Section
+Algorithms
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Algorithms"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Client Side: Reservation/Commit Protocol
+\end_layout
+
+\begin_layout Standard
+The reservation protocol follows the steps as outlined in the project descriptio
+n.
+ Once a client is in the tentatively booked state for a particular event
+ slot, it executes the commit protocol.
+\end_layout
+
+\begin_layout Standard
+We have opted to use a 3-phase commit algorithm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Skeen:1983:FMC:1313337.1313750"
+
+\end_inset
+
+ with slight modifications to account for the specifics of the scenario
+ being tackled (orderly leaves by nodes for instance).
+ It works as follows: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout LyX-Code
+\begin_inset Graphics
+	filename 3pcommit.eps
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Client side 3 phase commit with modification for partition tolerance.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Coordinator side (initiator of the event reservation):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The coordinator sends out reservation requests to all nodes.
+ Nodes then send their preferred list of slots (if any) to the coordinator
+ with RESERVATION-ACK messages, or decline the reservation request with
+ a RESERVATION-NACK message.
+ If all nodes send RESERVATION-ACK messages, the coordinator picks the first
+ common slot agreed to by the cohorts according to its preference and sends
+ out a PRECOMMIT message to all cohorts.
+\end_layout
+
+\begin_layout Enumerate
+The coordinator then collects YES or ABORT messages from all the cohorts
+ depending on whether or not they agree to proceed further in the reservation.
+\end_layout
+
+\begin_layout Enumerate
+If all nodes agree with a YES message, then the coordinator sends all the
+ cohorts a DOCOMMIT message, and it updates the reservation status to COMMITTED,
+ and the particular calendar slot to ASSIGNED.
+ This completes the reservation.
+\end_layout
+
+\begin_layout Enumerate
+If at least one node sends an ABORT message, the coordinator aborts the
+ reservation, and sends out ABORT messages to all the cohorts, causing them
+ to abort as well.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Cohort side (other participants in reservation):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The cohort receives a reservation request for a list of slots.
+ If it has at least one free slot from the list, then it responds with those
+ free slots in the form of a RESERVATION-ACK message.
+ If none of the requested slots are free, then the cohort responds with
+ a RESERVATION-NACK.
+\end_layout
+
+\begin_layout Enumerate
+If the cohort gets a PRECOMMIT message from a coordinator, then it implies
+ that all cohorts have responded for the reservation request positively.
+ The cohort then makes the following check:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+If pre-commit-queue is empty, and there is no reservation under lock, then
+ lock this reservation and respond with a YES message.
+\end_layout
+
+\begin_layout Enumerate
+If there is a reservation under lock, then add to the pre-commit-queue if
+ the reservation ID is newer than that under the lock.
+\end_layout
+
+\begin_layout Enumerate
+Attempt to abort newer reservation in favour of older one.
+ This is done by sending an ABORT message to the coordinator, and then waiting
+ for a response from the coordinator before performing the ABORT itself.
+ If the cohort receives a DOCOMMIT message after sending an ABORT, it commits
+ the currently locked reservation and aborts all reservations in the queue.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+If the cohort receives a DOCOMMIT message, then commit the reservation and
+ change the respective slot's status to ASSIGNED.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+This protocol does not lead to deadlocks as explained below <deadlock diagram
+ and situation>.
+\end_layout
+
+\begin_layout Subsection
+Server Side: Leader Election and Replication
+\end_layout
+
+\begin_layout Subsubsection
+Leader Election
+\end_layout
+
+\begin_layout Standard
+All instances of a server knows about all other server instances.
+ Each instance has a unique id.
+ Since the number of servers never exceeds four, each server regularly emits
+ a heartbeat to let the other servers know it is alive.
+ It is assumed that at most one server may fail at any time.
+ During the bootstrap of a server, each instance will select the server
+ with the highest ID (IP-Port combination) to be the leader.
+ Our leader election process is based on the Bully algorithm proposed by
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "GarciaMolina"
+
+\end_inset
+
+.
+ In case of a server failure, when any other instance suspects that a server
+ is unavailable, it will send a proposal to all other servers that X is
+ unavailable.
+ If all others agree, the server with the next highest ID is elected the
+ new leader.
+ The leader is selected in a round-robin fashion.
+\end_layout
+
+\begin_layout Standard
+To handle network partitions, a server may only become a leader if it is
+ part of the cluster with a majority of the servers.
+ In case each cluster is of equal size, the cluster with the current leader
+ will remain/elect the leader.
+ This assumes that the leader's failure and the 2-2 partition does not happen
+ simultaneously.
+ Clients trying to contact the minority cluster will not get any replies,
+ and according to the round-robin selection scheme, will eventually pick
+ a server from the majority cluster.
+\end_layout
+
+\begin_layout Subsubsection
+Replication
+\end_layout
+
+\begin_layout Standard
+In the interface above, three of the interfaces are considered writes.
+ Since we want to maintain a strong consistency among the replicas, the
+ master instance will propagate a write to all replicas before replying
+ to the client.
+ The propagation is assumed to be synchronous and utilises the broadcast
+ component of the communication layer described earlier.
+ Thus, a server which receives a request will block until it receives an
+ acknowledgement from all correct replicas.
+ The hit this takes on performance can be justified by the fact that a replicate
+d set of servers which are highly available would most likely be on a rack
+ with a high bandwidth inter-connect.
+ A replica is considered alive as long as a heartbeat has been received
+ within the given timeframe.
+\end_layout
+
+\begin_layout Standard
+In case a replica, i.e an instance which is not the leader, gets an unexpected
+ request from a client it will query the leader for the data, and retransmit
+ the response to the client.
+ Before propagating write requests to replicas, the leader maintains a log
+ of all write records.
+ When a server fails, and after a new leader is elected, the server instances
+ will synchronize to ensure that the user lookup table and sequence number
+ is aligned.
+ Each write to the user lookup table updates a logical timestamp, such that
+ ordering can be guaranteed.
+\end_layout
+
+\begin_layout Subsection
+Possible Optimisations
+\end_layout
+
+\begin_layout Itemize
+Minimising username lookups from the client side by using a cache (on the
+ same lines as a DNS cache).
+ 
+\end_layout
+
+\begin_layout Itemize
+In the scheme for committing a reservation, it is possible that two clients
+ can be part of two reservation sequences, and each of them can abort each
+ other's sequences.
+ This is a safety measure, but it is possible to use a tie-breaking system
+ at the tentatively booked phase.
+ 
+\end_layout
+
+\begin_layout Itemize
+It is possible to only consider a subset of acknowledgements when propagating
+ writes in the server cluster, thus improving performance.
+ 
+\end_layout
+
+\begin_layout Section
+Conclusions
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Conclusions"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this paper, we have presented the design and architecture for RADICal,
+ a peer-2-peer distributed internet calendar service.
+ The design is made with testability in mind.
+ The algorithms have been designed for handling partition tolerance on the
+ client side, and strong consistency with availability on the server side.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "latex8"
+options "latex8"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

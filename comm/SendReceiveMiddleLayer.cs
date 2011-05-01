@@ -140,44 +140,47 @@ namespace comm
 		
 		public void DeferredSend (object state)
 		{
-			Message [] msgarr = new Message[m_deferredSendMessages.Count];
-			string [] dstarr = new string[m_deferredSendDestination.Count];
-			
-			if (m_deferredSendDestination.Count != m_deferredSendMessages.Count)
+			if (!m_perfectPointToPoint.Paused)
 			{
-				DebugFatal ("Number of deferred messages and destinations do not match");
-			}
-			
-			msgarr = m_deferredSendMessages.ToArray ();
-			dstarr = m_deferredSendDestination.ToArray ();
-			
-			int count = m_deferredSendMessages.Count;
-			int i = 0;			
-			
-			m_deferredSendMessages.Clear ();
-			m_deferredSendDestination.Clear ();		
-			
-			DebugInfo ("INITIATING DEFERREDSEND for {0} {1} msgs", count, m_deferredSendDestination.Count);
-			
-			while (i < count)
-			{
-				Message msg = msgarr[i];
-				string dst = dstarr[i];
+				Message [] msgarr = new Message[m_deferredSendMessages.Count];
+				string [] dstarr = new string[m_deferredSendDestination.Count];
 				
-				DebugInfo ("DeferredSending msg type {0}, to {1}", msg.GetMessageType (), dst);
-				if (dst.Equals ("SERVER"))
+				if (m_deferredSendDestination.Count != m_deferredSendMessages.Count)
 				{
-					string newserver = m_rotateMasterCallback();
-					DebugInfo ("Rotate server returned {0}", newserver);
-					Send (msg, newserver, dst);
-				}
-				else
-				{
-					string uriretry = m_lookupCallback (dst);
-					Send (msg, uriretry, dst);
+					DebugFatal ("Number of deferred messages and destinations do not match");
 				}
 				
-				i++;
+				msgarr = m_deferredSendMessages.ToArray ();
+				dstarr = m_deferredSendDestination.ToArray ();
+				
+				int count = m_deferredSendMessages.Count;
+				int i = 0;			
+				
+				m_deferredSendMessages.Clear ();
+				m_deferredSendDestination.Clear ();		
+				
+				DebugInfo ("INITIATING DEFERREDSEND for {0} {1} msgs", count, m_deferredSendDestination.Count);
+				
+				while (i < count)
+				{
+					Message msg = msgarr[i];
+					string dst = dstarr[i];
+					
+					DebugInfo ("DeferredSending msg type {0}, to {1}", msg.GetMessageType (), dst);
+					if (dst.Equals ("SERVER"))
+					{
+						string newserver = m_rotateMasterCallback();
+						DebugInfo ("Rotate server returned {0}", newserver);
+						Send (msg, newserver, dst);
+					}
+					else
+					{
+						string uriretry = m_lookupCallback (dst);
+						Send (msg, uriretry, dst);
+					}
+					
+					i++;
+				}
 			}
 		}
 		
