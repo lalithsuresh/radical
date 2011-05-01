@@ -41,7 +41,7 @@ namespace comm
 		}
 		
 		public PerfectPointToPointSend (bool isPuppetChannel) 
-		{
+		{http://vennoid.blogspot.com/2011/05/nerd-venn-diagram.html
 			if (isPuppetChannel) 
 			{				
 				m_channelProperties["name"] = "tcpPuppet";				
@@ -137,6 +137,10 @@ namespace comm
 		
 		public void Send (Message m, string uri) 
 		{
+			// If channel is paused, then throw exception
+			// so that deferred send continues after
+			// the client re-connects
+						
 			m.SetSourceUri (GetURI ());
 			
 			// get reference to remote object 
