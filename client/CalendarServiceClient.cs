@@ -669,6 +669,12 @@ namespace client
 				}
 				else
 				{
+					// Add older reservation to queue, we may upgrade or abort this
+					// depending on the result of the next step
+					
+					slot.m_preCommitList.Add (reservationSequenceNumber, res);
+
+					
 					// A newer reservation has been locked. For now,
 					// we try and ABORT the newer one in favour of the older one.
 					// But the optimisation here would be for coordinators to
