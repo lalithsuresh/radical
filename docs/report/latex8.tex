@@ -395,6 +395,23 @@ phase.
 propagating writes in the server cluster, thus improving performance. 
 \end{itemize}
 
+\section{Evaluation}
+Results
+- quantitative
+  run all traces: number of msgs, avg size of msgs (max deviation?), commit ratio
+
+- qualitative
+software architecture obeyed 
+limitations of commit protocol
+
+Analysis
+- performance
+- what went well... maybe unnecessary
+- what could be improved: 
+  pass coordinator function to another node to make case 8 work (with forwarding) 
+  
+
+
 \section{Conclusions\label{sec:Conclusions}}
 
 In this paper, we have presented the design and architecture for RADICal,
