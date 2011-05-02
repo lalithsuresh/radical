@@ -396,15 +396,33 @@ propagating writes in the server cluster, thus improving performance.
 \end{itemize}
 
 \section{Evaluation}
-Results
-- quantitative
-  run all traces: number of msgs, avg size of msgs (max deviation?), commit ratio
+\subsection{Results}
+
+\begin{table}
+    \begin{tabular}{|l|l|l|}
+      \hline
+      \multicolumn{3}{|c|}{Table 1: Test results} \\
+      \hline
+        \hline
+        1  & 3           & NA          \\ 
+        2  & 3           & NA          \\ 
+        3  & 3           & NA          \\ 
+        4  & 3           & NA          \\ 
+        5  & 9           & 6           \\ 
+        6  & 9           & 7           \\ 
+        7  & 18          & 12          \\ 
+        8  & Unsupported & Unsupported \\ 
+        9  & 13          & 13          \\ 
+        10 & 14          & 14          \\
+        \hline
+    \end{tabular}
+\end{table}
 
 - qualitative
 software architecture obeyed 
 limitations of commit protocol
 
-Analysis
+\subsection{Analysis}
 - performance
 - what went well... maybe unnecessary
 - what could be improved: 
