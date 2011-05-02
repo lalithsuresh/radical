@@ -469,345 +469,50 @@ In addition to the client and the server, a puppet master will be introduced
 \end_layout
 
 \begin_layout Subsection
-Client
+RADICal stack
 \end_layout
 
 \begin_layout Standard
-The client architecture is described in Figure.
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:clientarch"
-
-\end_inset
-
-.
- The working of the client has been decomposed into three layers, each of
- which holds the appropriate working components.
- This is described as follows:
-\end_layout
-
-\begin_layout Subsubsection
-Interface Layer
-\end_layout
-
-\begin_layout Standard
-The client's interface layer comprises of the following: 
+The RADICal architecture is described below.
+ The working of nodes in RADICal has been decomposed into three layers,
+ described top down:
 \end_layout
 
 \begin_layout Itemize
-
-\family typewriter
-Client Interface
-\family default
-: The instantiation of this component handles user inputs.
- The user can reserve events on the calendar, view the calendar and connect/disc
-onnect to the server.
- This interface is also used by the puppet master to remotely control multiple
- clients.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Services Layer
+Interface layer: This layer implements the interfaces to the underlying
+ services.
+ For the client, this equates to the ReadCalendar(), Reserve(), Connect()
+ and Disconnect() interfaces.
+ For the server, we've implemented Connect(), Disconnect() and ReadState()
+ interfaces.
+ The puppet master hooks into these interfaces in order to control the system.
 \end_layout
 
 \begin_layout Itemize
-
-\family typewriter
-CalendarService
-\family default
-: This is the abstraction for the calendar itself.
- The event reservation and commit protocols are implemented within this
- component.
- 
+Services layer: All the services that compose of clients and servers are
+ implemented in this layer.
+ For the client, this involves services to handle username lookups, handle
+ calendar related messages, and connecting/disconnecting to/from the servers.
 \end_layout
 
 \begin_layout Itemize
-
-\family typewriter
-LookupService
-\family default
-: The Client performs lookups over the usernames of other participants using
- this service.
- The (IP,Port) tuples returned for each username are used to describe connection
-s and remote object invocations for every other component in the system.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-ConnectionManager
-\family default
-: This component handles user login/sign-outs.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-SequenceNumberService
-\family default
-: This service provides a unique sequence number from the centralised servers.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Communications Layer
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-SendReceiveMiddleLayer
-\family default
-: To abstract the underlying communication process from the services, we
- use the 
-\family typewriter
-SendReceiveMiddleLayer
-\family default
-.
- If there are multiple recipients to send a message to, this layer uses
- the 
-\family typewriter
-GroupMulticast 
-\family default
-abstraction, else, uses the 
-\family typewriter
-PointToPoint 
-\family default
-abstraction.
- It also acts as a demultiplexer (on the same lines as Linux's 
-\begin_inset Quotes eld
-\end_inset
-
-Layer 4/3 Demux
-\family typewriter
-
-\begin_inset Quotes erd
-\end_inset
-
-
-\family default
-), to find the appropriate service layer recipient for a particular message.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-GroupMulticast
-\family default
-: This abstraction uses the 
-\family typewriter
-PointToPoint 
-\family default
-abstraction to deliver messages to a group of participants.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-PointToPoint
-\family default
-: This abstraction uses a remote invocation to send a message to a recipient.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement t
-wide false
-sideways false
-status open
-
-\begin_layout LyX-Code
-\begin_inset Graphics
-	filename client.eps
-	scale 25
-
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Client Architecture.
- A three layer approach is used, with the following stack: An interface
- layer (
-\family typewriter
-Client Interface
-\family default
-), a service layer (
-\family typewriter
-CalendarService, LookupService, ConnectionManager, SequenceNumberService
-\family default
-) and a communication layer (
-\family typewriter
-SendReceiveMiddleLayer, PointToPoint, GroupMulticast
-\family default
-).
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:clientarch"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Server
-\end_layout
-
-\begin_layout Standard
-The Radical server consists of one master and three replicas.
- Each replica is strongly consistent with the master and updated on each
- write.
- In this section we describe the architecture of the servers, including
- the replicas and its leader election process.
- The services provided by the server are: a user to (IP, Port) lookup table
- and sequence numbering.
- A server instance may be in one of two states: master or replica.
- As a master, the instance is the primary and the only node responsible
- for serving clients with data.
- We assume that at most one instance may fail at any time during normal
- execution, including the master.
- If the master instance becomes unavailable, a new master is automatically
- elected among the three replicas.
- 
-\end_layout
-
-\begin_layout LyX-Code
-\begin_inset Float figure
-placement t
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename server.eps
-	scale 25
-
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Server Architecture.
- A 3 layer approach is used, with the following stack: An interface layer
- (
-\family typewriter
-ServerInterface
-\family default
-), a service layer (
-\family typewriter
-ReplicationService, UserLookupService, SequenceNumberService
-\family default
-) and a communication layer (
-\family typewriter
-SendReceiveMiddleLayer, PointToPoint, GroupMulticast
-\family default
-).
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:serverarch"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Interface Layer
-\end_layout
-
-\begin_layout Standard
-The server's interface layer comprises of the following: 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-Server Interface
-\family default
-: The instantiation of this class handles user inputs.
- The user can view server state, the currently active replica, and the currently
- logged on users.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Services Layer
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-ReplicationService
-\family default
-: This is the abstraction for the strongly consistent replication service.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-UserLookupService
-\family default
-: This service handles both connect/disconnects from the clients, and also
- provides the required username to (IP, Port) lookup service for them.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\family typewriter
-SequenceNumberService
-\family default
-: This service provides a unique sequence number to the clients.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Communications Layer
-\end_layout
-
-\begin_layout Itemize
-The components of the server communications layer remains the same as that
- of the client.
- 
+Comm layer: This layer implements all the logic for communicating between
+ nodes in the system.
+ This module is completely unaware of the upper layers and is client/server
+ agnostic.
+ It implements a middle layer to which services in the system register themselve
+s with.
+ This is required so that messages travelling up the stack can be delivered
+ to the appropriate end destination, on the same lines as protocol handlers
+ are used in the Linux kernel network stack.
+ Because the system is such that clients needn't be online all the time,
+ and servers can potentially fail, we implement logic wherein unsuccessful
+ transmissions are added to a queue.
+ Periodically, the messages in this queue are resent to the appropriate
+ destinations after performing another username lookup.
+ The lookup is required because clients can reconnect on different IP/Ports
+ after a disconnection.
+ Clients also rotate masters when a transmission to a server fails.
 \end_layout
 
 \begin_layout Section
@@ -842,6 +547,7 @@ key "Skeen:1983:FMC:1313337.1313750"
 
  with slight modifications to account for the specifics of the scenario
  being tackled (orderly leaves by nodes for instance).
+ The first phase of the 3PC is the reservation protocol as per the specification.
  It works as follows: 
 \end_layout
 
@@ -870,10 +576,6 @@ Client side 3 phase commit with modification for partition tolerance.
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -948,7 +650,8 @@ If there is a reservation under lock, then add to the pre-commit-queue if
 \end_layout
 
 \begin_layout Enumerate
-Attempt to abort newer reservation in favour of older one.
+Else, if the reservation has an ID older than that in the lock, attempt
+ to abort newer reservation in favour of older one.
  This is done by sending an ABORT message to the coordinator, and then waiting
  for a response from the coordinator before performing the ABORT itself.
  If the cohort receives a DOCOMMIT message after sending an ABORT, it commits
@@ -962,6 +665,30 @@ If the cohort receives a DOCOMMIT message, then commit the reservation and
 \end_layout
 
 \end_deeper
+\begin_layout Standard
+The procedure for aborting a reservation is as follows:
+\end_layout
+
+\begin_layout Itemize
+Coordinator side: If the coordinator receives an ABORT message for a particular
+ reservation which has entered the precommit phase, then it sends out ABORT
+ messages to all cohorts.
+ It then attempts to send out PRECOMMIT messages for any other slots that
+ all cohorts had previously acknowledged for reservation.
+ If there are no more slots left which can be reserved, the coordinator
+ declares the reservation to be ABORTED.
+\end_layout
+
+\begin_layout Itemize
+Cohort side: If the cohort decides to abort a reservation, it sends an ABORT
+ message to the coordinator.
+ If it receives the ABORT message back from the coordinator, it performs
+ all the necessary cleanups from the pre-commit queue, or the lock as is
+ appropriate.
+ If there are no more potential slots available for the reservation to proceed,
+ then the reservation is marked as ABORTED.
+\end_layout
+
 \begin_layout Standard
 Step 2.c protects against a potential deadlock situation which can arise
  as follows:
@@ -988,7 +715,7 @@ One possible scenario that can arise is as follows: B has a lock on reservation
 \end_layout
 
 \begin_layout Enumerate
-The older reservation R1 thus advances.
+The older reservation R1 thus advances, and R2 is forced to abort.
 \end_layout
 
 \begin_layout Subsection
@@ -1067,31 +794,6 @@ In case a replica, i.e an instance which is not the leader, gets an unexpected
  is aligned.
  Each write to the user lookup table updates a logical timestamp, such that
  ordering can be guaranteed.
-\end_layout
-
-\begin_layout Subsection
-Possible Optimisations
-\end_layout
-
-\begin_layout Itemize
-Minimising username lookups from the client side by using a cache (on the
- same lines as a DNS cache).
- 
-\end_layout
-
-\begin_layout Itemize
-In the scheme for committing a reservation, it is possible that two clients
- can be part of two reservation sequences, and each of them can abort each
- other's sequences.
- This is a safety measure, but it is possible to use a tie-breaking system
- at the tentatively booked phase.
- 
-\end_layout
-
-\begin_layout Itemize
-It is possible to only consider a subset of acknowledgements when propagating
- writes in the server cluster, thus improving performance.
- 
 \end_layout
 
 \begin_layout Section

@@ -121,121 +121,34 @@ introduced to facilitate testing. This component is not further discussed
 in this paper.
 
 
-\subsection{Client}
+\subsection{RADICal stack}
 
-The client architecture is described in Figure. \ref{fig:clientarch}.
-The working of the client has been decomposed into three layers, each
-of which holds the appropriate working components. This is described
-as follows:
-
-
-\subsubsection{Interface Layer}
-
-The client's interface layer comprises of the following: 
+The RADICal architecture is described below. The working of nodes
+in RADICal has been decomposed into three layers, described top down:
 \begin{itemize}
-\item \texttt{Client Interface}: The instantiation of this component handles
-user inputs. The user can reserve events on the calendar, view the
-calendar and connect/disconnect to the server. This interface is also
-used by the puppet master to remotely control multiple clients. 
-\end{itemize}
-
-\subsubsection{Services Layer}
-\begin{itemize}
-\item \texttt{CalendarService}: This is the abstraction for the calendar
-itself. The event reservation and commit protocols are implemented
-within this component. 
-\item \texttt{LookupService}: The Client performs lookups over the usernames
-of other participants using this service. The (IP,Port) tuples returned
-for each username are used to describe connections and remote object
-invocations for every other component in the system. 
-\item \texttt{ConnectionManager}: This component handles user login/sign-outs. 
-\item \texttt{SequenceNumberService}: This service provides a unique sequence
-number from the centralised servers. 
-\end{itemize}
-
-\subsubsection{Communications Layer}
-\begin{itemize}
-\item \texttt{SendReceiveMiddleLayer}: To abstract the underlying communication
-process from the services, we use the \texttt{SendReceiveMiddleLayer}.
-If there are multiple recipients to send a message to, this layer
-uses the \texttt{GroupMulticast }abstraction, else, uses the \texttt{PointToPoint
-}abstraction. It also acts as a demultiplexer (on the same lines as
-Linux's {}``Layer 4/3 Demux\texttt{''}), to find the appropriate
-service layer recipient for a particular message. 
-\item \texttt{GroupMulticast}: This abstraction uses the \texttt{PointToPoint
-}abstraction to deliver messages to a group of participants. 
-\item \texttt{PointToPoint}: This abstraction uses a remote invocation to
-send a message to a recipient. 
-\end{itemize}
-%
-\begin{figure}[t]
-\begin{lyxcode}
-\includegraphics[scale=0.25]{client}~
-\end{lyxcode}
-\caption{Client Architecture. A three layer approach is used, with the following
-stack: An interface layer (\texttt{Client Interface}), a service layer
-(\texttt{CalendarService, LookupService, ConnectionManager, SequenceNumberService})
-and a communication layer (\texttt{SendReceiveMiddleLayer, PointToPoint,
-GroupMulticast}).\label{fig:clientarch}}
-
-\end{figure}
-
-
-
-\subsection{Server}
-
-The Radical server consists of one master and three replicas. Each
-replica is strongly consistent with the master and updated on each
-write. In this section we describe the architecture of the servers,
-including the replicas and its leader election process. The services
-provided by the server are: a user to (IP, Port) lookup table and
-sequence numbering. A server instance may be in one of two states:
-master or replica. As a master, the instance is the primary and the
-only node responsible for serving clients with data. We assume that
-at most one instance may fail at any time during normal execution,
-including the master. If the master instance becomes unavailable,
-a new master is automatically elected among the three replicas. 
-\begin{lyxcode}
-%
-\begin{figure}[t]
-\begin{centering}
-\includegraphics[scale=0.25]{server} 
-\par\end{centering}
-
-\caption{Server Architecture. A 3 layer approach is used, with the following
-stack: An interface layer (\texttt{ServerInterface}), a service layer
-(\texttt{ReplicationService, UserLookupService, SequenceNumberService})
-and a communication layer (\texttt{SendReceiveMiddleLayer, PointToPoint,
-GroupMulticast}).\label{fig:serverarch}}
-
-\end{figure}
-
-\end{lyxcode}
-
-\subsubsection{Interface Layer}
-
-The server's interface layer comprises of the following: 
-\begin{itemize}
-\item \texttt{Server Interface}: The instantiation of this class handles
-user inputs. The user can view server state, the currently active
-replica, and the currently logged on users. 
-\end{itemize}
-
-\subsubsection{Services Layer}
-\begin{itemize}
-\item \texttt{ReplicationService}: This is the abstraction for the strongly
-consistent replication service. 
-\item \texttt{UserLookupService}: This service handles both connect/disconnects
-from the clients, and also provides the required username to (IP,
-Port) lookup service for them. 
-\item \texttt{SequenceNumberService}: This service provides a unique sequence
-number to the clients. 
-\end{itemize}
-
-\subsubsection{Communications Layer}
-\begin{itemize}
-\item The components of the server communications layer remains the same
-as that of the client. 
+\item Interface layer: This layer implements the interfaces to the underlying
+services. For the client, this equates to the ReadCalendar(), Reserve(),
+Connect() and Disconnect() interfaces. For the server, we've implemented
+Connect(), Disconnect() and ReadState() interfaces. The puppet master
+hooks into these interfaces in order to control the system.
+\item Services layer: All the services that compose of clients and servers
+are implemented in this layer. For the client, this involves services
+to handle username lookups, handle calendar related messages, and
+connecting/disconnecting to/from the servers.
+\item Comm layer: This layer implements all the logic for communicating
+between nodes in the system. This module is completely unaware of
+the upper layers and is client/server agnostic. It implements a middle
+layer to which services in the system register themselves with. This
+is required so that messages travelling up the stack can be delivered
+to the appropriate end destination, on the same lines as protocol
+handlers are used in the Linux kernel network stack. Because the system
+is such that clients needn't be online all the time, and servers can
+potentially fail, we implement logic wherein unsuccessful transmissions
+are added to a queue. Periodically, the messages in this queue are
+resent to the appropriate destinations after performing another username
+lookup. The lookup is required because clients can reconnect on different
+IP/Ports after a disconnection. Clients also rotate masters when a
+transmission to a server fails.
 \end{itemize}
 
 \section{Algorithms\label{sec:Algorithms}}
@@ -249,8 +162,9 @@ a particular event slot, it executes the commit protocol.
 
 We have opted to use a 3-phase commit algorithm \cite{Skeen:1983:FMC:1313337.1313750}
 with slight modifications to account for the specifics of the scenario
-being tackled (orderly leaves by nodes for instance). It works as
-follows: 
+being tackled (orderly leaves by nodes for instance). The first phase
+of the 3PC is the reservation protocol as per the specification. It
+works as follows: 
 
 %
 \begin{figure}
@@ -258,8 +172,6 @@ follows:
 \includegraphics[scale=0.25]{3pcommit}
 \end{lyxcode}
 \caption{Client side 3 phase commit with modification for partition tolerance.}
-
-
 
 \end{figure}
 
@@ -301,9 +213,10 @@ then lock this reservation and respond with a YES message.
 \item If there is a reservation under lock, then add to the pre-commit-queue
 if the reservation ID is newer than that under the lock. Do not respond
 with any message at this point.
-\item Attempt to abort newer reservation in favour of older one. This is
-done by sending an ABORT message to the coordinator, and then waiting
-for a response from the coordinator before performing the ABORT itself.
+\item Else, if the reservation has an ID older than that in the lock, attempt
+to abort newer reservation in favour of older one. This is done by
+sending an ABORT message to the coordinator, and then waiting for
+a response from the coordinator before performing the ABORT itself.
 If the cohort receives a DOCOMMIT message after sending an ABORT,
 it commits the currently locked reservation and aborts all reservations
 in the queue.
@@ -311,6 +224,21 @@ in the queue.
 \item If the cohort receives a DOCOMMIT message, then commit the reservation
 and change the respective slot's status to ASSIGNED.
 \end{enumerate}
+\end{itemize}
+The procedure for aborting a reservation is as follows:
+\begin{itemize}
+\item Coordinator side: If the coordinator receives an ABORT message for
+a particular reservation which has entered the precommit phase, then
+it sends out ABORT messages to all cohorts. It then attempts to send
+out PRECOMMIT messages for any other slots that all cohorts had previously
+acknowledged for reservation. If there are no more slots left which
+can be reserved, the coordinator declares the reservation to be ABORTED.
+\item Cohort side: If the cohort decides to abort a reservation, it sends
+an ABORT message to the coordinator. If it receives the ABORT message
+back from the coordinator, it performs all the necessary cleanups
+from the pre-commit queue, or the lock as is appropriate. If there
+are no more potential slots available for the reservation to proceed,
+then the reservation is marked as ABORTED.
 \end{itemize}
 Step 2.c protects against a potential deadlock situation which can
 arise as follows:
@@ -327,7 +255,7 @@ this event, node C sends out an ABORT message to its coordinator D,
 causing it to abort reservation R2. Node C then promotes reservation
 R1 from its pre-commit queue to its lock position, and responds with
 a YES message to node A for reservation R1.
-\item The older reservation R1 thus advances.
+\item The older reservation R1 thus advances, and R2 is forced to abort.
 \end{enumerate}
 
 \subsection{Server Side: Leader Election and Replication}
@@ -381,19 +309,6 @@ server instances will synchronize to ensure that the user lookup table
 and sequence number is aligned. Each write to the user lookup table
 updates a logical timestamp, such that ordering can be guaranteed.
 
-
-\subsection{Possible Optimisations}
-\begin{itemize}
-\item Minimising username lookups from the client side by using a cache
-(on the same lines as a DNS cache). 
-\item In the scheme for committing a reservation, it is possible that two
-clients can be part of two reservation sequences, and each of them
-can abort each other's sequences. This is a safety measure, but it
-is possible to use a tie-breaking system at the tentatively booked
-phase. 
-\item It is possible to only consider a subset of acknowledgements when
-propagating writes in the server cluster, thus improving performance. 
-\end{itemize}
 
 \section{Conclusions\label{sec:Conclusions}}
 
