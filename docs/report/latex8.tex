@@ -350,24 +350,29 @@ Further, test case 7 was used to determine the average size of each message sent
 Test case 9 and 10 includes more elaborate conflicts between the slots being reserved. However, all reservations eventually commit. Additionally, in test case 10 the master server is down for a period of time. This causes the client to search for a new master which results in one extra message. The system tolerates up to two server failures. If two fail simultaneously, each client may require up to two messages to determine the new master. 
 
 \subsection{Analysis}
+In this section we analyse our test results, suggest a few improvements, and briefly discuss our design choices for the software architecture. 
+
+\subsubsection{Performance}
 It is questionable why there are two messages being sent from the client in test case 1-4. At least one message in each test is the CONNECT message sent while the client is connecting to the server. For each reservation, irrespective of being a self-reservation or not, a sequence number is attached to it. One can argue that a self-reservation does not need a sequence number. That is left as an optimization. 
 
-The messages are generally quite large. While measuring the size of an empty Message object, i.e without any attributes such as destination, source, type, or payload attached to it, it determined to be 853 bytes big. As we can see, the message overhead is not signficantly impacted by our message data but rather by .NET's method for binary serialization. Binary serialization is used over tcp channels in .NET remoting. Consequently, this tells us that optimising the content of the message would yield less improvements compared to focusing on minimising the total number of messages. For example, usernames to uri lookups are done one and one. As an improvement lookups could be batched together to reduce messages. Further, clients do not cache any lookups, and therefore a new lookup is performed for every send. Even deffered sends. This also explains the relatively high number of messages counted in test case 7 even though Client 2 only was down for a few seconds. 
+The messages are generally quite large. While measuring the size of an empty Message object, i.e without any attributes such as destination, source, type, or payload attached to it, it determined to be 853 bytes big. As we can see, the message overhead is not signficantly impacted by our message data but rather by .NET's method for binary serialization. Binary serialization is used over tcp channels in .NET remoting. Consequently, this tells us that optimising the content of the message would yield less improvements compared to focusing on minimising the total number of messages. For example, usernames to uri lookups are done one and one. As an improvement lookups could be batched together to reduce messages. 
 
-Furthermore, as noted in the description of test case 5, each message sent to another client requires a lookup message to be sent to the server. It would be possible to implement a lookup cache to minimize the number of lookup messages. That was, however, not considered a primary task of this project.
+Further, clients do not cache any lookups. Therefore a new lookup is performed for every send, even deffered sends. This explains the relatively high number of messages counted in test case 7 even though Client 2 only was down for a few seconds. Implementing a lookup cache for the clients was, however, not considered a primary task of this project. One would, in case a cache existed, have to consider for how long a cache entry is to be valid, and when it should be invalidated. 
 
-- performance
-- what went well... maybe unnecessary
+There is one test case which is not supported at all, test case 8. This is because the coordinator is never online, at the same time, with all clients it is trying to reserve an event. Assuming that at one point in time, all clients have been on-line at the same time as the initiator, would solve this test case. If such an assumption is not made, the responsibility of completing a request has to be shared with all, or some, clients in the reservation. This could, for example, be done using a gossip mechanism: sharing the state of on-going reservations with the other clients that are online, such that they can complete it if a client which is down comes back online. 
 
-  - qualitative
-  software architecture obeyed 
-  limitations of commit protocol
+\subsubsection{System Architecture}
+One goal when designing the system was to minimize the number of remote entry points used between clients and between clients and servers. While Remote Procedure Calls offers developers the freedom to easily connect logic code with network code, it does comes with a price. Remote calls become interspersed with logic code and it becomes more difficult to follow the data and control flow. As the system required three components to be developed, the server, client and the puppet master, all of which required communication capabilities, we opted for an independent communication layer. The communication layer, used as is in all components, is fully decoupled from the services using it. In other words, the communication layer is completely unaware of what services are running on top. Instead each service registeres for the messages that it handles. Three important properties of this design choice are: 
 
-- what could be improved: 
-  pass coordinator function to another node to make case 8 work (with forwarding) 
-  
+\begin{enumerate}
+\item The guarantees of the communication point to point links are centralised to one place in the system. Once implemented, it was available to all services and components. For example, resending messages to clients who have disconnected was added later in the development of the project and confined two only one place. 
+\item It is easier to test and debug service and communication layer code independently. Communication bugs were all gathered in the same place as only one entry and exit point for messages exists in the system.
+\item A separate channel for the puppet master was created using another instance of the communication layer. Ultimately giving the puppet master the same guarantees as the clients and the servers. 
+\end{enumerate}  
 
+Regarding server configuration, the design lacks a flexible way of easily adding more servers. This applies to client configuration as well as the replication service. A list of servers are provided in a configuration file to the client and the server. While that is ok, each component is hardcoded to only read maximum three servers, and will only rotate between these in case a server is disconnected. Improvments can be made by adding to the common library, a mechanism to read and manage the available servers. This limitation affects the scalability of the server component. 
 
+Overall, the design choices made proved successfull. We were able to follow and use the architecture throughout the development and never resolved to any hacks which would be considered difficult or less elegant. 
 
 \section{Conclusions\label{sec:Conclusions}}
 
