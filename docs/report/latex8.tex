@@ -264,50 +264,48 @@ a YES message to node A for reservation R1.
 \subsubsection{Leader Election}
 
 All instances of a server knows about all other server instances.
-Each instance has a unique id. Since the number of servers never exceeds
-four, each server regularly emits a heartbeat to let the other servers
-know it is alive. It is assumed that at most one server may fail at
-any time. During the bootstrap of a server, each instance will select
-the server with the highest ID (IP-Port combination) to be the leader.
-Our leader election process is based on the Bully algorithm proposed
-by \cite{GarciaMolina}. In case of a server failure, when any other
-instance suspects that a server is unavailable, it will send a proposal
-to all other servers that X is unavailable. If all others agree, the
-server with the next highest ID is elected the new leader. The leader
-is selected in a round-robin fashion.
+Each instance has a unique id. The three servers regularly ping all other servers to determine, in a boolean fashion, its liveness. It is assumed that at most one server may fail at
+any time. The first server alive will become the master. Servers are, in case of failure, rotated in a round-robin selection scheme. We assume that our failure detector is perfect, and that we're operating in a fail-stop model. Thus, it is not possible to determine if a server does not respond for a while due to heavy load. 
+
+%Our leader election process is based on the Bully algorithm proposed
+%by \cite{GarciaMolina}. In case of a server failure, when any other
+%instance suspects that a server is unavailable, it will send a proposal
+%to all other servers that X is unavailable. If all others agree, the
+%server with the next highest ID is elected the new leader. The leader
+%is selected in a round-robin fashion.
 
 To handle network partitions, a server may only become a leader if
-it is part of the cluster with a majority of the servers. In case
-each cluster is of equal size, the cluster with the current leader
-will remain/elect the leader. This assumes that the leader's failure
-and the 2-2 partition does not happen simultaneously. Clients trying
+it is part of the cluster with a majority of the servers. Clients trying
 to contact the minority cluster will not get any replies, and according
-to the round-robin selection scheme, will eventually pick a server
+to a similar round-robin selection scheme of servers, eventually pick a server
 from the majority cluster.
 
 
 \subsubsection{Replication}
 
-In the interface above, three of the interfaces are considered writes.
-Since we want to maintain a strong consistency among the replicas,
-the master instance will propagate a write to all replicas before
-replying to the client. The propagation is assumed to be synchronous
+One of the design goals is to maintain a strong consistency among the replicas. Therefore, 
+the master instance will propagate a write to at least one replica before
+replying to the client. The propagation is synchronous
 and utilises the broadcast component of the communication layer described
 earlier. Thus, a server which receives a request will block until
-it receives an acknowledgement from all correct replicas. The hit
+it receives an acknowledgement from one correct replicas. The hit
 this takes on performance can be justified by the fact that a replicated
 set of servers which are highly available would most likely be on
 a rack with a high bandwidth inter-connect. A replica is considered
-alive as long as a heartbeat has been received within the given timeframe.
+alive as long as a recent heartbeat is available.
 
-In case a replica, i.e an instance which is not the leader, gets an
-unexpected request from a client it will query the leader for the
-data, and retransmit the response to the client. Before propagating
-write requests to replicas, the leader maintains a log of all write
-records. When a server fails, and after a new leader is elected, the
-server instances will synchronize to ensure that the user lookup table
-and sequence number is aligned. Each write to the user lookup table
-updates a logical timestamp, such that ordering can be guaranteed.
+In case a replica, i.e an instance which is not the leader, gets a request from a client it will reply to the client informing it who is the actual master. The client will then be forced to resend its request to that server instance. This will increase the number of messages required, but keeps the design simpler. 
+
+When a replica is started, in other words, when there already is at least one server alive, it will query this server with a replication request. The master will send its complete state - including the user table and its latest sequence number - to the replica. If a server crashes, a full synchronization is made. Servers maintain no persistent state on their own. Hence, the state is kept in memory.
+
+%In case a replica, i.e an instance which is not the leader, gets an
+%unexpected request from a client it will query the leader for the
+%data, and retransmit the response to the client. Before propagating
+%write requests to replicas, the leader maintains a log of all write
+%records. When a server fails, and after a new leader is elected, the
+%server instances will synchronize to ensure that the user lookup table
+%and sequence number is aligned. Each write to the user lookup table
+%updates a logical timestamp, such that ordering can be guaranteed.
 
 
 \section{Evaluation}
