@@ -323,28 +323,38 @@ The following results were taken using 10 test cases provided at the project che
         \hline
         Test & Client 1 & Client 2 \\
         \hline
-        1  & 3           & NA          \\ 
-        2  & 3           & NA          \\ 
-        3  & 3           & NA          \\ 
-        4  & 3           & NA          \\ 
-        5  & 9           & 6           \\ 
-        6  & 9           & 7           \\ 
-        7  & 18*          & 12          \\ 
+        1  & 2           & NA          \\ 
+        2  & 2           & NA          \\ 
+        3  & 2           & NA          \\ 
+        4  & 2           & NA          \\ 
+        5  & 8           & 5           \\ 
+        6  & 8           & 6           \\ 
+        7  & 17*          & 11          \\ 
         8  & Unsupported & Unsupported \\ 
-        9  & 13          & 13          \\ 
-        10 & 14          & 14          \\
+        9  & 12          & 12          \\ 
+        10 & 13          & 13          \\
         \hline
     \end{tabular}
 \end{table}
 
+Test case 1-4 only makes self-reservations with an increasing number of servers on-line, reaching a maximum of three. In test case 4, two slots are provided. However, as there are no previous slot reservations, and it is also self-reservation, no more than three messages will be used. 
+
+In test case 5 two clients connect and Client 1 issues a reservation with Client 2 with one slot suggestion. Deducting the CONNECT and SEQUENCE\_NUMBER messages 6 messages are required for a successful multi-user reservation for the initiating client. For each message sent to another client a lookup message to determine the destination's uri is sent to the server. This causes the number of messages used for a reservation to double. In fact, only three messages are required for a successful reservation which does not pose any conflicts. Client 2 acks the first two messages in the reservation protocol: RESERVATION and PRECOMMIT. 
+
+Test case 6 causes two clients two connect. Client 2 first initiates a self-reservation. Client 1 then tries to schedule a slot for the same slot that Client 2 just scheduled. As this slot is already confirmed, a new sequence will be initiated for the alternative slot. This reservation completes successfully. This causes the extra message from Client 2. 
+
 In test case 7, the number of sent messages cannot be deterministically measured as it depends on how long the receiving client is disconnected from the system. Only when it comes back on-line is can the reservation successfully complete. 
 
-Further, test case 7 was used to determine the average size of each message sent in the system. Still excluding server messages, counting 29 messages in total, the average size is 879 bytes with a standard deviation of 25 bytes. When excluding the server messages, which includes a substantial number of messages for its failure detector, the average size is 889 bytes, and a standard deviation of 30 bytes across a total of 231 messages. Message size was measured by serialising each message object into byte array and measuring its length.
+Further, test case 7 was used to determine the average size of each message sent in the system. Still excluding server messages, counting 29 messages in total, the average size is 879 bytes with a standard deviation of 25 bytes. When accounting for server messages, which includes a substantial number of messages for its failure detector, the average size is 889 bytes, and a standard deviation of 30 bytes across a total of 231 messages. Message size was measured by serialising each message object into byte array and measuring its length. The larger deviation is due to the servers synchronization messages in which the user database is copied to the requesting server. 
+
+Test case 9 and 10 includes more elaborate conflicts between the slots being reserved. However, all reservations eventually commit. Additionally, in test case 10 the master server is down for a period of time. This causes the client to search for a new master which results in one extra message. The system tolerates up to two server failures. If two fail simultaneously, each client may require up to two messages to determine the new master. 
 
 \subsection{Analysis}
-The messages are generally quite large which is likely due to .NET's XML standard for serialisation. This tells us that trying to optimise the content of the message would yield less improvment compared to focusing on minimising th enumber of messages in total. For example, usernames to uri lookups are done one and one. As an improvement lookups could be batched together to reduce messages. Further, clients do not cache any lookups, and therefore a new lookup is performed for every send. Even deffered sends. This also explains the relatively high number of messages counted in test case 7 even though Client 2 only was down for a few seconds. 
+It is questionable why there are two messages being sent from the client in test case 1-4. At least one message in each test is the CONNECT message sent while the client is connecting to the server. For each reservation, irrespective of being a self-reservation or not, a sequence number is attached to it. One can argue that a self-reservation does not need a sequence number. That is left as an optimization. 
 
+The messages are generally quite large. While measuring the size of an empty Message object, i.e without any attributes such as destination, source, type, or payload attached to it, it determined to be 853 bytes big. As we can see, the message overhead is not signficantly impacted by our message data but rather by .NET's method for binary serialization. Binary serialization is used over tcp channels in .NET remoting. Consequently, this tells us that optimising the content of the message would yield less improvements compared to focusing on minimising the total number of messages. For example, usernames to uri lookups are done one and one. As an improvement lookups could be batched together to reduce messages. Further, clients do not cache any lookups, and therefore a new lookup is performed for every send. Even deffered sends. This also explains the relatively high number of messages counted in test case 7 even though Client 2 only was down for a few seconds. 
 
+Furthermore, as noted in the description of test case 5, each message sent to another client requires a lookup message to be sent to the server. It would be possible to implement a lookup cache to minimize the number of lookup messages. That was, however, not considered a primary task of this project.
 
 - performance
 - what went well... maybe unnecessary
