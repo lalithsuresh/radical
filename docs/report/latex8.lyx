@@ -23,6 +23,10 @@
 \makeatother
 
 \usepackage{babel}
+
+\makeatother
+
+\usepackage{babel}
 \end_preamble
 \options times
 \use_default_options false
@@ -58,7 +62,6 @@
 \paperpagestyle empty
 \tracking_changes false
 \output_changes false
-\author "" 
 \author "" 
 \end_header
 
@@ -424,48 +427,281 @@ name "sec:systemarch"
 \end_layout
 
 \begin_layout Standard
-Since there is a Client and Server entity for this system, we describe the
- architecture of each separetely.
- One of the main design goals is to allow easy testability and debugging
- facilities within the system in order to ease development.
- To a certain degree, we hope to achieve this through classic 'printf' style
- debugging.
- Every class in PADICal inherits from a class 
-\family typewriter
-PadiCalObject
-\family default
-, which has one virtual method named 
-\family typewriter
-Debug()
-\family default
-.
- This method performs pretty printing of internal state of an object, and
- follows the flow of logic through the stack.
- All sub classes have to implement this method depending on the kind of
- methods and state information they may hold.
- Additionally, the NUnit framework is used during the development phase
- to ensure methods do not misbehave when changes are introduced later.
+Two main quality attributes drive the architecture of RADIcal: testability,
+ and reusability.
+ As with any distributed system, hard to track bugs may occur at any point
+ in the code.
+ To facilitate speedy development of the reservation protocol and replication
+ algorithm we deem it crucial to have appropriate testing and debugging
+ mechanisms in place.
+ The puppet master requirement also strongly motivates this decision.
+ Further, both clients, servers and the puppet master requires communication
+ capabilities.
+ It therefore makes sense to develop a common communication library which
+ can be reused for all components.
+\end_layout
+
+\begin_layout Standard
+The three logical components: the client, the server, and the puppet master
+ component, all follow a three-tier architectural decomposition.
+ From top to down, the layers are: the interface layer, the services layer,
+ and the communications layer.
+ The layered architecture makes it easy to reuse the communication layer
+ in all components.
+ In addition, a fourth library with common functions are also shared among
+ all components.
+ This common library contains abstract classes which modules in the services
+ and communication layer implements to facilitate testing and debugging.
+ For example, pretty printing of an object's state during program execution.
+\end_layout
+
+\begin_layout Standard
+In the section below we outline the details of what we call the RADICal
+ stack.
+ Specifically we focus on the client and the server's functionality.
+ The puppet master, which is introduced to facilitate testing, will not
+ be detailed in this paper.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Since there is a Client and Server entity for this system, we describe
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%the architecture of each separetely.
+ One of the main design goals
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%is to allow easy testability and debugging facilities within the system
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%in order to ease development.
+ To a certain degree, we hope to achieve
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%this through classic 'printf' style debugging.
+ Every class in PADICal
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%inherits from a class 
+\backslash
+texttt{PadiCalObject}, which has one virtual
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%method named 
+\backslash
+texttt{Debug()}.
+ This method performs pretty printing
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%of internal state of an object, and follows the flow of logic through
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%the stack.
+ All sub classes have to implement this method depending
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%on the kind of methods and state information they may hold.
+ Additionally,
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%the NUnit framework is used during the development phase to ensure
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%methods do not misbehave when changes are introduced later.
  The 
-\family typewriter
-Debug()
-\family default
- method of different objects comprising of a client or server can be enabled
- via a configuration file or through some interfaces we can provide to the
- UI of the client.
+\backslash
+texttt{Debug()}
 \end_layout
 
-\begin_layout Standard
-The client and the server follows a three-tier architectural decomposition.
- From top to down, they are as follows: the interface layer, the services
- layer, and the communications layer.
- In the sections below, we first describe the client, the server, and the
- components of each of the three layers that they comprise of.
+\begin_layout Plain Layout
+
 \end_layout
 
-\begin_layout Standard
-In addition to the client and the server, a puppet master will be introduced
- to facilitate testing.
- This component is not further discussed in this paper.
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%method of different objects comprising of a client or server can be
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%enabled via a configuration file or through some interfaces we can
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%provide to the UI of the client.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -475,7 +711,7 @@ RADICal stack
 \begin_layout Standard
 The RADICal architecture is described below.
  The working of nodes in RADICal has been decomposed into three layers,
- described top down:
+ described top down: 
 \end_layout
 
 \begin_layout Itemize
@@ -486,6 +722,7 @@ Interface layer: This layer implements the interfaces to the underlying
  For the server, we've implemented Connect(), Disconnect() and ReadState()
  interfaces.
  The puppet master hooks into these interfaces in order to control the system.
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -493,6 +730,7 @@ Services layer: All the services that compose of clients and servers are
  implemented in this layer.
  For the client, this involves services to handle username lookups, handle
  calendar related messages, and connecting/disconnecting to/from the servers.
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -513,6 +751,7 @@ s with.
  The lookup is required because clients can reconnect on different IP/Ports
  after a disconnection.
  Clients also rotate masters when a transmission to a server fails.
+ 
 \end_layout
 
 \begin_layout Section
@@ -548,7 +787,7 @@ key "Skeen:1983:FMC:1313337.1313750"
  with slight modifications to account for the specifics of the scenario
  being tackled (orderly leaves by nodes for instance).
  The first phase of the 3PC is the reservation protocol as per the specification.
- It works as follows: 
+ It works as follows:
 \end_layout
 
 \begin_layout Standard
@@ -597,11 +836,13 @@ The coordinator sends out reservation requests to all nodes.
  If all nodes send RESERVATION-ACK messages, the coordinator picks the first
  common slot agreed to by the cohorts according to its preference and sends
  out a PRECOMMIT message to all cohorts.
+ 
 \end_layout
 
 \begin_layout Enumerate
 The coordinator then collects YES or ABORT messages from all the cohorts
  depending on whether or not they agree to proceed further in the reservation.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -609,12 +850,14 @@ If all nodes agree with a YES message, then the coordinator sends all the
  cohorts a DOCOMMIT message, and it updates the reservation status to COMMITTED,
  and the particular calendar slot to ASSIGNED.
  This completes the reservation.
+ 
 \end_layout
 
 \begin_layout Enumerate
 If at least one node sends an ABORT message, the coordinator aborts the
  reservation, and sends out ABORT messages to all the cohorts, causing them
  to abort as well.
+ 
 \end_layout
 
 \end_deeper
@@ -629,6 +872,7 @@ The cohort receives a reservation request for a list of slots.
  free slots in the form of a RESERVATION-ACK message.
  If none of the requested slots are free, then the cohort responds with
  a RESERVATION-NACK.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -641,12 +885,14 @@ If the cohort gets a PRECOMMIT message from a coordinator, then it implies
 \begin_layout Enumerate
 If pre-commit-queue is empty, and there is no reservation under lock, then
  lock this reservation and respond with a YES message.
+ 
 \end_layout
 
 \begin_layout Enumerate
 If there is a reservation under lock, then add to the pre-commit-queue if
  the reservation ID is newer than that under the lock.
  Do not respond with any message at this point.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -656,17 +902,19 @@ Else, if the reservation has an ID older than that in the lock, attempt
  for a response from the coordinator before performing the ABORT itself.
  If the cohort receives a DOCOMMIT message after sending an ABORT, it commits
  the currently locked reservation and aborts all reservations in the queue.
+ 
 \end_layout
 
 \end_deeper
 \begin_layout Enumerate
 If the cohort receives a DOCOMMIT message, then commit the reservation and
  change the respective slot's status to ASSIGNED.
+ 
 \end_layout
 
 \end_deeper
 \begin_layout Standard
-The procedure for aborting a reservation is as follows:
+The procedure for aborting a reservation is as follows: 
 \end_layout
 
 \begin_layout Itemize
@@ -677,6 +925,7 @@ Coordinator side: If the coordinator receives an ABORT message for a particular
  all cohorts had previously acknowledged for reservation.
  If there are no more slots left which can be reserved, the coordinator
  declares the reservation to be ABORTED.
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -687,11 +936,12 @@ Cohort side: If the cohort decides to abort a reservation, it sends an ABORT
  appropriate.
  If there are no more potential slots available for the reservation to proceed,
  then the reservation is marked as ABORTED.
+ 
 \end_layout
 
 \begin_layout Standard
 Step 2.c protects against a potential deadlock situation which can arise
- as follows:
+ as follows: 
 \end_layout
 
 \begin_layout Enumerate
@@ -699,6 +949,7 @@ Let there be a reservation R1 coordinated by node A, involving nodes B and
  C.
  Let there also be a reservation R2, coordinated by D, which has occured
  later than R1, involving nodes B and C as well.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -712,10 +963,12 @@ One possible scenario that can arise is as follows: B has a lock on reservation
  D, causing it to abort reservation R2.
  Node C then promotes reservation R1 from its pre-commit queue to its lock
  position, and responds with a YES message to node A for reservation R1.
+ 
 \end_layout
 
 \begin_layout Enumerate
 The older reservation R1 thus advances, and R2 is forced to abort.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -729,38 +982,121 @@ Leader Election
 \begin_layout Standard
 All instances of a server knows about all other server instances.
  Each instance has a unique id.
- Since the number of servers never exceeds four, each server regularly emits
- a heartbeat to let the other servers know it is alive.
+ The three servers regularly ping all other servers to determine, in a boolean
+ fashion, its liveness.
  It is assumed that at most one server may fail at any time.
- During the bootstrap of a server, each instance will select the server
- with the highest ID (IP-Port combination) to be the leader.
- Our leader election process is based on the Bully algorithm proposed by
- 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "GarciaMolina"
+ The first server alive will become the master.
+ Servers are, in case of failure, rotated in a round-robin selection scheme.
+ We assume that our failure detector is perfect, and that we're operating
+ in a fail-stop model.
+ Thus, it is not possible to determine if a server does not respond for
+ a while due to heavy load.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%Our leader election process is based on the Bully algorithm proposed
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
 
 \end_inset
 
-.
- In case of a server failure, when any other instance suspects that a server
- is unavailable, it will send a proposal to all other servers that X is
- unavailable.
- If all others agree, the server with the next highest ID is elected the
- new leader.
- The leader is selected in a round-robin fashion.
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%by 
+\backslash
+cite{GarciaMolina}.
+ In case of a server failure, when any other
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%instance suspects that a server is unavailable, it will send a proposal
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%to all other servers that X is unavailable.
+ If all others agree, the
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%server with the next highest ID is elected the new leader.
+ The leader
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%is selected in a round-robin fashion.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 To handle network partitions, a server may only become a leader if it is
  part of the cluster with a majority of the servers.
- In case each cluster is of equal size, the cluster with the current leader
- will remain/elect the leader.
- This assumes that the leader's failure and the 2-2 partition does not happen
- simultaneously.
  Clients trying to contact the minority cluster will not get any replies,
- and according to the round-robin selection scheme, will eventually pick
- a server from the majority cluster.
+ and according to a similar round-robin selection scheme of servers, eventually
+ pick a server from the majority cluster.
 \end_layout
 
 \begin_layout Subsubsection
@@ -768,32 +1104,757 @@ Replication
 \end_layout
 
 \begin_layout Standard
-In the interface above, three of the interfaces are considered writes.
- Since we want to maintain a strong consistency among the replicas, the
- master instance will propagate a write to all replicas before replying
- to the client.
- The propagation is assumed to be synchronous and utilises the broadcast
- component of the communication layer described earlier.
+One of the design goals is to maintain a strong consistency among the replicas.
+ Therefore, the master instance will propagate a write to at least one replica
+ before replying to the client.
+ The propagation is synchronous and utilises the broadcast component of
+ the communication layer described earlier.
  Thus, a server which receives a request will block until it receives an
- acknowledgement from all correct replicas.
+ acknowledgement from one correct replicas.
  The hit this takes on performance can be justified by the fact that a replicate
 d set of servers which are highly available would most likely be on a rack
  with a high bandwidth inter-connect.
- A replica is considered alive as long as a heartbeat has been received
- within the given timeframe.
+ A replica is considered alive as long as a recent heartbeat is available.
 \end_layout
 
 \begin_layout Standard
-In case a replica, i.e an instance which is not the leader, gets an unexpected
- request from a client it will query the leader for the data, and retransmit
- the response to the client.
- Before propagating write requests to replicas, the leader maintains a log
- of all write records.
- When a server fails, and after a new leader is elected, the server instances
- will synchronize to ensure that the user lookup table and sequence number
- is aligned.
- Each write to the user lookup table updates a logical timestamp, such that
- ordering can be guaranteed.
+In case a replica, i.e an instance which is not the leader, gets a request
+ from a client it will reply to the client informing it who is the actual
+ master.
+ The client will then be forced to resend its request to that server instance.
+ This will increase the number of messages required, but keeps the design
+ simpler.
+\end_layout
+
+\begin_layout Standard
+When a replica is started, in other words, when there already is at least
+ one server alive, it will query this server with a replication request.
+ The master will send its complete state - including the user table and
+ its latest sequence number - to the replica.
+ If a server crashes, a full synchronization is made.
+ Servers maintain no persistent state on their own.
+ Hence, the state is kept in memory.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%In case a replica, i.e an instance which is not the leader, gets an
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%unexpected request from a client it will query the leader for the
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%data, and retransmit the response to the client.
+ Before propagating
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%write requests to replicas, the leader maintains a log of all write
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%records.
+ When a server fails, and after a new leader is elected, the
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%server instances will synchronize to ensure that the user lookup table
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%and sequence number is aligned.
+ Each write to the user lookup table
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%updates a logical timestamp, such that ordering can be guaranteed.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Evaluation
+\end_layout
+
+\begin_layout Subsection
+Results
+\end_layout
+
+\begin_layout Standard
+The following results were taken using 10 test cases provided at the project
+ checkpoint.
+ Each test case connects one or more clients to a set of servers.
+ From test case 3 and onwards three servers are used.
+ Test case 8 is unsupported as it requires migrating the coordination of
+ a reservation to another user.
+ Something not supported in our prototype.
+ Moreover, the following measurements does not account for any messages
+ sent by the servers.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="12" columns="3">
+<features>
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" topline="true" bottomline="true" usebox="none" special="|c|">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Table 1: Test results
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Test 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Client 1 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Client 2 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NA 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NA 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NA 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NA 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17* 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Unsupported 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Unsupported 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Test case 1-4 only makes self-reservations with an increasing number of
+ servers on-line, reaching a maximum of three.
+ In test case 4, two slots are provided.
+ However, as there are no previous slot reservations, and it is also self-reserv
+ation, no more than three messages will be used.
+\end_layout
+
+\begin_layout Standard
+In test case 5 two clients connect and Client 1 issues a reservation with
+ Client 2 with one slot suggestion.
+ Deducting the CONNECT and SEQUENCE_NUMBER messages 6 messages are required
+ for a successful multi-user reservation for the initiating client.
+ For each message sent to another client a lookup message to determine the
+ destination's uri is sent to the server.
+ This causes the number of messages used for a reservation to double.
+ In fact, only three messages are required for a successful reservation
+ which does not pose any conflicts.
+ Client 2 acks the first two messages in the reservation protocol: RESERVATION
+ and PRECOMMIT.
+\end_layout
+
+\begin_layout Standard
+Test case 6 causes two clients two connect.
+ Client 2 first initiates a self-reservation.
+ Client 1 then tries to schedule a slot for the same slot that Client 2
+ just scheduled.
+ As this slot is already confirmed, a new sequence will be initiated for
+ the alternative slot.
+ This reservation completes successfully.
+ This causes the extra message from Client 2.
+\end_layout
+
+\begin_layout Standard
+In test case 7, the number of sent messages cannot be deterministically
+ measured as it depends on how long the receiving client is disconnected
+ from the system.
+ Only when it comes back on-line is can the reservation successfully complete.
+\end_layout
+
+\begin_layout Standard
+Further, test case 7 was used to determine the average size of each message
+ sent in the system.
+ Still excluding server messages, counting 29 messages in total, the average
+ size is 879 bytes with a standard deviation of 25 bytes.
+ When accounting for server messages, which includes a substantial number
+ of messages for its failure detector, the average size is 889 bytes, and
+ a standard deviation of 30 bytes across a total of 231 messages.
+ Message size was measured by serialising each message object into byte
+ array and measuring its length.
+ The larger deviation is due to the servers synchronization messages in
+ which the user database is copied to the requesting server.
+\end_layout
+
+\begin_layout Standard
+Test case 9 and 10 includes more elaborate conflicts between the slots being
+ reserved.
+ However, all reservations eventually commit.
+ Additionally, in test case 10 the master server is down for a period of
+ time.
+ This causes the client to search for a new master which results in one
+ extra message.
+ The system tolerates up to two server failures.
+ If two fail simultaneously, each client may require up to two messages
+ to determine the new master.
+\end_layout
+
+\begin_layout Subsection
+Analysis
+\end_layout
+
+\begin_layout Standard
+In this section we analyse our test results, suggest a few improvements,
+ and briefly discuss our design choices for the software architecture.
+\end_layout
+
+\begin_layout Subsubsection
+Performance
+\end_layout
+
+\begin_layout Standard
+It is questionable why there are two messages being sent from the client
+ in test case 1-4.
+ At least one message in each test is the CONNECT message sent while the
+ client is connecting to the server.
+ For each reservation, irrespective of being a self-reservation or not,
+ a sequence number is attached to it.
+ This is a trivial fix.
+\end_layout
+
+\begin_layout Standard
+The messages are generally quite large.
+ While measuring the size of an empty Message object, i.e without any attributes
+ such as destination, source, type, or payload attached to it, it determined
+ to be 853 bytes big.
+ As we can see, the message overhead is not signficantly impacted by our
+ message data but rather by .NET's method for binary serialization.
+ Binary serialization is used over tcp channels in .NET remoting.
+ Consequently, this tells us that optimising the content of the message
+ would yield less improvements compared to focusing on minimising the total
+ number of messages.
+ For example, usernames to uri lookups are done one by one before the actual
+ remoting is performed.
+ As an improvement, lookups could be batched together to reduce messages.
+\end_layout
+
+\begin_layout Standard
+Furthermore, clients do not cache any lookups.
+ Therefore a new lookup is performed for every send, even deffered sends
+ (resend attempts in case of offline destinations).
+ This is done in order to protect against the same destination client appearing
+ online on a different IP/Port pair.
+ This explains the relatively high number of messages counted in test case
+ 7 even though Client 2 only was down for a few seconds.
+ Implementing a lookup cache for the clients was not done.
+ One would, in case a cache existed, have to consider for how long a cache
+ entry is to be valid, and when it should be invalidated.
+\end_layout
+
+\begin_layout Standard
+There is one test case which is not supported in our implementation, namely
+ test case 8.
+ This is because the coordinator is never online at the same time with each
+ client it is trying to reserve an event with.
+ Assuming that at some point of time, each client has been on-line at the
+ same time as the initiator (independent of the other clients), the reservations
+ would proceed.
+ If such an assumption is not made, the responsibility of completing a request
+ has to be shared with all, or some, clients in the reservation.
+ This could, for example, be done by a handover of coordinator status to
+ other clients who may complete the reservation if a client which is down
+ comes back online.
+\end_layout
+
+\begin_layout Subsubsection
+System Architecture
+\end_layout
+
+\begin_layout Standard
+One goal when designing the system was to minimize the number of remote
+ entry points used between clients and between clients and servers.
+ While Remote Procedure Calls offers developers the freedom to easily connect
+ logic code with network code, it does comes with a price.
+ Remote calls become interspersed with logic code and it becomes more difficult
+ to follow the data and control flow.
+ As the system required three components to be developed, the server, client
+ and the puppet master, all of which required communication capabilities,
+ we opted for an independent communication layer.
+ The communication layer, used as is in all components, is fully decoupled
+ from the services using it.
+ In other words, the communication layer is completely unaware of what services
+ are running on top.
+ Instead each service registers for the messages that it should handle.
+ Three important properties of this design choice are:
+\end_layout
+
+\begin_layout Enumerate
+The guarantees of the communication point to point links are centralised
+ to one place in the system.
+ Once implemented, it was available to all services and components.
+ For example, resending messages to clients who have disconnected was added
+ later in the development of the project and confined two only one place.
+ 
+\end_layout
+
+\begin_layout Enumerate
+It is easier to test and debug service and communication layer code independentl
+y.
+ Communication bugs were all gathered in the same place as only one entry
+ and exit point for messages exists in the system.
+ 
+\end_layout
+
+\begin_layout Enumerate
+A separate channel for the puppet master was created using another instance
+ of the communication layer.
+ Ultimately giving the puppet master the same guarantees as the clients
+ and the servers.
+ 
+\end_layout
+
+\begin_layout Standard
+Regarding server configuration, the design lacks a flexible way of easily
+ adding more servers.
+ This applies to client configuration as well as the replication service.
+ A list of servers are provided in a configuration file to the client and
+ the server.
+ While that is ok, each component is hardcoded to only read a maximum of
+ three servers, and will only rotate between these in case a server is disconnec
+ted.
+ Improvments can be made by adding to the common library, a mechanism to
+ read and manage the available servers.
+ This limitation affects the scalability of the server component.
+\end_layout
+
+\begin_layout Standard
+Overall, the design choices made proved successful.
+ We were able to follow and use the architecture throughout the development
+ and never resolved to any hacks which would be considered difficult or
+ less elegant.
 \end_layout
 
 \begin_layout Section
@@ -816,6 +1877,19 @@ In this paper, we have presented the design and architecture for RADICal,
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+bibliographystyle{latex8}
+\end_layout
+
+\end_inset
+
+ 
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "latex8"

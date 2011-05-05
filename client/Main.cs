@@ -64,68 +64,6 @@ namespace client
 						
 			client.InitClient ();
 			
-			//FIXME: Remove later
-
-			
-			client.Connect ();
-			
-			
-			//System.Threading.Thread.Sleep (100);
-
-			if (client.UserName.Equals ("testclient1"))
-			{
-				
-					// This test should book slot 1
-				{
-				List<string> userlist = new List<string> ();
-				List<int> slotlist = new List<int> ();
-				string description = "test description";
-				
-				userlist.Add ("testclient1");
-				userlist.Add ("testclient2");
-				//userlist.Add ("user2");
-				//userlist.Add ("user3");
-				slotlist.Add (8000);
-				slotlist.Add (8001);
-				//slotlist.Add (3);
-				client.Reserve (description, userlist, slotlist);
-				}
-				
-				/*
-				// This test should book slot 2 as opposed to slot 1
-				{
-				List<string> userlist = new List<string> ();
-				List<int> slotlist = new List<int> ();
-				string description = "test description111";
-				
-				userlist.Add ("testclient2");
-				userlist.Add ("testclient3");
-				//userlist.Add ("user5");
-				//userlist.Add ("user6");
-				slotlist.Add (1);
-				slotlist.Add (2);
-				slotlist.Add (8);
-				client.Reserve (description, userlist, slotlist);
-				}
-				
-				
-				// This test should book slot 8 as opposed to slot 1 or 2
-				{
-				List<string> userlist = new List<string> ();
-				List<int> slotlist = new List<int> ();
-				string description = "test description111";
-				
-				userlist.Add ("testclient2");
-				userlist.Add ("testclient3");
-				//userlist.Add ("user5");
-				//userlist.Add ("user6");
-				slotlist.Add (1);
-				slotlist.Add (2);
-				slotlist.Add (8);
-				client.Reserve (description, userlist, slotlist);
-				}*/
-			}
-			
 			
 			Console.ReadLine();			
 			
