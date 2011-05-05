@@ -93,32 +93,28 @@ paper.
 
 
 \section{System Architecture\label{sec:systemarch}}
+Two main quality attributes drive the architecture of RADIcal: testability, and reusability. As with any distributed system, hard to track bugs may occur at any point in the code. To facilitate speedy development of the reservation protocol and replication algorithm we deem it crucial to have appropriate testing and debugging mechanisms in place. The puppet master requirement also strongly motivates this decision. Further, both clients, servers and the puppet master requires communication capabilities. It therefore makes sense to develop a common communication library which can be reused for all components. 
 
-Since there is a Client and Server entity for this system, we describe
-the architecture of each separetely. One of the main design goals
-is to allow easy testability and debugging facilities within the system
-in order to ease development. To a certain degree, we hope to achieve
-this through classic 'printf' style debugging. Every class in PADICal
-inherits from a class \texttt{PadiCalObject}, which has one virtual
-method named \texttt{Debug()}. This method performs pretty printing
-of internal state of an object, and follows the flow of logic through
-the stack. All sub classes have to implement this method depending
-on the kind of methods and state information they may hold. Additionally,
-the NUnit framework is used during the development phase to ensure
-methods do not misbehave when changes are introduced later. The \texttt{Debug()}
-method of different objects comprising of a client or server can be
-enabled via a configuration file or through some interfaces we can
-provide to the UI of the client.
+The three logical components: the client, the server, and the puppet master component, all follow a three-tier architectural decomposition. From top to down, the layers are: the interface layer, the services layer, and the communications layer. The layered architecture makes it easy to reuse the communication layer in all components. In addition, a fourth library with common functions are also shared among all components. This common library contains abstract classes which modules in the services and communication layer implements to facilitate testing and debugging. For example, pretty printing of an object's state during program execution. 
 
-The client and the server follows a three-tier architectural decomposition.
-From top to down, they are as follows: the interface layer, the services
-layer, and the communications layer. In the sections below, we first
-describe the client, the server, and the components of each of the
-three layers that they comprise of.
+In the section below we outline the details of what we call the RADICal stack. Specifically we focus on the client and the server's functionality. The puppet master, which is introduced to facilitate testing, will not be detailed in this paper. 
 
-In addition to the client and the server, a puppet master will be
-introduced to facilitate testing. This component is not further discussed
-in this paper.
+%Since there is a Client and Server entity for this system, we describe
+%the architecture of each separetely. One of the main design goals
+%is to allow easy testability and debugging facilities within the system
+%in order to ease development. To a certain degree, we hope to achieve
+%this through classic 'printf' style debugging. Every class in PADICal
+%inherits from a class \texttt{PadiCalObject}, which has one virtual
+%method named \texttt{Debug()}. This method performs pretty printing
+%of internal state of an object, and follows the flow of logic through
+%the stack. All sub classes have to implement this method depending
+%on the kind of methods and state information they may hold. Additionally,
+%the NUnit framework is used during the development phase to ensure
+%methods do not misbehave when changes are introduced later. The \texttt{Debug()}
+%method of different objects comprising of a client or server can be
+%enabled via a configuration file or through some interfaces we can
+%provide to the UI of the client.
+
 
 
 \subsection{RADICal stack}
