@@ -151,31 +151,6 @@ namespace client
 				
 				DebugInfo ("Started puppet service");
 			}
-					
-			
-			/*
-			m_connectionServiceClient.Connect ();			
-			System.Threading.Thread.Sleep (3000);
-			DebugUncond ("I can haz sequence number... {0}", GetSequenceNumber ());
-			
-			
-			System.Threading.Thread.Sleep (30000);
-			m_connectionServiceClient.Disconnect ();
-			
-			DebugUncond ("lookup() returned this: {0}", m_lookupService.Lookup ("testclient1"));
-			
-			System.Threading.Thread.Sleep (3000);
-			
-			m_connectionServiceClient.Disconnect ();
-			*/
-			/*
-			System.Threading.Thread testthread = new System.Threading.Thread (bleh);
-			testthread.Start ();
-			string lookupresonse = m_lookupService.Lookup ("user1");
-			
-			DebugUncond ("Received lookupresponse {0}", lookupresonse);*/
-			
-			//Console.WriteLine ("My username {0}", UserName);
 		}
 		
 		// All client side APIs are listed belowS

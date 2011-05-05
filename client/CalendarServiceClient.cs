@@ -179,15 +179,6 @@ namespace client
 			reservation.m_acksForSlot = new Dictionary<int, int> ();
 			reservation.m_initiator = m_client.UserName;
 			
-			// 2) Obtain sequence number
-			reservation.m_sequenceNumber = m_client.GetSequenceNumber ();
-			
-			// 2) Maintain reservation session as per sequence number
-			// Add reservation object to int-to-reservation-object map.
-			m_activeReservationSessions.Add (reservation.m_sequenceNumber, reservation);
-			
-			DebugLogic ("Created reservation object for" +
-				"[Desc: {0}, Users: {1}, Slots: {2} Seq: {3}]",description, userlist, slotlist, reservation.m_sequenceNumber);
 			
 			// Update slot objects
 			foreach (int i in slotlist)
@@ -234,6 +225,16 @@ namespace client
 					}
 				}
 			}
+						
+			// 2) Obtain sequence number
+			reservation.m_sequenceNumber = m_client.GetSequenceNumber ();
+			
+			// 2) Maintain reservation session as per sequence number
+			// Add reservation object to int-to-reservation-object map.
+			m_activeReservationSessions.Add (reservation.m_sequenceNumber, reservation);
+			
+			DebugLogic ("Created reservation object for" +
+				"[Desc: {0}, Users: {1}, Slots: {2} Seq: {3}]",description, userlist, slotlist, reservation.m_sequenceNumber);
 			
 			// Else, trim yourself out of the list (position 0).
 			// Surely it is yourself, but sanity checks are good.
