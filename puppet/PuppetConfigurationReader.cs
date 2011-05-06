@@ -112,6 +112,11 @@ namespace puppet
 					instruction = null;
 				}
 			}
+			else if (type[0].Equals ("wait"))
+			{
+				instruction.Type = PuppetInstructionType.WAIT;
+				instruction.ApplyToUser = type[1].Trim ();
+			}
 			else 
 			{
 				instruction = null;

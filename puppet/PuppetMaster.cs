@@ -110,13 +110,25 @@ namespace puppet
 			
 		}	
 		
+		private PuppetInstruction instruction;
+		
 		public void Step ()
 		{
 			if (InstructionSet.Count > 0)
-			{
-				PuppetInstruction instruction = InstructionSet.Dequeue ();
+			{				
+				instruction = InstructionSet.Dequeue ();
+				
 				NotifySubscribers (String.Format ("{0} {1}", instruction.Type, instruction.ApplyToUser));
-				m_puppetMasterService.CommandClient (instruction);
+				
+				if (instruction.Type == PuppetInstructionType.WAIT)
+				{
+					Thread.Sleep (Int32.Parse (instruction.ApplyToUser));
+					return;
+				} 
+				else
+				{					
+					m_puppetMasterService.CommandClient (instruction);
+				}					
 			} 
 			else 
 			{
@@ -130,7 +142,11 @@ namespace puppet
 			while (InstructionSet.Count > 0)			
 			{
 				Step ();
-				Thread.Sleep (1000);
+				if (instruction.Type != PuppetInstructionType.RESERVATION &&
+				    instruction.Type != PuppetInstructionType.READ_CALENDAR)
+				{
+					Thread.Sleep (1000);
+				}
 			}
 		}
 		

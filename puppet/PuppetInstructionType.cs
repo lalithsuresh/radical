@@ -10,6 +10,7 @@ namespace puppet
 		CONNECT,
 		DISCONNECT,
 		READ_CALENDAR,
-		RESERVATION
+		RESERVATION,
+		WAIT
 	}
 }
