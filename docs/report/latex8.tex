@@ -454,11 +454,8 @@ and briefly discuss our design choices for the software architecture.
 
 \subsubsection{Performance}
 
-It is questionable why there are two messages being sent from the
-client in test case 1-4. At least one message in each test is the
-CONNECT message sent while the client is connecting to the server.
-For each reservation, irrespective of being a self-reservation or
-not, a sequence number is attached to it. This is a trivial fix.
+Test cases 1-4 generate one message each, which is the CONNECT message
+sent to the server when the client joins the system.
 
 The messages are generally quite large. While measuring the size of
 an empty Message object, i.e without any attributes such as destination,
