@@ -490,9 +490,10 @@ or some, clients in the reservation. This could, for example, be done
 by a handover of coordinator status to other clients who may complete
 the reservation if a client which is down comes back online.
 
+\subsubsection{Correctness}
+In addition to the tests described above, a worst-case reservation case was created to test the correctness of the commit protocol. In this case 10 clients connect to the system. All 10 clients try to reserve a slot, with 10 alternatives, with all clients in the system. The order of slot alternatives are the same for all clients. This will result in all clients refusing some slots. Ultimately, all clients are able to make a reservation with all other clients for one of the slots provided. The order of the slots given, i.e the priority given to the clients, is determined by which the clients receive the sequence numbers from the server. This order cannot be determined deterministically as it depends on which sequence number request first reaches the server. 
 
 \subsubsection{System Architecture}
-
 One goal when designing the system was to minimize the number of remote
 entry points used between clients and between clients and servers.
 While Remote Procedure Calls offers developers the freedom to easily
@@ -538,11 +539,7 @@ elegant.
 
 \section{Conclusions\label{sec:Conclusions}}
 
-In this paper, we have presented the design and architecture for RADICal,
-a peer-2-peer distributed internet calendar service. The design is
-made with testability in mind. The algorithms have been designed for
-handling partition tolerance on the client side, and strong consistency
-with availability on the server side.
+In this paper, we have presented the design and architecture for RADICal, a peer-2-peer distributed Internet calendar service. The architecture, designed with testability and reusability in mind, made it easy to develop the distributed algorithms used for reservation, replication, and leader election. The algorithms have been designed for handling partition tolerance on the client side, and strong consistency with availability on the server side. Our evaluation shows that the commit protocol is performant in all cases. As long as free slots are available, eventually all reservations succeed assuming that the coordinator of the reservation is on-line with all clients taking part at least at some point. 
 
 \bibliographystyle{latex8} \bibliographystyle{latex8}
 \bibliography{latex8}
